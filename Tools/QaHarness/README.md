@@ -28,6 +28,24 @@ unity run . --command eval_file --timeout 180 --no-tail --format json --non-inte
 - CLI 종료 후 `git diff -- ProjectSettings/ProjectSettings.asset`를 확인한다.
   CLI가 바꾼 `runInBackground`만 원복하고 다른 사용자 변경은 보존한다.
 
+## Unity CLI 전투 UI 검토 이미지
+
+`capture_battle_ui.eval.cs`는 현재 Battle 씬과 실제 GameData로 만든 독립 런에
+UI 표시용 상태를 주입한다. Director의 저장/리플레이 초기화는 실행하지 않으며,
+튜토리얼 완료 설정도 원래 값으로 복원한다. 씬은 저장하지 않는다.
+
+```powershell
+$captureScript = (Resolve-Path Tools/QaHarness/capture_battle_ui.eval.cs).Path
+unity run . --command eval_file --timeout 180 --no-tail --format json --non-interactive -- --file $captureScript --timeout 30000
+```
+
+- 출력: `out/revamp/battle-ui-ready.png`, 기본 1280×720, 시드 12345.
+- `RSS_CAPTURE_HUD=locked`: 계약으로 강화가 막힌 상태. `empty`: 선택 없음·실드 0.
+- `RSS_CAPTURE_TOUCH=1`, `RSS_CAPTURE_SCALE=1`: 터치 안내와 640×360 원본 배율.
+- 예: `battle-ui-locked-touch-640.png`. 튜토리얼은 표시 검토를 위해 3/3 단계로 주입한다.
+- GPU batch Editor 전용 오프스크린 렌더이며, 실플레이·완전한 터치 UI·성능 검증은 아니다.
+  실행 후 `ProjectSettings/`에 의도하지 않은 변경이 없는지 확인한다.
+
 ## 준비 (1회)
 
 ```

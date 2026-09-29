@@ -28,7 +28,7 @@ namespace Shmup.Presentation.Battle
         {
             Resolution = 0, Fullscreen, RebindActivate,
             RebindUp, RebindDown, RebindLeft, RebindRight,
-            ResetBindings, ScreenShake, ReduceFlash, Close
+            ResetBindings, ScreenShake, ReduceFlash, ReplayGuide, Close
         }
         const int ItemCount = (int)Item.Close + 1;
 
@@ -41,6 +41,7 @@ namespace Shmup.Presentation.Battle
         [SerializeField] JuiceDirector _juice;
         [SerializeField] Font _font;
         [SerializeField] Font _fontBold;
+        OnboardingHints _onboarding;
 
         /// <summary>
         /// 터치 기기에서 의미가 있는 항목만. 해상도·전체화면은 웹/폰에서 캔버스 크기를 건드려
@@ -48,7 +49,7 @@ namespace Shmup.Presentation.Battle
         /// </summary>
         static readonly Item[] TouchItems =
         {
-            Item.ScreenShake, Item.ReduceFlash, Item.Close
+            Item.ScreenShake, Item.ReduceFlash, Item.ReplayGuide, Item.Close
         };
 
         bool _open;
@@ -67,6 +68,7 @@ namespace Shmup.Presentation.Battle
 
         void Start()
         {
+            _onboarding = GetComponent<OnboardingHints>();
             _resolutionIndex = Mathf.Clamp(
                 PlayerPrefs.GetInt(ResolutionPrefKey, 0), 0, Resolutions.Length - 1);
             bool fullscreen = PlayerPrefs.GetInt(FullscreenPrefKey, 0) == 1;
@@ -79,7 +81,7 @@ namespace Shmup.Presentation.Battle
             _root = canvas.gameObject;
             UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.7f)).raycastTarget = true;
             var panel = UiKit.CreatePanel(canvas.transform,
-                touch ? new Vector2(300f, 200f) : new Vector2(360f, 258f));
+                touch ? new Vector2(300f, 230f) : new Vector2(360f, 274f));
             UiKit.CreateCornerText(panel, _fontBold, UiText.OptionsTitle, 16, UiKit.TextMain,
                 new Vector2(0.5f, 1f), new Vector2(0f, -10f), TextAnchor.UpperCenter, "Title");
             _bodyText = UiKit.CreateTextStretch(panel, _font, "", 11,
@@ -135,6 +137,9 @@ namespace Shmup.Presentation.Battle
                         break;
                     case Item.Close:
                         label.text = "CLOSE";
+                        break;
+                    case Item.ReplayGuide:
+                        label.text = UiText.ReplayGuide;
                         break;
                 }
             }
@@ -293,6 +298,10 @@ namespace Shmup.Presentation.Battle
                 case Item.Close:
                     SetOpen(false);
                     break;
+                case Item.ReplayGuide:
+                    if (_onboarding != null) _onboarding.RestartGuide();
+                    SetOpen(false);
+                    break;
             }
             _panelText = null;
         }
@@ -327,6 +336,7 @@ namespace Shmup.Presentation.Battle
             AppendItem(sb, Item.ResetBindings, "RESET BINDINGS");
             AppendItem(sb, Item.ScreenShake, $"SCREEN SHAKE   {(shakeOn ? "ON" : "OFF")}");
             AppendItem(sb, Item.ReduceFlash, $"REDUCE FLASH   {(flashReduce ? "ON" : "OFF")}");
+            AppendItem(sb, Item.ReplayGuide, UiText.ReplayGuide);
             AppendItem(sb, Item.Close, "BACK  ESC / B");
             sb.Append("\n\nKEYBOARD KEYS ONLY / ARROWS ALSO MOVE\nWEAPONS FIRE AUTOMATICALLY");
             _panelText = sb.ToString();

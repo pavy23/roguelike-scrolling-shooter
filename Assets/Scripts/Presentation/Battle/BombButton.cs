@@ -119,7 +119,11 @@ namespace Shmup.Presentation.Battle
             if (stock != _shownStock)
             {
                 _shownStock = stock;
-                if (_label != null) _label.text = $"x{stock}";
+                if (_label != null)
+                {
+                    string stockLabel = stock > 0 ? $"BOMB x{stock}" : "EMPTY";
+                    _label.text = UiPlatform.TouchMode ? stockLabel : stockLabel + "\nB / EAST";
+                }
                 if (_iconImage != null)
                 {
                     var ic = _iconImage.color;

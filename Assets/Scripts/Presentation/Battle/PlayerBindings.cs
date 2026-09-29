@@ -78,5 +78,8 @@ namespace Shmup.Presentation.Battle
         public static string MoveHint(InputAction move) =>
             $"MOVE {KeyboardLabel(move, "up")}/{KeyboardLabel(move, "left")}/"
             + $"{KeyboardLabel(move, "down")}/{KeyboardLabel(move, "right")} / {GamepadLabel(move)}";
+
+        public static string ActivateHint(InputAction activate) => UiPlatform.TouchMode ? "SELECT"
+            : activate != null ? KeyboardLabel(activate) + " / " + GamepadLabel(activate) : "X / Y";
     }
 }

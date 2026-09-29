@@ -24,6 +24,7 @@ namespace Shmup.Presentation.Battle
         [Header("Scene wiring")]
         [SerializeField] PlayerInputReader _input;
         public PlayerInputReader Input => _input;
+        OnboardingHints _onboarding;
         [SerializeField] Transform _playerTransform;
         [SerializeField] GameObject _bulletPrefab;
         [SerializeField] Transform _bulletRoot;
@@ -698,6 +699,7 @@ namespace Shmup.Presentation.Battle
 
         /// <summary>런이 끝났는가 (사망 또는 완주).</summary>
         public bool IsRunFinished => _run != null && _run.IsFinished;
+        public bool IsPlaying => _run != null && _run.State == RunState.Playing;
 
         /// <summary>타이틀 CONTINUE가 채우는 이어하기 데이터 — Awake에서 1회 소비.</summary>
         public static Shmup.Core.Simulation.RunSuspendData PendingResume;
@@ -1033,6 +1035,7 @@ namespace Shmup.Presentation.Battle
 
         void Awake()
         {
+            _onboarding = GetComponent<OnboardingHints>();
             if (!ValidateWiring()) return;
 
             Seed = DevArgs.OverrideSeed ?? DevArgs.RuntimeSeed ?? _seed;
@@ -1476,7 +1479,9 @@ namespace Shmup.Presentation.Battle
                     _recorder.Record(in command);
                 }
             }
+            if (_onboarding != null) _onboarding.BeforeStep(_run.Battle, Gauge, in command);
             _run.Step(command);
+            if (_onboarding != null) _onboarding.AfterStep(_run.Battle);
             DetectContractLock(in command, playingBefore);
 
             // 최종전 판돈 (REQ-104): Core가 최종 보스 진입에서 남은 컨티뉴를 전부
