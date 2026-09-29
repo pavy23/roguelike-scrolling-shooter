@@ -2032,3 +2032,9 @@ SfxPlayer의 6개 소스 재사용, SfxVoiceGate의 반복 간격과 우선순�
 주입한 GPU Editor 캡처를 비교하며 실플레이로 보고하지 않는다. MobileBuilder에
 RSS_WEB_BUILD_OUTPUT 경로 선택을 추가해 기존 빌드와 분리한다. 사용자는 이번 작업 후
 rss-play 테스트 사이트 배포를 승인했으며 최종 배포 근거는 REVAMP-LOG에 기록한다.
+
+배포 완료: source `09dc823`, `rss-play@baabaa1`, Pages 작업 `36644519321` 성공.
+공개 파일 4개 다운로드 후 SHA-256/크기 일치를 확인했다. 템플릿의 캐시 버전만 바꾸고
+build-info.json에 추적 정보를 남겼다. codex/revamp도 원격에 게시했다. 브라우저 주행은
+공유 PC 규칙상 실행하지 않았으며 PLAYTESTER PASS로 보고하지 않는다. 실제 기기에서
+메뉴/전투/음향 체감은 사용자 테스트와 원 담당 복귀 후 검토 대상으로 남긴다.

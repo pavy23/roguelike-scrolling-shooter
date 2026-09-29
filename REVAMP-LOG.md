@@ -444,3 +444,33 @@ Tools/QaHarness/capture_combat_readability.eval.cs로 같은 실제 씬/에셋/�
 신규 아트/음원, GameData, Core, 카메라/임포트/패키지 설정은 바꾸지 않았다.
 자동 생성된 TimeManager 직렬화 차이는 검증 후 원복한다. 웹 빌드와 배포 결과는 아래에
 추가한다. 브라우저 자동화는 공유 PC 규칙상 실행하지 않으며 실제 플레이는 사용자에게 인계한다.
+
+### 2026-09-30 — 개편 WebGL 테스트 사이트 배포 완료
+
+사용자의 명시적인 Git 테스트 사이트 배포 승인에 따라 기존 `rss-play`를 갱신했다.
+소스는 `roguelike-scrolling-shooter`의 `codex/revamp`에 push했고 main에 병합하지 않았다.
+
+- 빌드 소스: `09dc8238db60791ffc695efe3523e934ccc048b3`, CLI provenance의 dirty=false.
+- Unity CLI 1.0.0-beta.11 / Editor 6000.5.3f1 / Pipeline 0.8.0-exp.1.
+  `unity build . --target WebGL --execute-method Shmup.EditorTools.MobileBuilder.BuildWebGl`
+  및 `RSS_WEB_BUILD_OUTPUT`으로 별도 출력했다. 기본 Builds/Web의 이전 빌드는 보존했다.
+- 08:12:55–08:15:23 KST 실행, 종료 코드 0, CLI outcome=success,
+  Unity BuildReport Success / MobileBuilder 성공. 산출물 4개 합계 **29,850,368 bytes**.
+- 배포 커밋: `pavy23/rss-play@baabaa120f4bfe62dcc7bc58552929c12ae6ea59`.
+  기존 HTML/모바일/오디오 시작 템플릿을 보존하고 캐시 버전 한 줄을 갱신했다.
+  build-info.json에 소스 SHA, 테스트 수, 파일 크기/SHA-256, 실주행 미실시를 기록했다.
+- [GitHub Pages 배포 작업](https://github.com/pavy23/rss-play/actions/runs/36644519321):
+  build/deploy 모두 성공. 08:20:07 KST 공개 URL 검증에서 index HTTP 200과 새 버전,
+  build-info의 소스 SHA를 확인하고 **게임 파일 4개를 실제 다운로드해 원본 크기와
+  SHA-256 전부 일치**를 확인했다.
+- [개편 테스트 플레이](https://pavy23.github.io/rss-play/?v=20260930-081733-09dc823).
+  타이틀의 LAUNCH에서 출격한다. 기존 URL도 같은 최신 빌드를 제공한다.
+
+근거는 out/revamp/webgl-build.log, playtest/Web/unity-build.provenance.json,
+served-playtest/verification.json과 공개 build-info.json이다. 빌드 중 생성된
+PerformanceTestRunInfo/Settings 리소스는 종료 후 자동 정리됐고 소스 checkout은 깨끗했다.
+기존 SfxPlayer._laserVolume 미사용 필드 경고와 LicensingClient validation 진단은
+남았지만 빌드 실패는 없었다. 이는 Core 597개/Unity EditMode 715개 통과 및 정적 렌더,
+빌드/배포 파일 검증 결과이며 브라우저 실주행이나 PLAYTESTER PASS를 뜻하지 않는다.
+사용자 테스트에서는 폭발 속 적 탄/레이저 가독성, 경고음과 피격음, 메뉴·보상 조작,
+플래시 감소 설정의 체감을 우선 확인한다. 다음 구현 단위는 도트 애니메이션 검토다.
