@@ -101,7 +101,9 @@ namespace Shmup.Presentation.Battle
         void SetCursor(int index)
         {
             if (!_director.CanInteractWithChoices) return;
-            _cursor = Mathf.Clamp(index, 0, _shownOptionCount - 1);
+            int next = Mathf.Clamp(index, 0, _shownOptionCount - 1);
+            if (_cursor != next) UiAudio.Play(UiCue.Navigate);
+            _cursor = next;
             RefreshSelection();
         }
 
@@ -119,7 +121,9 @@ namespace Shmup.Presentation.Battle
 
         void OnReroll()
         {
-            if (_director == null || !_director.RerollRewards()) return;
+            if (_director == null) return;
+            if (!_director.RerollRewards()) { UiAudio.Play(UiCue.Reject); return; }
+            UiAudio.Play(UiCue.Confirm);
             _labelsBuilt = false;
             _rerollFeedbackUntil = Time.unscaledTime + 1.8f;
             RefreshCards();
@@ -145,6 +149,7 @@ namespace Shmup.Presentation.Battle
         void Choose(int index)
         {
             if (_director == null || !_director.ChooseReward(index)) return;
+            UiAudio.Play(UiCue.Confirm);
             _labelsBuilt = false;
             _rerollFeedbackUntil = 0f;
             // Hide immediately; a second reward round is rebuilt on the next Update.

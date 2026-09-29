@@ -2004,3 +2004,12 @@ GROK(작성자 인체공학)과 필드명·시맨틱을 합의하고 진행할 �
 BattleDirector의 성공 후 기록·프레임당 단일 선택, PauseScreen의 재개 입력 차단을 원 담당
 복귀 시 리뷰 대상으로 남긴다. Core 597개 및 Unity EditMode 663개 통과. 근거는
 `REVAMP-LOG.md`의 보상·계약 선택 개편 항목과 `ChoiceScreenTests.cs`에 있다.
+
+### 2026-09-30 오디오 개편 대행분 리뷰 인계
+
+같은 사용자 승인 범위에서 Codex가 Presentation/오케스트레이션을 대행했다.
+AudioPreferences/AudioChannelSource, UiAudio, 공용 AudioSettingsPanel 및 타이틀·일시정지·
+선택 UI 연동을 원 담당 복귀 시 리뷰한다. 씬은 CLI의 Editor API로 채널과 기존 클립
+참조를 추가했으며, BattleSceneBuilder에도 동일 배선을 반영했다. Core 597개, Unity
+683개 통과. 실제 장치에서 UI 소리 크기·음색 및 브라우저 오디오 시작 동작은 후속
+플레이 테스트 대상이다. 신규 음원은 채택하지 않았다.

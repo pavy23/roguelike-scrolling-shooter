@@ -39,7 +39,7 @@ namespace Shmup.Presentation.Battle
         // 일시정지
         public const string PauseTitle = "PAUSED";
         public const string PauseHints =
-            "ESC / (START) RESUME      O / (SELECT) OPTIONS      Q QUIT TO TITLE";
+            "ESC / (START) RESUME   O / (SELECT) OPTIONS   V / (Y) AUDIO   Q QUIT";
         public const string VolumeFormat = "VOLUME  {0}%   (LEFT / RIGHT)";
 
         // 게임오버 / 완주

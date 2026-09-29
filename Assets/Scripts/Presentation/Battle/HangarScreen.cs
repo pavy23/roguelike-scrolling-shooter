@@ -118,6 +118,7 @@ namespace Shmup.Presentation.Battle
             var result = _meta.TryPurchaseContinue();
             if (result.Purchased)
             {
+                UiAudio.Play(UiCue.Confirm);
                 MetaSave.Save(_meta);
                 _continueNotice = null;
                 _continueNoticeTimer = 0f;
@@ -130,6 +131,7 @@ namespace Shmup.Presentation.Battle
                         ? $"NEED {result.Price:N0} cr"
                         : UiText.HangarContinueFull;
                 _continueNoticeTimer = 2f;
+                UiAudio.Play(UiCue.Reject);
             }
             _shownContinueStock = -1;   // 표시 갱신
             _shownCurrency = -1;
@@ -139,6 +141,7 @@ namespace Shmup.Presentation.Battle
         {
             if (_data == null || _data.Ships.Count == 0) return;
             _cursor = (_cursor + delta + _data.Ships.Count) % _data.Ships.Count;
+            if (delta != 0) UiAudio.Play(UiCue.Navigate);
         }
 
         /// <summary>커서의 함선을 해금한다 (크레딧이 모자라면 Core가 거부한다).</summary>
@@ -148,7 +151,11 @@ namespace Shmup.Presentation.Battle
             var ship = _data.Ships[_cursor];
             if (_meta.IsUnlocked(ship.Id)) return;
             if (_meta.TryUnlock(ship))
+            {
                 MetaSave.Save(_meta);
+                UiAudio.Play(UiCue.Confirm);
+            }
+            else UiAudio.Play(UiCue.Reject);
             _shownCursor = -1;   // 표시 갱신
         }
 
@@ -191,6 +198,7 @@ namespace Shmup.Presentation.Battle
                 if (gamepad.dpad.right.wasPressedThisFrame) move = 1;
             }
             _cursor = (_cursor + move + _data.Ships.Count) % _data.Ships.Count;
+            if (move != 0) UiAudio.Play(UiCue.Navigate);
 
             var ship = _data.Ships[_cursor];
             bool unlockPressed = (keyboard != null && keyboard.uKey.wasPressedThisFrame)

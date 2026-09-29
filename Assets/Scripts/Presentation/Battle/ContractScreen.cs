@@ -256,6 +256,7 @@ namespace Shmup.Presentation.Battle
             if (options == null || index < 0 || index >= options.Count) return;
             if (_director.ChooseContract(index))
             {
+                UiAudio.Play(UiCue.Confirm);
                 _built = false;
                 _root.SetActive(false);
             }
@@ -264,7 +265,9 @@ namespace Shmup.Presentation.Battle
         void SetCursor(int index)
         {
             if (!_director.CanInteractWithChoices) return;
-            _cursor = Mathf.Clamp(index, 0, _shownCount - 1);
+            int next = Mathf.Clamp(index, 0, _shownCount - 1);
+            if (_cursor != next) UiAudio.Play(UiCue.Navigate);
+            _cursor = next;
             RefreshSelection();
         }
 

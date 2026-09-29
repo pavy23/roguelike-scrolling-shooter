@@ -1553,6 +1553,7 @@ namespace Shmup.EditorTools
             CreateHud(director, hudSlotSprite, hudPipSprite, sectionThemes, warshipView, chainView, partsView);
             CreateSfx(director);
             CreateBgm(director);
+            ConfigureSceneAudio();
 
             VerifyEssentialComponents("Battle");
 
@@ -1806,6 +1807,37 @@ namespace Shmup.EditorTools
         /// </summary>
         const string SfxDir = "Assets/Audio/Sfx";
 
+        /// <summary>Idempotent audio wiring, also used to upgrade existing scenes without rebuilding them.</summary>
+        public static void ConfigureSceneAudio()
+        {
+            foreach (var source in UnityEngine.Object.FindObjectsByType<AudioSource>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                AudioChannel channel;
+                if (source.GetComponent<SfxPlayer>() != null) channel = AudioChannel.Effects;
+                else if (source.GetComponent<BgmPlayer>() != null
+                    || (source.clip != null && source.clip.name.StartsWith("bgm_"))) channel = AudioChannel.Music;
+                else continue;
+                var gain = source.GetComponent<AudioChannelSource>();
+                if (gain == null) gain = source.gameObject.AddComponent<AudioChannelSource>();
+                gain.Configure(channel);
+                EditorUtility.SetDirty(gain);
+            }
+            var ui = UnityEngine.Object.FindAnyObjectByType<UiAudio>();
+            if (ui == null)
+            {
+                var go = new GameObject("UiAudio");
+                var source = go.AddComponent<AudioSource>();
+                source.playOnAwake = false;
+                source.spatialBlend = 0f;
+                source.ignoreListenerPause = true;
+                go.AddComponent<AudioChannelSource>().Configure(AudioChannel.Interface);
+                ui = go.AddComponent<UiAudio>();
+            }
+            SetReference(ui, "_navigate", LoadClip("sfx_pickup"));
+            SetReference(ui, "_confirm", LoadClip("sfx_powerup"));
+            SetReference(ui, "_reject", LoadClip("sfx_hit"));
+        }
+
         static void CreateSfx(BattleDirector director)
         {
             var go = new GameObject("Sfx");
@@ -1938,6 +1970,7 @@ namespace Shmup.EditorTools
                 bgmSource.spatialBlend = 0f;
             }
 
+            ConfigureSceneAudio();
             VerifyEssentialComponents("Title");
 
             EditorSceneManager.MarkSceneDirty(scene);

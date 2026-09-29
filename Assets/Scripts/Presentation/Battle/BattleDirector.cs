@@ -2360,7 +2360,7 @@ namespace Shmup.Presentation.Battle
         int _choiceInputFrame = -1;
 
         public bool CanInteractWithChoices => !_replayMode && Time.timeScale > 0f
-            && !OptionsScreen.BlocksPauseInput;
+            && !OptionsScreen.BlocksPauseInput && !AudioSettingsPanel.BlocksInput;
 
         // Resume/confirm must not also pick a reward underneath the pause menu.
         public void BlockChoiceInputThisFrame() => _choiceInputFrame = Time.frameCount;

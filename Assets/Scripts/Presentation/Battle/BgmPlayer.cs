@@ -29,6 +29,8 @@ namespace Shmup.Presentation.Battle
         const float DuckLerpSpeed = 6f;
 
         float _baseVolume = 1f;   // 빌더가 지정한 믹스 레벨을 기준으로 덕킹/복원
+        AudioChannelSource _channel;
+        float _duckGain = 1f;
         string _activeThemeId;
         bool _bossTrackActive;
         RunStageSection _bossTrackSection;
@@ -40,7 +42,15 @@ namespace Shmup.Presentation.Battle
         void Awake()
         {
             if (_source != null)
-                _baseVolume = _source.volume;
+            {
+                _channel = _source.GetComponent<AudioChannelSource>();
+                if (_channel == null)
+                {
+                    _channel = _source.gameObject.AddComponent<AudioChannelSource>();
+                    _channel.Configure(AudioChannel.Music);
+                }
+                _baseVolume = _channel.BaseVolume;
+            }
         }
 
         void Update()
@@ -114,11 +124,10 @@ namespace Shmup.Presentation.Battle
             }
 
             // 덕킹 볼륨 복원
-            float targetVolume = Time.realtimeSinceStartup < _duckUntilRealtime
-                ? _baseVolume * 0.4f
-                : _baseVolume;
-            _source.volume = Mathf.MoveTowards(
-                _source.volume, targetVolume, DuckLerpSpeed * Time.unscaledDeltaTime);
+            float targetGain = Time.realtimeSinceStartup < _duckUntilRealtime ? 0.4f : 1f;
+            _duckGain = Mathf.MoveTowards(_duckGain, targetGain,
+                DuckLerpSpeed * Time.unscaledDeltaTime / Mathf.Max(_baseVolume, 0.001f));
+            if (_channel != null) _channel.SetMixGain(_duckGain);
         }
 
         void Duck(float seconds)

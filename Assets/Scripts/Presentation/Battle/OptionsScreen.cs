@@ -159,10 +159,12 @@ namespace Shmup.Presentation.Battle
             IsOpen = open;
             _panelText = null;
             if (!open) SetVisible(false, null);
+            UiAudio.Play(open ? UiCue.Confirm : UiCue.Back);
         }
 
         void Update()
         {
+            if (AudioSettingsPanel.BlocksInput) return;
             var keyboard = Keyboard.current;
             // 폰에는 키보드도 패드도 없다 — 여기서 일찍 리턴하면 터치 입구가 아예 안 뜬다.
             var gamepad = Gamepad.current;
@@ -226,6 +228,7 @@ namespace Shmup.Presentation.Battle
             {
                 _cursor = (_cursor + move + ItemCount) % ItemCount;
                 _panelText = null;
+                UiAudio.Play(UiCue.Navigate);
             }
 
             // 좌우: 해상도 항목 순환
@@ -245,6 +248,7 @@ namespace Shmup.Presentation.Battle
                 _resolutionIndex = (_resolutionIndex + adjust + Resolutions.Length) % Resolutions.Length;
                 Apply(Screen.fullScreen);
                 _panelText = null;
+                UiAudio.Play(UiCue.Navigate);
             }
 
             bool confirm = (keyboard != null && keyboard.enterKey.wasPressedThisFrame)
@@ -274,6 +278,7 @@ namespace Shmup.Presentation.Battle
 
         void ActivateItem(Item item)
         {
+            UiAudio.Play(UiCue.Confirm);
             switch (item)
             {
                 case Item.Resolution:
@@ -411,6 +416,7 @@ namespace Shmup.Presentation.Battle
                     if (conflict != null)
                     {
                         _rebindPrompt = conflict + "\nCHOOSE ANOTHER KEY / ESC CANCEL";
+                        UiAudio.Play(UiCue.Reject);
                         operation.RemoveCandidate(operation.selectedControl);
                     }
                     else operation.Complete();
@@ -450,6 +456,7 @@ namespace Shmup.Presentation.Battle
             _rebindFinishedFrame = Time.frameCount;
             _pauseInputConsumedFrame = Time.frameCount;
             if (save && _input != null) PlayerBindings.Save(_input.Actions);
+            UiAudio.Play(save ? UiCue.Confirm : UiCue.Back);
             _panelText = null;
         }
 

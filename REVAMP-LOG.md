@@ -283,3 +283,64 @@ Pipeline `0.8.0-exp.1`에서 실행했다. 실제 Battle 씬 UI에 독립 런과
 Core/GameData·씬·신규 아트/음원·패키지는 변경하지 않았다. Unity가 다시 직렬화한
 TimeManager 설정은 원복한다. 로컬 `codex/revamp` 커밋이며 GitHub push, WebGL 빌드,
 `rss-play` 배포는 보류한다. 다음 단위는 BGM/SFX 볼륨 분리와 UI 효과음이다.
+
+## 2026-09-30 — 3단계: 오디오 설정과 UI 소리 피드백
+
+Unity CLI로 확인한 기존 구성은 WebGL 타깃 / 48kHz, 씬마다 리스너 1개,
+TitleBgm 1개와 Battle의 Bgm/Sfx 2개 소스였다. 믹서 에셋은 없고 모든 소스는 2D다.
+음악 원래 레벨은 0.45, 전투 효과음은 1이었다. 전체 볼륨은 전투 씬의 PauseScreen에서만
+불러와 타이틀까지 일관되게 반영하지 못하고, 음악만 낮출 수도 없었다.
+
+변경:
+
+- 전체/음악/전투 효과음/UI 소리 네 가지 사용자 볼륨과 저장을 추가했다.
+  기존 `rss.volume`은 전체 볼륨으로 그대로 읽어 기존 0(음소거)도 유지한다.
+  새 채널은 100% 기본값으로 기존 소스 믹스를 보존하며, 읽을 때 잘못된 범위를 보정한다.
+- AudioChannelSource가 작성된 원래 레벨 × 장면 연출 배율 × 사용자 채널 볼륨을
+  적용한다. 음악 덕킹과 설정값을 분리해 음소거 해제·소스 재활성화에서 볼륨이
+  이중으로 곱해지지 않으며, 격파 연출과 결과 화면에서도 사용자 설정은 즉시 반영된다.
+  징글은 기존 음악 소스에 있으므로 MUSIC 설정을 따른다.
+- 공용 오디오 설정 창에 4개 슬라이더, ± 버튼, 음소거 표시, 오디오 기본값 복원,
+  뒤로 가기를 추가했다. 타이틀은 AUDIO / F3 / 패드 Start, 일시정지는 AUDIO SETTINGS /
+  V / 패드 Y로 진입한다. 방향키/패드와 마우스/터치 모두 지원한다. Enter/A는
+  선택한 채널 음소거/복구다. 다른 게임 설정은 오디오 기본값 복원으로 바꾸지 않는다.
+- 오디오 창의 입력은 타이틀 출격·격납고·다른 옵션·보상에서 차단한다. 열기 입력으로
+  곧바로 음소거되거나, 뒤로 가기로 곧바로 재개되는 같은 프레임 입력도 차단했다.
+  일시정지에 PC 클릭 버튼과 RESUME 초기 포커스를 제공한다.
+- UI 전용 소스 1개가 씬 사이에서 유지된다. 이동/확정/취소/거절은 채택된
+  sfx_pickup / sfx_powerup / sfx_hit 클립의 낮은 재생 레벨과 피치로 구분한다.
+  같은 프레임 중복을 억제하고, 거절이 확정보다 우선하며, 이동음 간격을 제한한다.
+  전투 일시정지 동안 UI 소리는 허용하되 전체/UI 음소거는 존중한다.
+- 타이틀·격납고·옵션·보상/계약 및 공용 버튼에 소리 피드백을 연결했다.
+  신규 음악/효과음 파일을 생성하거나 채택하지 않았다. 공개 AudioSource API를 사용했고
+  믹서 내부 API나 수동 mixer 파일 편집은 사용하지 않았다.
+
+검증:
+
+| 항목 | 결과 |
+| --- | --- |
+| CoreStandalone | **597 passed / 0 failed / 0 skipped** |
+| Unity EditMode | **683 passed / 0 failed / 0 skipped** |
+| 추가 회귀 테스트 | 20개: 기존 전체 음소거, 개별 저장/복원, 손상된 값, 음악 덕킹/재활성화/연출 중 설정, UI 음소거·중복·없는 클립, 키보드/패드 조작, 열기/닫기 입력 전파, 슬라이더 콜백, 현재 씬의 채널/클립/리스너 배선 |
+| 테스트 증거 | `out/revamp/audio-unity.xml`, `audio-unity.log` |
+| PC 타이틀 | `audio-title-entry.png`, `audio-title-settings.png` |
+| PC 일시정지 | `audio-battle-entry.png`, `audio-battle-settings.png` |
+| 640×360 터치 | `audio-battle-entry-touch-640.png`, `audio-battle-settings-touch-640.png` |
+| 도구 로그 | `audio-inventory.log`, `audio-wiring.log`, `audio-title-capture.log`, `audio-touch-capture.log`, `audio-pause-final.log` |
+
+최초 실행의 2건 실패는 ignoreListenerPause를 저장된 씬 속성으로 검사한 테스트 오류였다.
+해당 값은 UiAudio.Awake에서 설정하므로 런타임 초기화를 거친 검사로 수정했고 통과했다.
+추가로 BgmPlayer.Update와 격파 연출의 조기 반환에서도 음소거가 유지되는지 검증했다.
+
+캡처는 Unity CLI `1.0.0-beta.11` / Pipeline `0.8.0-exp.1` GPU batch Editor에서
+실제 UI를 생성한 정적 렌더다. 표시용 볼륨을 주입하고 기존 설정값은 복구한다.
+픽셀 배치와 제어 상태를 확인했으며, 테스트/캡처 중 UI 소리를 재생하지 않는다.
+이는 실제 청음, Play Mode 전환, 모바일 터치, WebGL의 최초 사용자 제스처 이후 오디오
+시작 검증을 대체하지 않는다. 위험 경고가 전투 소리 속에 묻히는지와 UI 음량 체감도는
+사용자가 미룬 Git 플레이 테스트에서 확인한다.
+
+두 씬은 기존 장면을 재생성하지 않고 Editor API로 오디오 구성만 추가했다. 저장 과정에서
+이전에 제거된 사용하지 않는 Attack 액션 이름 직렬화 필드가 정리됐다. Core/GameData,
+음원 임포트 설정, 패키지, 카메라 규격은 변경하지 않았다. TimeManager의 자동 직렬화
+차이는 원복한다. 로컬 개편 브랜치에 커밋하며 WebGL 빌드·GitHub push·rss-play 배포는
+계속 보류한다. 다음 단위는 전투 경고음·피격음·폭발음이 겹칠 때의 우선순위와 반복 피로다.

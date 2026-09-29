@@ -29,6 +29,7 @@ namespace Shmup.Presentation.Battle
         Text _promptText, _seedValueText;
         GameObject _devRoot;
         Button _rankingCloseButton;
+        AudioSettingsPanel _audioSettings;
         int _modalInputConsumedFrame = -1;
         string _shownSeed;
 
@@ -180,12 +181,14 @@ namespace Shmup.Presentation.Battle
 
         void CycleDifficulty()
         {
+            UiAudio.Play(UiCue.Navigate);
             DifficultySelect.Index = (DifficultySelect.Index + 1) % 3;
             RefreshDifficultyText();
         }
 
         void ToggleMode()
         {
+            UiAudio.Play(UiCue.Confirm);
             _dailyMode = !_dailyMode;
             RefreshModeText();
             RefreshDifficultyText();   // 데일리는 난이도가 고정된다 - 화면도 따라가야 한다
@@ -217,6 +220,7 @@ namespace Shmup.Presentation.Battle
         void ContinueRun()
         {
             if (_suspended == null) return;
+            UiAudio.Play(UiCue.Confirm);
             // 저장 파일은 삭제하지 않는다 — 복원이 성공한 뒤 BattleDirector가 지운다
             BattleDirector.PendingResume = _suspended;
             DevArgs.RuntimeSeed = (long)_suspended.runSeed;
@@ -230,6 +234,7 @@ namespace Shmup.Presentation.Battle
         void PlayReplay()
         {
             if (_replay == null) return;
+            UiAudio.Play(UiCue.Confirm);
             BattleDirector.PendingReplay = _replay;
             DevArgs.RuntimeSeed = _replay.seed;
             DevArgs.RuntimeDaily = false;
@@ -269,7 +274,7 @@ namespace Shmup.Presentation.Battle
         /// </summary>
         public bool RankingOpen => _rankingRoot != null && _rankingRoot.activeSelf;
         public bool DevPanelOpen => _devRoot != null && _devRoot.activeSelf;
-        public bool ModalOpen => RankingOpen || DevPanelOpen;
+        public bool ModalOpen => RankingOpen || DevPanelOpen || AudioSettingsPanel.BlocksInput;
 
         void ToggleRanking()
         {
@@ -825,6 +830,8 @@ namespace Shmup.Presentation.Battle
             var topLeft = new Vector2(0f, 1f);
             var topRight = new Vector2(1f, 1f);
             var size = new Vector2(166f, 40f);
+            MenuButton(parent, UiPlatform.TouchMode ? "AUDIO" : "AUDIO [F3]/START", topLeft,
+                new Vector2(12f, -26f), new Vector2(128f, 40f), OpenAudio, "AudioSettingsButton");
             UiKit.CreateCornerText(parent, _font, "RUN SETUP", 9, UiKit.TextAccent,
                 topLeft, new Vector2(12f, -110f), TextAnchor.UpperLeft, "SetupHeader");
             _difficultyButtonLabel = MenuButton(parent, "", topLeft, new Vector2(12f, -130f),
@@ -857,6 +864,7 @@ namespace Shmup.Presentation.Battle
 
         void Start()
         {
+            _audioSettings = AudioSettingsPanel.Create(transform, _font, _fontBold);
             _seedText = NewRandomSeed().ToString();
             _seedUi = DevArgs.DevMode;
 
@@ -944,6 +952,7 @@ namespace Shmup.Presentation.Battle
             // 모달 위에서 스페이스가 그대로 출격으로 새면 보드를 읽다가 런이 시작된다.
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
+            if (AudioSettingsPanel.BlocksInput) return;
             if (_modalInputConsumedFrame == Time.frameCount) return;
             if (RankingOpen)
             {
@@ -968,6 +977,10 @@ namespace Shmup.Presentation.Battle
                 RefreshSeedText();
                 return;
             }
+
+            if ((keyboard != null && keyboard.f3Key.wasPressedThisFrame)
+                || (gamepad != null && gamepad.startButton.wasPressedThisFrame))
+            { OpenAudio(); return; }
 
             if (keyboard != null)
             {
@@ -1057,6 +1070,7 @@ namespace Shmup.Presentation.Battle
 
         void StartRun()
         {
+            UiAudio.Play(UiCue.Confirm);
             // 모드 선택이 여기 모인다 — 버튼이든 스페이스든 한 곳으로 흐른다.
             if (_dailyMode)
             {
@@ -1070,6 +1084,12 @@ namespace Shmup.Presentation.Battle
             // 파싱이 깨진 문자열이면 어차피 새로 뽑은 랜덤이라 수동이 아니다.
             DevArgs.RuntimeSeeded = _seedManual && parsed;
             SceneManager.LoadScene("Battle");
+        }
+
+        void OpenAudio()
+        {
+            if (_audioSettings == null) _audioSettings = AudioSettingsPanel.Create(transform, _font, _fontBold);
+            _audioSettings.Open();
         }
     }
 }
