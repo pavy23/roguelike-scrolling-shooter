@@ -889,6 +889,9 @@ namespace Shmup.Core.Simulation
                 FoldInt32((int)laser.Phase);
                 FoldInt32((int)laser.ThicknessStage);
                 FoldInt32(laser.HalfWidth);
+                // FullHalfWidth is derived presentation metadata: hostile attack
+                // definitions already fold it, and player beams use HalfWidth.
+                // Keep gameplay trace hashes comparable across renderer fixes.
                 FoldInt32(laser.PhaseTicksRemaining);
                 FoldInt32(laser.Damage);
             }

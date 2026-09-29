@@ -1,0 +1,16 @@
+{
+    "name": "Shmup.Presentation.Tests",
+    "rootNamespace": "Shmup.Presentation.Tests",
+    "references": [
+        "Shmup.Core",
+        "Shmup.Presentation",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": ["Editor"],
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "noEngineReferences": false
+}

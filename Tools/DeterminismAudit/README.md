@@ -6,6 +6,11 @@ all ordered entity collections, generated stage data, reward candidates and
 choices, power-up state, statistics, and complete per-tick events into a stable
 64-bit FNV-1a hash.
 
+Derived presentation metadata (`LaserState.FullHalfWidth`) is not folded a second
+time: hostile attack definitions already include the authored width, and player
+beams use their current `HalfWidth`. This preserves gameplay trace comparisons
+when only the warning renderer changes.
+
 Run the full audit suite:
 
 ```powershell

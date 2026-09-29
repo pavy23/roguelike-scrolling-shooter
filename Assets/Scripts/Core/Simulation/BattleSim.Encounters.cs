@@ -1891,7 +1891,8 @@ namespace Shmup.Core.Simulation
                 thickness,
                 halfWidth,
                 phaseEnd - age,
-                definition.Damage);
+                definition.Damage,
+                definition.FullHalfWidth);
         }
 
         /// <summary>
