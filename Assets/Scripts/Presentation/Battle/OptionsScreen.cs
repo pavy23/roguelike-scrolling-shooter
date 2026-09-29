@@ -27,11 +27,11 @@ namespace Shmup.Presentation.Battle
 
         enum Item
         {
-            Resolution = 0, Fullscreen, AutoFire, RebindFire, RebindActivate,
+            Resolution = 0, Fullscreen, RebindActivate,
             RebindUp, RebindDown, RebindLeft, RebindRight,
             ResetBindings, ScreenShake, ReduceFlash, Close
         }
-        const int ItemCount = 13;
+        const int ItemCount = (int)Item.Close + 1;
 
         /// <summary>PauseScreen이 입력 충돌(볼륨 화살표 등)을 피하기 위한 상태 공유.</summary>
         public static bool IsOpen { get; private set; }
@@ -76,11 +76,12 @@ namespace Shmup.Presentation.Battle
             _root = canvas.gameObject;
             UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.7f));
             var panel = UiKit.CreatePanel(canvas.transform,
-                touch ? new Vector2(300f, 200f) : new Vector2(360f, 210f));
+                touch ? new Vector2(300f, 200f) : new Vector2(360f, 238f));
             UiKit.CreateCornerText(panel, _fontBold, UiText.OptionsTitle, 16, UiKit.TextMain,
                 new Vector2(0.5f, 1f), new Vector2(0f, -10f), TextAnchor.UpperCenter, "Title");
             _bodyText = UiKit.CreateTextStretch(panel, _font, "", 11,
-                UiKit.TextMain, TextAnchor.MiddleCenter, 10f, "Body");
+                UiKit.TextMain, TextAnchor.UpperLeft, 14f, "Body");
+            _bodyText.rectTransform.offsetMax = new Vector2(-14f, -42f);
 
             if (touch)
             {
@@ -123,9 +124,6 @@ namespace Shmup.Presentation.Battle
                 if (label == null) continue;
                 switch (TouchItems[i])
                 {
-                    case Item.AutoFire:
-                        label.text = $"AUTO FIRE          {(PlayerInputReader.AutoFire ? "ON" : "OFF")}";
-                        break;
                     case Item.ScreenShake:
                         label.text = $"SCREEN SHAKE   {(shakeOn ? "ON" : "OFF")}";
                         break;
@@ -233,7 +231,6 @@ namespace Shmup.Presentation.Battle
             {
                 if (keyboard.rKey.wasPressedThisFrame) ActivateItem(Item.Resolution);
                 if (keyboard.fKey.wasPressedThisFrame) ActivateItem(Item.Fullscreen);
-                if (keyboard.bKey.wasPressedThisFrame) ActivateItem(Item.RebindFire);
                 if (keyboard.nKey.wasPressedThisFrame) ActivateItem(Item.RebindActivate);
                 if (keyboard.digit1Key.wasPressedThisFrame) ActivateItem(Item.RebindUp);
                 if (keyboard.digit2Key.wasPressedThisFrame) ActivateItem(Item.RebindDown);
@@ -259,10 +256,6 @@ namespace Shmup.Presentation.Battle
                 case Item.Fullscreen:
                     Apply(!Screen.fullScreen);
                     break;
-                case Item.AutoFire:
-                    PlayerInputReader.SetAutoFire(!PlayerInputReader.AutoFire);
-                    break;
-                case Item.RebindFire: StartRebindFire(); break;
                 case Item.RebindActivate: StartRebindActivate(); break;
                 case Item.RebindUp: StartRebindMovePart("up"); break;
                 case Item.RebindDown: StartRebindMovePart("down"); break;
@@ -295,12 +288,6 @@ namespace Shmup.Presentation.Battle
         {
             if (_panelText != null) return;
             var resolution = Resolutions[_resolutionIndex];
-            var fire = FindFireAction();
-            string fireBinding = fire != null
-                ? InputControlPath.ToHumanReadableString(
-                    fire.bindings[0].effectivePath,
-                    InputControlPath.HumanReadableStringOptions.OmitDevice)
-                : "?";
             bool shakeOn = PlayerPrefs.GetInt(JuiceDirector.ShakePrefKey, 1) == 1;
             bool flashReduce = PlayerPrefs.GetInt(JuiceDirector.FlashReducePrefKey, 0) == 1;
 
@@ -313,9 +300,6 @@ namespace Shmup.Presentation.Battle
                     activate.bindings[0].effectivePath,
                     InputControlPath.HumanReadableStringOptions.OmitDevice)
                 : "?";
-            AppendItem(sb, Item.AutoFire,
-                $"AUTO FIRE   {(PlayerInputReader.AutoFire ? "ON" : "OFF")}");
-            AppendItem(sb, Item.RebindFire, $"REBIND FIRE  (now: {fireBinding})");
             AppendItem(sb, Item.RebindActivate, $"REBIND ACTIVATE  (now: {activateBinding})");
             AppendItem(sb, Item.RebindUp, "REBIND MOVE UP");
             AppendItem(sb, Item.RebindDown, "REBIND MOVE DOWN");
@@ -325,6 +309,7 @@ namespace Shmup.Presentation.Battle
             AppendItem(sb, Item.ScreenShake, $"SCREEN SHAKE   {(shakeOn ? "ON" : "OFF")}");
             AppendItem(sb, Item.ReduceFlash, $"REDUCE FLASH   {(flashReduce ? "ON" : "OFF")}");
             AppendItem(sb, Item.Close, "CLOSE  [O]/(Select)");
+            sb.Append("\n\nWEAPONS FIRE AUTOMATICALLY");
             _panelText = sb.ToString();
         }
 
@@ -362,19 +347,6 @@ namespace Shmup.Presentation.Battle
             SaveFlush.Request();
             if (_juice != null) _juice.ReloadPrefs();
             _panelText = null;
-        }
-
-        InputAction FindFireAction()
-        {
-            if (_input == null || _input.Actions == null) return null;
-            return _input.Actions.FindAction(_input.FireActionName, throwIfNotFound: false);
-        }
-
-        void StartRebindFire()
-        {
-            var fire = FindFireAction();
-            if (fire == null) return;
-            StartRebind(fire, -1);
         }
 
         InputAction FindActivateAction()

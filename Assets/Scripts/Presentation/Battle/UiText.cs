@@ -12,7 +12,7 @@ namespace Shmup.Presentation.Battle
         // "폭탄도 키보드로 누를수 있게 해줘(이미 되어있나?)"라고 물었다 —
         // 화면에 적히지 않은 조작은 없는 것과 같다 (2026-08-05).
         public const string Onboarding1 =
-            "MOVE  WASD / LEFT STICK      FIRE  SPACE / (A)      "
+            "MOVE  WASD / LEFT STICK      FIRE  AUTOMATIC      "
             + "BOMB  B / (B)      PAUSE  ESC / (START)";
         public const string Onboarding2 =
             "Destroy enemies to drop capsules - each one advances the gauge below";

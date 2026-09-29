@@ -26,13 +26,14 @@ namespace Shmup.Presentation.Battle
         [SerializeField] Font _fontBold;
 
         string _seedText;
-        Text _promptText, _seedValueText, _continueText;
+        Text _promptText, _seedValueText;
+        GameObject _devRoot;
         string _shownSeed;
 
         /// <summary>
-        /// 시드 UI(표시 줄·숫자 입력·NEW SEED 버튼)를 내보내는가 = <see cref="DevArgs.DevMode"/>.
+        /// 개발 도구 안의 시드 표시·입력을 제공하는가 = <see cref="DevArgs.DevMode"/>.
         ///
-        /// 이 셋은 "같은 판을 다시 돌린다"는 개발/디버깅 도구다. 릴리스에서 플레이어에게
+        /// 같은 판을 다시 돌리는 개발/디버깅 도구다. 릴리스에서 플레이어에게
         /// 시드 칸을 보여 주면 (a) 무슨 숫자인지 설명할 자리가 없고 (b) 손으로 고정한 런은
         /// 어차피 스코어보드 제출이 막혀 있어 눌러 봐야 손해만 본다. 그래서 통째로 감춘다 —
         /// 시드 값 자체는 그대로 <see cref="NewRandomSeed"/>로 뽑으므로 런의 동작은 같다.
@@ -54,7 +55,6 @@ namespace Shmup.Presentation.Battle
         int _dailyDateInt;
         /// <summary>오늘(UTC)의 MM-dd. 데일리 안내/버튼이 같은 문자열을 쓰도록 한 번만 만든다.</summary>
         string _dailyDateLabel = "";
-        Text _difficultyText;
         Text _difficultyButtonLabel;
 
         // 글로벌 랭킹 패널 (P1). 처음 눌렀을 때 한 번만 조립한다 — 타이틀에 온 사람 중
@@ -107,7 +107,6 @@ namespace Shmup.Presentation.Battle
         static readonly string[] DevColossals = { "", "leviathan", "broodmother" };
 
         Text _modeButtonLabel;
-        Text _modeHintText;
         Text _launchButtonLabel;
 
         /// <summary>
@@ -172,12 +171,9 @@ namespace Shmup.Presentation.Battle
             // 겨루는 것이 데일리의 존재 이유다. 고른 난이도가 적용되지 않는데 화면이
             // 그대로면 "설정이 먹지 않는다"로 읽히므로, 여기서 그 사실을 말한다.
             string label = _dailyMode ? "NORMAL (DAILY)" : DifficultySelect.Label;
-            if (_difficultyText != null)
-                _difficultyText.text = _dailyMode
-                    ? "DIFFICULTY   NORMAL — DAILY IS FIXED"
-                    : $"[T] DIFFICULTY ◄ {label} ►";
             if (_difficultyButtonLabel != null)
-                _difficultyButtonLabel.text = $"DIFFICULTY\n{label}";
+                _difficultyButtonLabel.text = (UiPlatform.TouchMode ? "DIFFICULTY" : "DIFFICULTY [T]/UP")
+                    + "\n" + label;
         }
 
         void CycleDifficulty()
@@ -201,13 +197,9 @@ namespace Shmup.Presentation.Battle
                     : UiText.ModeButtonNormal;
             if (_launchButtonLabel != null)
                 _launchButtonLabel.text = _dailyMode ? "LAUNCH DAILY" : "LAUNCH";
-            // 키보드 화면에는 버튼이 없다 — 안내 줄이 현재 모드를 대신 보여 준다.
-            if (_modeHintText != null)
-                _modeHintText.text = string.Format(
-                    UiText.DailyFormat,
-                    _dailyMode
-                        ? string.Format(UiText.ModeHintDaily, _dailyDateLabel)
-                        : UiText.ModeHintNormal);
+            if (!UiPlatform.TouchMode && _modeButtonLabel != null)
+                _modeButtonLabel.text = _modeButtonLabel.text.Replace("MODE", "MODE [D]/RB");
+            RefreshLaunchHint();
         }
 
         void StartDailyRun()
@@ -274,6 +266,8 @@ namespace Shmup.Presentation.Battle
         /// 보드를 읽는 동안 뒤에서 함선이 바뀌거나 크레딧이 나가면 안 된다.
         /// </summary>
         public bool RankingOpen => _rankingRoot != null && _rankingRoot.activeSelf;
+        public bool DevPanelOpen => _devRoot != null && _devRoot.activeSelf;
+        public bool ModalOpen => RankingOpen || DevPanelOpen;
 
         void ToggleRanking()
         {
@@ -300,7 +294,7 @@ namespace Shmup.Presentation.Battle
             canvas.transform.SetParent(transform, false);
             _rankingRoot = canvas.gameObject;
 
-            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.72f));
+            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.72f)).raycastTarget = true;
             // 컬럼 7개(순위·파일럿·점수·스테이지·기체·봄·피격)를 고정폭으로 세우려면
             // 380px로는 모자란다. HIT 칸이 붙으면서 한 줄이 42자 → 47자가 됐으므로
             // 같은 비율로 폭만 다시 키운다. 헤어라인 패널 언어는 그대로다.
@@ -733,6 +727,7 @@ namespace Shmup.Presentation.Battle
         /// <summary>개발자 패널로 출격. 이 런은 점수 제출이 막힌다.</summary>
         void StartDevRun()
         {
+            _dailyMode = false;
             DevArgs.RuntimeDevRun = true;
             DevArgs.RuntimeGod = _devGod;
             DevArgs.RuntimeMaxPower = _devMaxPower;
@@ -755,108 +750,101 @@ namespace Shmup.Presentation.Battle
             StartRun();
         }
 
-        /// <summary>
-        /// 개발자 패널 (개발 모드 전용). 오른쪽 아래에 세로로 쌓는다 — 랭킹/시드 열과
-        /// 겹치지 않고, 일반 플레이어에게는 애초에 나오지 않는다.
-        /// </summary>
+        // The developer tools are a modal, so their controls never cover the normal menu.
         void BuildDevPanel(Transform parent)
         {
-            const float w = 104f, h = 30f, step = 33f;
-            float y = 150f;
+            MenuButton(parent, UiPlatform.TouchMode ? "DEV TOOLS" : "DEV [F2]/SELECT",
+                new Vector2(1f, 1f), new Vector2(-12f, -26f), new Vector2(110f, 40f),
+                ToggleDevPanel, "DevToolsButton");
+            var canvas = UiKit.CreateCanvas("DevCanvas", 60);
+            canvas.transform.SetParent(transform, false);
+            _devRoot = canvas.gameObject;
+            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.85f)).raycastTarget = true;
+            var panel = UiKit.CreatePanel(canvas.transform, new Vector2(352f, 296f), "DevPanel");
+            UiKit.CreateCornerText(panel, _fontBold, "DEV TOOLS / NO SCORE SUBMIT", 12,
+                UiKit.TextAccent, new Vector2(0.5f, 1f), new Vector2(0f, -12f),
+                TextAnchor.UpperCenter, "DevHeader");
+            _seedValueText = UiKit.CreateCornerText(panel, _font, "", 10,
+                UiKit.TextMain, new Vector2(0.5f, 1f), new Vector2(0f, -36f),
+                TextAnchor.UpperCenter, "Seed");
+            _seedValueText.rectTransform.sizeDelta = new Vector2(328f, 40f);
 
-            Text Add(string name, UnityEngine.Events.UnityAction action)
+            Text Add(string name, int column, int row, UnityEngine.Events.UnityAction action)
             {
-                var button = UiKit.CreateTouchButton(parent, _font, "", 9,
-                    new Vector2(1f, 0f), new Vector2(-10f, y), new Vector2(w, h),
-                    action, name);
-                y += step;
+                var button = UiKit.CreateTouchButton(panel, _font, "", 10,
+                    new Vector2(0.5f, 1f), new Vector2(column == 0 ? -83f : 83f, -84f - row * 46f),
+                    new Vector2(158f, 40f), action, name);
                 return button.GetComponentInChildren<Text>();
             }
-
-            var launch = UiKit.CreateTouchButton(parent, _font, "DEV LAUNCH\nno submit", 9,
-                new Vector2(1f, 0f), new Vector2(-10f, y), new Vector2(w, h + 6f),
+            _devStageLabel = Add("DevStage", 0, 0, CycleDevStage);
+            _devWarpLabel = Add("DevWarp", 1, 0, CycleDevWarp);
+            _devThemeLabel = Add("DevTheme", 0, 1, CycleDevTheme);
+            _devGodLabel = Add("DevGod", 1, 1, ToggleDevGod);
+            _devPowerLabel = Add("DevPower", 0, 2, ToggleDevPower);
+            UiKit.CreateTouchButton(panel, _font, "CLOSE", 10,
+                new Vector2(0.5f, 1f), new Vector2(83f, -176f), new Vector2(158f, 40f),
+                ToggleDevPanel, "DevClose");
+            UiKit.CreateTouchButton(panel, _fontBold, "DEV LAUNCH", 16,
+                new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(324f, 44f),
                 StartDevRun, "DevLaunch", accent: true);
-            y += step + 6f;
-            _devPowerLabel = Add("DevPower", ToggleDevPower);
-            _devThemeLabel = Add("DevTheme", CycleDevTheme);
-            _devGodLabel = Add("DevGod", ToggleDevGod);
-            _devWarpLabel = Add("DevWarp", CycleDevWarp);
-            _devStageLabel = Add("DevStage", CycleDevStage);
-
-            var header = UiKit.CreateCornerText(parent, _font, "DEV", 9,
-                UiKit.TextDim, new Vector2(1f, 0f), new Vector2(-10f, y + 4f),
-                TextAnchor.LowerRight, "DevHeader");
-            header.rectTransform.sizeDelta = new Vector2(w, 16f);
             RefreshDevPanel();
+            RefreshSeedText();
+            _devRoot.SetActive(false);
         }
 
-        void BuildTouchButtons(Transform parent)
+        void ToggleDevPanel()
         {
-            const float w = 132f, h = 34f, step = 38f;
-            float y = -150f;
+            if (_devRoot != null) _devRoot.SetActive(!_devRoot.activeSelf);
+            var first = DevPanelOpen ? _devStageLabel?.GetComponentInParent<Button>() : null;
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(
+                first != null ? first.gameObject : null);
+        }
 
-            var difficulty = UiKit.CreateTouchButton(parent, _font, "", 10,
-                new Vector2(0f, 1f), new Vector2(10f, y), new Vector2(w, h),
-                CycleDifficulty, "DifficultyButton");
-            _difficultyButtonLabel = difficulty.GetComponentInChildren<Text>();
-            y -= step;
+        // Keyboard shortcuts own controller navigation on the base screen. Prevent an
+        // EventSystem Submit from also clicking a previously pointer-selected menu button.
+        Button MenuButton(Transform parent, string label, Vector2 anchor, Vector2 offset,
+            Vector2 size, UnityEngine.Events.UnityAction action, string name, bool accent = false)
+        {
+            var button = UiKit.CreateTouchButton(parent, accent ? _fontBold : _font, label,
+                accent ? 18 : 10, anchor, offset, size,
+                () => { if (!ModalOpen) action(); }, name, accent);
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            return button;
+        }
 
-            // 데일리는 "다른 시드로 한 판"이 아니라 모두가 같은 시드로 겨루는 스코어링
-            // 챌린지다 — 두 줄로 성격(GLOBAL SEED)과 오늘 날짜를 함께 읽히게 한다.
-            const float dailyH = 40f;
-            var mode = UiKit.CreateTouchButton(parent, _font, "", 9,
-                new Vector2(0f, 1f), new Vector2(10f, y), new Vector2(w, dailyH),
-                ToggleMode, "ModeButton");
-            _modeButtonLabel = mode.GetComponentInChildren<Text>();
-            y -= step + (dailyH - h);
-
+        void BuildMenuButtons(Transform parent)
+        {
+            var topLeft = new Vector2(0f, 1f);
+            var topRight = new Vector2(1f, 1f);
+            var size = new Vector2(166f, 40f);
+            UiKit.CreateCornerText(parent, _font, "RUN SETUP", 9, UiKit.TextAccent,
+                topLeft, new Vector2(12f, -110f), TextAnchor.UpperLeft, "SetupHeader");
+            _difficultyButtonLabel = MenuButton(parent, "", topLeft, new Vector2(12f, -130f),
+                size, CycleDifficulty, "DifficultyButton").GetComponentInChildren<Text>();
+            _modeButtonLabel = MenuButton(parent, "", topLeft, new Vector2(12f, -174f),
+                size, ToggleMode, "ModeButton").GetComponentInChildren<Text>();
+            MenuButton(parent, "RANKING", topLeft, new Vector2(12f, -218f),
+                size, ToggleRanking, "RankingButton");
+            float historyY = -130f;
+            if (_suspended != null || _replay != null)
+                UiKit.CreateCornerText(parent, _font, "FLIGHT RECORD", 9, UiKit.TextAccent,
+                    topRight, new Vector2(-12f, -110f), TextAnchor.UpperRight, "HistoryHeader");
             if (_suspended != null)
             {
-                UiKit.CreateTouchButton(parent, _font,
-                    $"CONTINUE\nstage {_suspended.stageIndex}", 10,
-                    new Vector2(0f, 1f), new Vector2(10f, y), new Vector2(w, h),
-                    ContinueRun, "ContinueButton", accent: true);
-                y -= step;
+                string hint = UiPlatform.TouchMode ? "" : " [C]/X";
+                MenuButton(parent, $"CONTINUE{hint}\nSTAGE {_suspended.stageIndex}", topRight,
+                    new Vector2(-12f, historyY), size, ContinueRun, "ContinueButton");
+                historyY -= 44f;
             }
-
             if (_replay != null)
             {
-                UiKit.CreateTouchButton(parent, _font, "REPLAY", 10,
-                    new Vector2(0f, 1f), new Vector2(10f, y), new Vector2(w, h),
-                    PlayReplay, "ReplayButton");
+                string hint = UiPlatform.TouchMode ? "" : " [V]/LB";
+                MenuButton(parent, $"REPLAY{hint}\n{_replay.finalScore:N0}", topRight,
+                    new Vector2(-12f, historyY), size, PlayReplay, "ReplayButton");
             }
-
-            // 오른쪽 열. 시드 블록은 개발 모드에서만 나오므로 좌표를 박아 두지 않고
-            // 커서로 쌓는다 — 릴리스에서 시드가 빠진 자리에 버튼 두 칸짜리 구멍이
-            // 남으면 랭킹 버튼만 허공에 떠 보인다.
-            float rightY = -150f;
-
-            // 시드 버튼은 없앴다 (사람 지시 2026-08-03: "seed 부여 버튼은 필요없지
-// 않나?"). 타이틀에 들어올 때마다 시드는 어차피 새로 뽑히고, 다시 뽑기
-            // 버튼은 그 위에 있으나 없으나 결과가 같았다. 값은 개발 모드에서만
-            // 읽기 전용으로 남긴다 — 버그 재현에 시드가 필요하다.
-            if (_seedUi && _seedValueText != null)
-            {
-                var rect = _seedValueText.rectTransform;
-                rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1f, 1f);
-                rect.anchoredPosition = new Vector2(-10f, rightY);
-                rect.sizeDelta = new Vector2(112f, 20f);
-                _seedValueText.alignment = TextAnchor.UpperRight;
-                _seedValueText.fontSize = 9;
-                rightY -= 26f;
-            }
-
-            // 글로벌 랭킹 (P1): 오늘의 데일리 보드 top 10.
-            UiKit.CreateTouchButton(parent, _font, "RANKING", 10,
-                new Vector2(1f, 1f), new Vector2(-10f, rightY), new Vector2(112f, h),
-                ToggleRanking, "RankingButton");
-
-            // 출격은 가장 크고 눈에 띄게 — 이 화면의 유일한 주 동작이다.
-            var launch = UiKit.CreateTouchButton(parent, _fontBold, "LAUNCH", 20,
-                new Vector2(0.5f, 0f), new Vector2(0f, 118f), new Vector2(200f, 50f),
-                StartRun, "LaunchButton", accent: true);
-            _launchButtonLabel = launch.GetComponentInChildren<Text>();
-            RefreshModeText();
+            _launchButtonLabel = MenuButton(parent, "LAUNCH", new Vector2(0.5f, 0f),
+                new Vector2(0f, 10f), new Vector2(232f, 44f), StartRun,
+                "LaunchButton", accent: true).GetComponentInChildren<Text>();
         }
 
         void Start()
@@ -898,94 +886,37 @@ namespace Shmup.Presentation.Battle
 
             // 아이브로: 로고 위 작은 앰버 라벨 — 큰 타이포의 서열을 만들어 준다
             var eyebrow = UiKit.CreateCornerText(canvas.transform, _font, "- RUN PROTOCOL -", 9,
-                UiKit.TextAccent, new Vector2(0.5f, 1f), new Vector2(0f, -46f),
+                UiKit.TextAccent, new Vector2(0.5f, 1f), new Vector2(0f, -24f),
                 TextAnchor.UpperCenter, "Eyebrow");
             UiKit.AddShadow(eyebrow, 1f);
 
-            var title1 = UiKit.CreateCornerText(canvas.transform, _fontBold, "ROGUELIKE", 40,
-                UiKit.TextMain, new Vector2(0.5f, 1f), new Vector2(0f, -58f),
+            var title1 = UiKit.CreateCornerText(canvas.transform, _fontBold, "ROGUELIKE", 30,
+                UiKit.TextMain, new Vector2(0.5f, 1f), new Vector2(0f, -36f),
                 TextAnchor.UpperCenter, "Title1");
-            var title2 = UiKit.CreateCornerText(canvas.transform, _fontBold, "SCROLLING SHOOTER", 40,
-                UiKit.TextMain, new Vector2(0.5f, 1f), new Vector2(0f, -102f),
+            var title2 = UiKit.CreateCornerText(canvas.transform, _fontBold, "SCROLLING SHOOTER", 26,
+                UiKit.TextMain, new Vector2(0.5f, 1f), new Vector2(0f, -70f),
                 TextAnchor.UpperCenter, "Title2");
             UiKit.AddShadow(title1, 3f);
             UiKit.AddShadow(title2, 3f);
             // 로고 밑줄 — 양끝이 사그라드는 앰버 라인이 로고와 메뉴 영역을 나눈다
             UiKit.CreateRule(canvas.transform, new Vector2(0.5f, 1f),
-                new Vector2(0f, -148f), 300f, UiKit.TextAccent, "TitleRule");
+                new Vector2(0f, -102f), 300f, UiKit.TextAccent, "TitleRule");
             _promptText = UiKit.CreateCornerText(canvas.transform, _font,
-                UiText.LaunchPrompt, 14, UiKit.TextAccent,
-                new Vector2(0.5f, 1f), new Vector2(0f, -160f), TextAnchor.UpperCenter, "Prompt");
+                UiPlatform.TouchMode ? "CHOOSE SHIP / TAP LAUNCH" : UiText.LaunchPrompt, 9,
+                UiKit.TextAccent, new Vector2(0.5f, 0f), new Vector2(0f, 58f),
+                TextAnchor.LowerCenter, "Prompt");
             UiKit.AddShadow(_promptText);
-            if (_seedUi)
-            {
-                _seedValueText = UiKit.CreateCornerText(canvas.transform, _font, "", 11,
-                    UiKit.TextDim, new Vector2(0.5f, 0f), new Vector2(0f, 66f),
-                    TextAnchor.LowerCenter, "Seed");
-                UiKit.AddShadow(_seedValueText);
-            }
 
-            // 이어하기 (REQ-017): 저장된 런이 있으면 안내 표시
             _suspended = RunSave.TryLoad();
-            if (_suspended != null)
-            {
-                _continueText = UiKit.CreateCornerText(canvas.transform, _font,
-                    $"[C]/(X) CONTINUE — stage {_suspended.stageIndex}, score {_suspended.score:N0}",
-                    11, UiKit.TextAccent, new Vector2(0f, 0.5f), new Vector2(14f, 34f),
-                    TextAnchor.MiddleLeft, "Continue");
-                UiKit.AddShadow(_continueText);
-            }
-
-            // 난이도 선택 (REQ-020): [T]/(dpad↑) 순환, 잠정 배율 §7
-            _difficultyText = UiKit.CreateCornerText(canvas.transform, _font, "", 11,
-                UiKit.TextMain, new Vector2(0f, 0.5f), new Vector2(14f, 56f),
-                TextAnchor.MiddleLeft, "Difficulty");
-            UiKit.AddShadow(_difficultyText);
-            RefreshDifficultyText();
-
-            // 데일리 런 (REQ-018): 날짜는 Presentation이 읽고 Core는 순수 해시만
+            _replay = ReplaySave.TryLoad();
             var todayUtc = System.DateTime.UtcNow;
             _dailyDateInt = todayUtc.Year * 10000 + todayUtc.Month * 100 + todayUtc.Day;
             _dailyDateLabel = todayUtc.ToString(
                 "MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-            var daily = UiKit.CreateCornerText(canvas.transform, _font,
-                string.Format(UiText.DailyFormat, UiText.ModeHintNormal), 11, UiKit.TextMain,
-                new Vector2(0f, 0.5f), new Vector2(14f, 12f), TextAnchor.MiddleLeft, "Daily");
-            UiKit.AddShadow(daily);
-            _modeHintText = daily;
-
-            // 마지막 런 리플레이 (REQ-018/019)
-            _replay = ReplaySave.TryLoad();
-            Text replayText = null;
-            if (_replay != null)
-            {
-                replayText = UiKit.CreateCornerText(canvas.transform, _font,
-                    $"[V]/(LB) REPLAY — {_replay.finalScore:N0}", 11, UiKit.TextMain,
-                    new Vector2(0f, 0.5f), new Vector2(14f, -10f), TextAnchor.MiddleLeft, "Replay");
-                UiKit.AddShadow(replayText);
-            }
-
-            if (UiPlatform.TouchMode)
-            {
-                // 단축키 안내는 폰에서 읽을 이유가 없다 — 버튼이 같은 일을 한다.
-                Hide(_promptText);
-                Hide(_difficultyText);
-                Hide(daily);
-                Hide(_continueText);
-                Hide(replayText);
-                BuildTouchButtons(canvas.transform);
-            }
-            // 개발자 패널은 개발 모드에서만. 터치/키보드 화면 양쪽에 붙인다 —
-            // 보스 확인은 폰에서도 해야 한다.
+            BuildMenuButtons(canvas.transform);
             if (_seedUi) BuildDevPanel(canvas.transform);
-
             RefreshDifficultyText();
             RefreshModeText();
-        }
-
-        static void Hide(Text text)
-        {
-            if (text != null) text.gameObject.SetActive(false);
         }
 
         void Update()
@@ -1008,12 +939,25 @@ namespace Shmup.Presentation.Battle
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
 
+            bool toggleDev = _seedUi && ((keyboard != null && keyboard.f2Key.wasPressedThisFrame)
+                || (gamepad != null && gamepad.selectButton.wasPressedThisFrame));
+            if (toggleDev)
+            {
+                ToggleDevPanel();
+                return;
+            }
+            if (DevPanelOpen)
+            {
+                if ((keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+                    || (gamepad != null && gamepad.buttonEast.wasPressedThisFrame))
+                    ToggleDevPanel();
+                else if (keyboard != null) EditSeed(keyboard);
+                RefreshSeedText();
+                return;
+            }
+
             if (keyboard != null)
             {
-                // 시드 편집도 개발 모드 전용이다. 릴리스에서 숫자 키를 살려 두면 화면에
-                // 아무것도 안 보이는 채로 시드가 바뀌고, 그 런은 수동 낙인이 찍혀 조용히
-                // 제출이 막힌다 — 보이지 않는 UI에 붙은 입력은 없는 편이 낫다.
-                if (_seedUi) EditSeed(keyboard);
                 if (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)
                 {
                     StartRun();
@@ -1056,22 +1000,30 @@ namespace Shmup.Presentation.Battle
                 return;
             }
 
-            // 깜빡이는 출격 안내 (터치 모드에서는 LAUNCH 버튼이 대신하므로 꺼져 있다)
-            bool promptVisible = Mathf.Repeat(Time.time, 1f) < 0.7f;
-            if (_promptText != null && _promptText.enabled != promptVisible)
-                _promptText.enabled = promptVisible;
+        }
 
+        void RefreshSeedText()
+        {
             if (_seedValueText != null
                 && (!ReferenceEquals(_shownSeed, _seedText) || _shownSeedManual != _seedManual))
             {
                 _shownSeed = _seedText;
                 _shownSeedManual = _seedManual;
                 string line = string.Format(
-                    UiPlatform.TouchMode ? UiText.SeedFormatTouch : UiText.SeedFormat, _seedText);
+                    UiPlatform.TouchMode ? UiText.SeedFormatTouch : "SEED {0}\nTYPE DIGITS / BACKSPACE TO EDIT", _seedText);
                 // 제출이 막힌 사실은 런이 끝난 뒤가 아니라 **출격 전에** 알려야 한다.
-                _seedValueText.text = _seedManual ? line + UiText.SeedManualSuffix : line;
-                _seedValueText.color = _seedManual ? UiKit.TextAccent : UiKit.TextDim;
+                _seedValueText.text = _seedManual ? line + "\nMANUAL SEED / NO SUBMIT" : line;
+                _seedValueText.color = _seedManual ? UiKit.TextAccent : UiKit.TextMain;
+                RefreshLaunchHint();
             }
+        }
+
+        void RefreshLaunchHint()
+        {
+            if (_promptText == null) return;
+            _promptText.text = _seedManual && !_dailyMode
+                ? "MANUAL SEED / NO SCORE SUBMIT"
+                : (UiPlatform.TouchMode ? "CHOOSE SHIP / TAP LAUNCH" : UiText.LaunchPrompt);
         }
 
         void EditSeed(Keyboard keyboard)
