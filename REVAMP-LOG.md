@@ -231,3 +231,55 @@ Core/GameData·씬·신규 아트/음원·패키지 설정은 변경하지 않�
 TimeManager 직렬화 형식 변경은 원복했다. 커밋은 로컬 개편 브랜치에만 남기며,
 WebGL 빌드·GitHub push·`rss-play` 배포는 진행하지 않았다.
 다음 단위는 보상/계약 카드의 정보 우선순위와 선택 피드백, 이후 음악/효과음 분리다.
+
+## 2026-09-29 — 2단계: 보상·계약 선택 개편
+
+기존 보상 UI는 Core가 계약에 따라 4개를 생성해도 3개만 표시했다. 무기 교체는
+실제 무기 이름 없이 SWAP으로 표시했고, 계약 제목은 카드 위에 겹쳤다. 봉인 계약의
+`NO GAUGE x1.6`은 점수 배율이라는 설명이 빠져 있었다. 또한 직접 키 입력과
+EventSystem Submit이 별도로 동작해 이전 선택이나 다음 화면까지 확정할 여지가 있었다.
+
+변경:
+
+- 보상 1~4개를 중앙 배치하고 네 번째 카드에 숫자 4/패드/포인터 선택 경로를 제공했다.
+  이름, 실제 효과, 이번 런의 대가를 별도 영역에 표시한다. 미사일·드론 편대 교체 이름,
+  캡슐의 커서 이동/화폐 효과, 실드의 재고 회복, 실제 주무기 피해 증가량을 명확히 했다.
+  드롭 가중치 감소는 고정 개수나 확률 감소로 오해하지 않도록 FEWER CAPSULE DROPS로 표시한다.
+- 계약 제목과 미리보기를 분리하고 모든 효과를 BENEFITS/TRADE-OFFS로 묶었다.
+  SCORE는 독립된 항목이며, 봉인은 해당 게이지 입력/슬롯이 잠기는 것으로 설명한다.
+  위험 등급은 제목에, 현재 선택은 앰버 테두리와 SELECTED 문자에 표시한다.
+- 리롤에 R/패드 Y 단축키, 비용·잔고·지불 후 잔고, 부족한 캡슐 수와 완료 안내를 추가했다.
+  성공 즉시 Core가 새로 생성한 후보로 다시 그리며, 부족하면 버튼을 비활성화한다.
+- ChoiceButton은 포인터의 선택 강조/누름 상태를 유지하면서 중복 Submit을 받지 않는다.
+  BattleDirector는 성공한 선택만 기록하고, 리롤·보상·계약 사이에서 같은 프레임의
+  입력을 한 번만 받는다. 재생/일시정지/옵션/보스 격파 연출 중 수동 선택을 차단한다.
+  재개 버튼으로 닫은 프레임도 PauseScreen이 차단해 뒤쪽 보상을 고르지 않게 했다.
+- 빈 후보 목록에서는 이전 카드를 숨긴다. 디밍 영역이 뒤쪽 UI의 포인터 입력을 막는다.
+  기존 아트·폰트·해상도를 사용하고 보상 화면에 보스 초상화를 다시 추가하지 않았다.
+
+검증:
+
+| 항목 | 결과 |
+| --- | --- |
+| CoreStandalone | **597 passed / 0 failed / 0 skipped** |
+| Unity EditMode | **663 passed / 0 failed / 0 skipped** |
+| 추가 회귀 테스트 | 19개: 실제 Core 1~4개 생성, 네 번째 키/클릭 선택, 리롤+확정 동시 입력, 중복 차감/다음 화면 확정 차단, 부족·정지·재생·연출, 재개, 포인터/패드 커서, 빈 목록, 전체 현재 보상·계약 문구의 공간 검사 |
+| 최종 테스트 증거 | `out/revamp/choices-unity.xml`, `choices-unity.log` |
+| 변경 전 | `choice-reward-before.png`, `choice-reward-four-before.png`, `choice-contract-before.png` |
+| PC 최종 | `choice-reward-after.png`, `choice-reward-four-after.png`, `choice-reward-rerolled-after.png`, `choice-contract-after.png`, `choice-contract-final-after.png` |
+| 터치 최종 | 위 화면의 `-touch-640.png` 변형, 캡슐 부족 상태 포함 |
+| 캡처 로그 | `choices-before.log`, `choices-after-final.log`, `choices-touch-final.log` |
+
+첫 회귀 실행의 2건 실패는 테스트가 1개 후보를 Main -2로 구성한 오류(실제는 Mid -1)와
+네 장 배치에서 캡슐 설명이 4줄로 넘친 문제였다. 실제 경로로 테스트를 수정하고 설명을
+짧게 한 뒤 통과했다. 최종 테스트에는 일시정지 재개와 계약 스틱 탐색 검증도 포함했다.
+
+캡처는 `Tools/QaHarness/capture_choices.eval.cs`를 Unity CLI `1.0.0-beta.11` /
+Pipeline `0.8.0-exp.1`에서 실행했다. 실제 Battle 씬 UI에 독립 런과 데이터 기반
+후보를 주입한 GPU batch Editor 렌더다. PC 리롤 캡처는 실제 Core 리롤을 호출해
+8→4 캡슐 차감과 새 후보 표시를 확인했다. 1280×720 및 640×360에서 문구·제목·카드가
+겹치지 않는 것을 확인했다. 이 자료는 Play Mode, 실기기 조작, 전체 런 플레이 검증이 아니다.
+
+Core/GameData·씬·신규 아트/음원·패키지는 변경하지 않았다. Unity가 다시 직렬화한
+TimeManager 설정은 원복한다. 로컬 `codex/revamp` 커밋이며 GitHub push, WebGL 빌드,
+`rss-play` 배포는 보류한다. 다음 단위는 BGM/SFX 볼륨 분리와 UI 효과음이다.

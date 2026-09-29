@@ -31,16 +31,20 @@ namespace Shmup.Presentation.Battle
 
         const int MaxOptions = 3;
         const float BoxWidth = 168f;
-        const float BoxHeight = 216f;
+        const float BoxHeight = 228f;
         const float BoxGap = 14f;
         const float PreviewHeight = 54f;
 
         GameObject _root;
         Text _titleText;
+        Text _hints;
+        Text _contextText;
         readonly RectTransform[] _boxRects = new RectTransform[MaxOptions];
         readonly Image[] _boxBorders = new Image[MaxOptions];
         readonly Text[] _boxTitles = new Text[MaxOptions];
         readonly Text[] _boxTexts = new Text[MaxOptions];
+        readonly Text[] _boxMarkers = new Text[MaxOptions];
+        readonly ChoiceButton[] _buttons = new ChoiceButton[MaxOptions];
         readonly GameObject[] _previewRoots = new GameObject[MaxOptions];
         readonly Image[] _previewBgs = new Image[MaxOptions];
         readonly Image[] _previewBosses = new Image[MaxOptions];
@@ -57,7 +61,7 @@ namespace Shmup.Presentation.Battle
                 case ContractRiskTier.Low: return new Color(0.35f, 0.65f, 1f, 1f);
                 case ContractRiskTier.High: return new Color(1f, 0.62f, 0.25f, 1f);
                 case ContractRiskTier.Extreme: return new Color(1f, 0.32f, 0.28f, 1f);
-                default: return UiKit.PanelBorder;   // Safe = 무채색 (표준 항로)
+                default: return UiKit.TextDim;
             }
         }
 
@@ -79,11 +83,13 @@ namespace Shmup.Presentation.Battle
             canvas.transform.SetParent(transform, false);
             _root = canvas.gameObject;
 
-            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.6f));
+            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.7f)).raycastTarget = true;
             _titleText = UiKit.CreateCornerText(canvas.transform, _fontBold,
                 UiText.ContractTitle, 16, UiKit.TextAccent,
-                new Vector2(0.5f, 1f), new Vector2(0f, -70f),
+                new Vector2(0.5f, 1f), new Vector2(0f, -28f),
                 TextAnchor.UpperCenter, "Title");
+            _contextText = UiKit.CreateCornerText(canvas.transform, _font, "", 9,
+                UiKit.TextDim, new Vector2(0.5f, 1f), new Vector2(0f, -54f), TextAnchor.UpperCenter, "Context");
 
             for (int i = 0; i < MaxOptions; i++)
             {
@@ -104,21 +110,29 @@ namespace Shmup.Presentation.Battle
                 titleRect.pivot = new Vector2(0.5f, 1f);
                 titleRect.anchoredPosition = new Vector2(0f, -8f - PreviewHeight);
                 titleRect.sizeDelta = new Vector2(-12f, 42f);
+                _boxTitles[i].horizontalOverflow = HorizontalWrapMode.Wrap;
 
                 // 카드 본문: 효과 전체 목록 (프리뷰·제목 아래 영역)
                 _boxTexts[i] = UiKit.CreateTextStretch(panel, _font, "", 10,
-                    UiKit.TextMain, TextAnchor.MiddleCenter, 8f, "Effects");
+                    UiKit.TextMain, TextAnchor.UpperLeft, 12f, "Effects");
+                _boxTexts[i].horizontalOverflow = HorizontalWrapMode.Wrap;
                 var effectsRect = _boxTexts[i].rectTransform;
-                effectsRect.offsetMax = new Vector2(-8f, -(PreviewHeight + 44f));
+                effectsRect.offsetMin = new Vector2(12f, 28f);
+                effectsRect.offsetMax = new Vector2(-12f, -(PreviewHeight + 48f));
+
+                _boxMarkers[i] = UiKit.CreateCornerText(panel, _font, "", 9, UiKit.TextAccent,
+                    new Vector2(0.5f, 0f), new Vector2(0f, 12f), TextAnchor.MiddleCenter, "Selection");
+                _boxMarkers[i].rectTransform.sizeDelta = new Vector2(BoxWidth - 16f, 14f);
 
                 int index = i;   // 클로저가 루프 변수를 잡지 않도록 복사
-                UiKit.MakeTappable(_boxBorders[i], () => Choose(index));
+                _buttons[i] = ChoiceButton.Create(_boxBorders[i], () => Choose(index), () => SetCursor(index));
             }
 
-            UiKit.CreateCornerText(canvas.transform, _font,
+            _hints = UiKit.CreateCornerText(canvas.transform, _font,
                 UiPlatform.TouchMode ? UiText.ChoiceHintsTouch : UiText.ChoiceHints,
                 10, UiKit.TextDim,
-                new Vector2(0.5f, 0f), new Vector2(0f, 40f), TextAnchor.MiddleCenter, "Hints");
+                new Vector2(0.5f, 0f), new Vector2(0f, 24f), TextAnchor.MiddleCenter, "Hints");
+            _hints.rectTransform.sizeDelta = new Vector2(620f, 20f);
 
             _root.SetActive(false);
         }
@@ -132,7 +146,7 @@ namespace Shmup.Presentation.Battle
             {
                 if (_boxRects[i] == null) continue;
                 _boxRects[i].anchoredPosition = new Vector2(
-                    -total / 2f + BoxWidth / 2f + i * (BoxWidth + BoxGap), -6f);
+                    -total / 2f + BoxWidth / 2f + i * (BoxWidth + BoxGap), -8f);
             }
         }
 
@@ -225,7 +239,7 @@ namespace Shmup.Presentation.Battle
             _boxTitles[i].rectTransform.anchoredPosition =
                 new Vector2(0f, show ? -8f - PreviewHeight : -8f);
             _boxTexts[i].rectTransform.offsetMax =
-                new Vector2(-8f, show ? -(PreviewHeight + 44f) : -44f);
+                new Vector2(-12f, show ? -(PreviewHeight + 48f) : -48f);
             if (!show) return;
 
             _previewBgs[i].sprite = At(_themeBgs, theme);
@@ -240,7 +254,30 @@ namespace Shmup.Presentation.Battle
             if (_director == null || !_director.AwaitingContract) return;
             var options = _director.ContractOptions;
             if (options == null || index < 0 || index >= options.Count) return;
-            _director.ChooseContract(index);
+            if (_director.ChooseContract(index))
+            {
+                _built = false;
+                _root.SetActive(false);
+            }
+        }
+
+        void SetCursor(int index)
+        {
+            if (!_director.CanInteractWithChoices) return;
+            _cursor = Mathf.Clamp(index, 0, _shownCount - 1);
+            RefreshSelection();
+        }
+
+        void RefreshSelection()
+        {
+            for (int i = 0; i < _shownCount; i++)
+            {
+                bool selected = i == _cursor;
+                _boxBorders[i].color = selected ? UiKit.TextAccent : UiKit.PanelBorder;
+                _boxMarkers[i].color = selected ? UiKit.TextAccent : UiKit.TextDim;
+                _boxMarkers[i].text = (UiPlatform.TouchMode ? "" : $"[{i + 1}]  ")
+                    + (selected ? "> SELECTED" : "CHOOSE");
+            }
         }
 
         /// <summary>
@@ -271,11 +308,11 @@ namespace Shmup.Presentation.Battle
                 // 봉인 계약 (REQ-095). 무엇이 막히는지가 카드의 정체다 —
                 // "게이지를 못 쓴다"는 다른 어떤 배율보다 먼저 읽혀야 한다.
                 case ContractEffectType.GaugeActivationBanned:
-                    return "NO GAUGE";
+                    return "GAUGE INPUT LOCKED";
                 case ContractEffectType.OptionActivationBanned:
-                    return "NO OPTION";
+                    return "OPTION SLOT LOCKED";
                 case ContractEffectType.ShieldActivationBanned:
-                    return "NO SHIELD";
+                    return "SHIELD SLOT LOCKED";
                 default:
                     // 모르는 효과도 절대 빈 줄로 두지 않는다 — 빈 줄은 "카드가 고장났다"로
                     // 읽히고, 이 화면의 존재 이유(효과를 다 적는다)와 정면으로 어긋난다.
@@ -292,46 +329,37 @@ namespace Shmup.Presentation.Battle
                 || type == ContractEffectType.ShieldActivationBanned;
         }
 
-        /// <summary>
-        /// 카드 본문의 효과 줄 전체. 봉인 계약은 배율이 곧 봉인의 대가라 봉인 줄에
-        /// 배율을 붙여 한 줄로 읽히게 하고("NO GAUGE x1.6"), 같은 숫자를 반복하는
-        /// 별도 SCORE 줄은 접는다 — 168px 카드에서 중복은 소음이다.
-        /// 봉인이 없는 계약은 기존 그대로 한 효과 = 한 줄이다.
-        /// </summary>
+        // Preserve every effect, including SCORE as its own named quantity.
         static void AppendEffectLines(System.Text.StringBuilder sb, ContractOption contract)
         {
             var effects = contract.Effects;
             if (effects == null || effects.Count == 0) return;
-
-            int scoreNumerator = contract.ScoreMultiplierNumerator;
-            int scoreDenominator = contract.ScoreMultiplierDenominator;
-            bool hasScore = scoreDenominator != 0 && scoreNumerator != scoreDenominator;
-            bool scorePending = hasScore && HasBan(effects);
-            string scoreSuffix = hasScore
-                ? $" x{(float)scoreNumerator / scoreDenominator:0.##}" : "";
-
-            for (int k = 0; k < effects.Count; k++)
+            for (int group = 0; group < 2; group++)
             {
-                var effect = effects[k];
-                // 봉인 줄이 배율을 이미 싣고 있으면 SCORE 줄은 생략한다.
-                if (scorePending && effect.Type == ContractEffectType.ScoreMultiplier)
-                    continue;
-                if (sb.Length > 0) sb.Append('\n');
-                sb.Append(DescribeEffect(in effect));
-                // 배율은 첫 봉인 줄에만. 봉인이 둘이어도 같은 숫자를 두 번 적지 않는다.
-                if (scorePending && IsBan(effect.Type))
+                bool heading = false;
+                for (int k = 0; k < effects.Count; k++)
                 {
-                    sb.Append(scoreSuffix);
-                    scorePending = false;
+                    var effect = effects[k];
+                    if (IsBenefit(effect) != (group == 0)) continue;
+                    if (!heading)
+                    {
+                        if (sb.Length > 0) sb.Append("\n\n");
+                        sb.Append(group == 0 ? "<color=#9DDEBF>BENEFITS</color>" : "<color=#FF8A70>TRADE-OFFS</color>");
+                        heading = true;
+                    }
+                    sb.Append('\n').Append(DescribeEffect(effect));
                 }
             }
         }
 
-        static bool HasBan(System.Collections.Generic.IReadOnlyList<ContractEffectView> effects)
+        static bool IsBenefit(in ContractEffectView effect)
         {
-            for (int k = 0; k < effects.Count; k++)
-                if (IsBan(effects[k].Type)) return true;
-            return false;
+            if (IsBan(effect.Type)) return false;
+            if (effect.Type == ContractEffectType.GuaranteedBombDrop) return true;
+            if (effect.Type == ContractEffectType.RewardOptionCountDelta) return effect.Numerator > 0;
+            bool increased = effect.Numerator > effect.Denominator;
+            return effect.Type == ContractEffectType.EnemyDensityMultiplier
+                || effect.Type == ContractEffectType.GimmickIntensityMultiplier ? !increased : increased;
         }
 
         void Update()
@@ -347,13 +375,26 @@ namespace Shmup.Presentation.Battle
             }
 
             var options = _director.ContractOptions;
-            if (options == null || options.Count == 0) return;   // Core가 빈 후보를 보장하지 않으므로 방어만
+            if (options == null || options.Count == 0)
+            {
+                _built = false;
+                foreach (var rect in _boxRects) rect.gameObject.SetActive(false);
+                _titleText.text = "WAITING FOR CONTRACTS";
+                _hints.text = "NO ROUTES AVAILABLE";
+                return;
+            }
 
-            if (!_built)
+            if (!_built || _shownCount != options.Count)
             {
                 _built = true;
                 _cursor = 0;
+                _titleText.text = UiText.ContractTitle;
+                _contextText.text = options[0].DestinationKind == ContractDestinationKind.EndRun
+                    ? (options.Count == 1 ? "FINISH THIS RUN AND BANK YOUR SCORE" : "RETURN HOME OR ENTER THE HIDDEN SECTOR")
+                    : "CONDITIONS APPLY TO THE NEXT SECTOR";
                 LayoutBoxes(Mathf.Clamp(options.Count, 1, MaxOptions));
+                _hints.text = UiPlatform.TouchMode ? UiText.ChoiceHintsTouch
+                    : $"[1]-[{_shownCount}] PICK   LEFT / RIGHT MOVE   (A) / ENTER CONFIRM";
                 for (int i = 0; i < MaxOptions; i++)
                 {
                     bool used = i < options.Count;
@@ -402,7 +443,11 @@ namespace Shmup.Presentation.Battle
                         _boxTexts[i].color = UiKit.TextMain;
                     }
                 }
+                RefreshSelection();
             }
+
+            foreach (var button in _buttons) button.interactable = _director.CanInteractWithChoices;
+            if (!_director.CanInteractWithChoices) return;
 
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
@@ -422,25 +467,17 @@ namespace Shmup.Presentation.Battle
             }
             if (gamepad != null)
             {
-                if (gamepad.dpad.left.wasPressedThisFrame) move = -1;
-                if (gamepad.dpad.right.wasPressedThisFrame) move = 1;
+                if (gamepad.dpad.left.wasPressedThisFrame || gamepad.leftStick.left.wasPressedThisFrame) move = -1;
+                if (gamepad.dpad.right.wasPressedThisFrame || gamepad.leftStick.right.wasPressedThisFrame) move = 1;
             }
             if (move != 0)
-                _cursor = Mathf.Clamp(_cursor + move, 0, options.Count - 1);
+                SetCursor(_cursor + move);
 
             bool confirm =
                 (keyboard != null && (keyboard.enterKey.wasPressedThisFrame || keyboard.zKey.wasPressedThisFrame))
                 || (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame);
             if (confirm) { Choose(_cursor); return; }
 
-            // 커서 강조는 등급 색을 밝혀서 — 커서와 등급이 각각 다른 채널이면 혼란스럽다.
-            for (int i = 0; i < options.Count && i < MaxOptions; i++)
-            {
-                var baseColor = TierColor(options[i].RiskTier);
-                _boxBorders[i].color = i == _cursor
-                    ? Color.Lerp(baseColor, Color.white, 0.35f)
-                    : baseColor;
-            }
         }
 
         /// <summary>

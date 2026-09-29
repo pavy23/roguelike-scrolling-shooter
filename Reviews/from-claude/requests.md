@@ -1996,3 +1996,11 @@ GROK(작성자 인체공학)과 필드명·시맨틱을 합의하고 진행할 �
 
 **처리 (2026-08-07, CLAUDE 대행):** 커밋 d2bbd88. 해시 6/6 일치, 테스트 4개 추가.
 채택(신규 데이터에 실제 사용)은 GROK 몫으로 남음.
+
+### 2026-09-29 개편 대행분 리뷰 인계
+
+사용자의 기존 `codex/revamp` 개편 계속 지시에 따라 Codex가 Presentation/오케스트레이션을
+대행했다. RewardScreen/ContractScreen의 정보 배치와 네 번째 보상, ChoiceButton 입력 경로,
+BattleDirector의 성공 후 기록·프레임당 단일 선택, PauseScreen의 재개 입력 차단을 원 담당
+복귀 시 리뷰 대상으로 남긴다. Core 597개 및 Unity EditMode 663개 통과. 근거는
+`REVAMP-LOG.md`의 보상·계약 선택 개편 항목과 `ChoiceScreenTests.cs`에 있다.

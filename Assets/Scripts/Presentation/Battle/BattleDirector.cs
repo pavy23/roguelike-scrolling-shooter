@@ -2357,15 +2357,25 @@ namespace Shmup.Presentation.Battle
         /// <summary>현재 스테이지에 적용 중인 계약. 스테이지 1과 런 종료 후에는 null.</summary>
         public ContractDefinition ActiveContract => _run?.ActiveContract;
 
-        public void ChooseContract(int index)
+        int _choiceInputFrame = -1;
+
+        public bool CanInteractWithChoices => !_replayMode && Time.timeScale > 0f
+            && !OptionsScreen.BlocksPauseInput;
+
+        // Resume/confirm must not also pick a reward underneath the pause menu.
+        public void BlockChoiceInputThisFrame() => _choiceInputFrame = Time.frameCount;
+
+        public bool ChooseContract(int index)
         {
-            if (!AwaitingContract) return;
-            if (_replayMode) return;   // 리플레이 중 수동 선택 금지 (자동 재현)
-            if (!_run.ChooseContract(index)) return;   // 잘못된 인덱스는 Core가 안전 거부
+            if (!AwaitingContract || !CanInteractWithChoices || _choiceInputFrame == Time.frameCount)
+                return false;
+            if (!_run.ChooseContract(index)) return false;
+            _choiceInputFrame = Time.frameCount;
             // 기록은 성공 후에만 — 거부된 선택이 기록되면 리플레이가 어긋난다.
             if (_recordingActive) _recordedContractChoices.Add(index);
             RefreshBattle();
             SyncViews();
+            return true;
         }
 
         /// <summary>
@@ -2405,27 +2415,31 @@ namespace Shmup.Presentation.Battle
         public System.Collections.Generic.IReadOnlyList<RewardOption> RewardOptions
             => _run?.RewardOptions;
 
-        public void ChooseReward(int index)
+        public bool ChooseReward(int index)
         {
-            if (!AwaitingReward) return;
-            if (_replayMode) return;   // 리플레이 중 수동 선택 금지 (자동 재현)
+            if (!AwaitingReward || !CanInteractWithChoices || BossDeathCinematicActive
+                || _choiceInputFrame == Time.frameCount) return false;
+            if (!_run.ChooseReward(index)) return false;
+            _choiceInputFrame = Time.frameCount;
             if (_recordingActive) _recordedChoices.Add(index);
-            _run.ChooseReward(index);
             RefreshBattle();
             SyncViews();
+            return true;
         }
 
         // ── 보상 리롤 (REQ-072 — 캡슐 화폐) ─────────────────────────────────────
 
         public int CapsuleBalance => _run?.CapsuleBalance ?? 0;
         public int RewardRerollCost => _run?.RewardRerollCost ?? 0;
-        public bool CanRerollRewards => _run != null && _run.CanRerollRewardOptions;
+        public bool CanRerollRewards => CanInteractWithChoices && !BossDeathCinematicActive
+            && _run != null && _run.CanRerollRewardOptions && _run.RewardOptions.Count > 0;
 
         /// <summary>리롤 성공 여부. 리플레이 기록에는 선택 -1이 리롤을 뜻한다.</summary>
         public bool RerollRewards()
         {
-            if (!AwaitingReward || _replayMode) return false;
+            if (!CanRerollRewards || _choiceInputFrame == Time.frameCount) return false;
             if (!_run.RerollRewardOptions()) return false;
+            _choiceInputFrame = Time.frameCount;
             if (_recordingActive) _recordedChoices.Add(RerollChoiceSentinel);
             return true;
         }

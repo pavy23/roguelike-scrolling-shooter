@@ -139,6 +139,7 @@ namespace Shmup.Presentation.Battle
 
         void SetPaused(bool paused)
         {
+            if (_paused != paused && _director != null) _director.BlockChoiceInputThisFrame();
             _paused = paused;
             Time.timeScale = paused ? 0f : 1f;
             AudioListener.pause = paused;
