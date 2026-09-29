@@ -84,3 +84,24 @@ CLI 테스트가 남긴 `runInBackground` 변경은 원복했다.
 다음 UI 작업은 항상 사격 정책과 옵션의 모순 정리, 실제 바인딩을 반영하는 안내,
 입력 장치별 메뉴 흐름이다. 음악/효과음 분리와 UI 사운드, 플래시 감소의 일관성은
 그다음 순서이며, 새 아트·사운드 채택 전에는 비교 시안과 청취가 필요하다.
+
+## 2026-09-29 — 중간 화면 공유와 Pipeline 호환성 수정
+
+사용자의 중간 스크린샷 공유 요청을 실행 계획에 반영했다. 첫 타이틀 캡처 중
+Pipeline `0.4.0-exp.1`이 명령 인자 파싱에 `0.6.0-exp.1` 이상을 요구하며
+`eval_file` 실행을 거절했다. 앞선 조건부 업데이트 지시에 따라 Unity CLI의
+`pipeline upgrade`로 **`0.8.0-exp.1`**을 설치했다. Editor는 `6000.5.3f1`로 유지했다.
+
+- 업데이트 후 Unity EditMode: **610 passed / 0 failed / 0 skipped**.
+  증거: `out/revamp/pipeline08-unity.xml`, `pipeline08-unity.log`.
+- Unity CLI와 GPU batch Editor로 창을 띄우지 않고 타이틀 PNG 생성 성공.
+  재현 스크립트: `Tools/QaHarness/capture_title.eval.cs`, 사용법은 같은 폴더 README.
+  저장소의 최종 스크립트로 재실행도 통과했다 (`capture-title-workflow.log`).
+- `out/revamp/title-ui-review.png`: 1280×720, 현재 씬·UI 코드의 에디터 개발 모드
+  오프스크린 렌더. 실플레이 캡처가 아니며 개발 패널이 포함된다. 씬은 저장하지 않았다.
+- 제목/난이도, 시드/격납고 정보, 개발 패널/제목의 겹침을 확인했다.
+  다음 UI 작업의 첫 비교 기준으로 `UIUX-AUDIO-REVIEW.md`에 반영했다.
+
+최근 벽 재생·보스 결과/음악 순서 수정은 회귀 테스트까지 검증했다. 이번 타이틀
+이미지는 그 전투 연출의 시각 검증을 대신하지 않는다. 실플레이와 실제 청취는 남아 있다.
+CLI가 남긴 `runInBackground` 설정 변경은 원복했다.
