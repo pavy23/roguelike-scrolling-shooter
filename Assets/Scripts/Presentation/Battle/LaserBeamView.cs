@@ -369,6 +369,12 @@ namespace Shmup.Presentation.Battle
 
             float grow = GrowFraction(track, laser, deltaTime);
             bool player = laser.SourceKind == LaserSourceKind.Player;
+            bool reduced = _director != null && _director.FlashReduced;
+            int order = player ? CombatReadability.FriendlyLaserOrder : CombatReadability.HostileLaserOrder;
+            outer.sortingOrder = order;
+            band.sortingOrder = order + 1;
+            core.sortingOrder = order + 2;
+            glow.sortingOrder = impact.sortingOrder = order + 3;
 
             float bandThickness, coreThickness;
             Color bandColor, coreColor;
@@ -381,7 +387,8 @@ namespace Shmup.Presentation.Battle
                 {
                     float toFire = laser.PhaseTicksRemaining / (float)SimSpace.TicksPerSecond;
                     bool imminent = toFire <= ImminentSeconds;
-                    float pulse = Pulse(track, imminent ? ImminentPulseHz : TelegraphPulseHz, deltaTime);
+                    // Reduced-flash keeps the complete warning shape and a steady urgency level.
+                    float pulse = reduced ? .5f : Pulse(track, imminent ? ImminentPulseHz : TelegraphPulseHz, deltaTime);
                     float alpha = imminent
                         ? Mathf.Lerp(ImminentAlphaMin, ImminentAlphaMax, pulse)
                         : Mathf.Lerp(TelegraphAlphaMin, TelegraphAlphaMax, pulse);
@@ -454,6 +461,7 @@ namespace Shmup.Presentation.Battle
             // 스프라이트라, 겹칠수록 가운데가 단단해지고 바깥이 부드럽게 사라진다.
             Color outerColor = bandColor;
             outerColor.a = bandColor.a * OuterAlphaScale;
+            if (reduced) outerColor.a *= .45f;
             PlaceQuad(
                 outer, start + delta * (0.5f * grow), rotation, length * grow,
                 bandThickness * OuterWidthScale, outerColor);
@@ -470,7 +478,7 @@ namespace Shmup.Presentation.Battle
             // 캡은 방사 감쇠라, 빔 두께보다 조금 크게 걸면 그 원호가 빔의 시작
             // 단면을 덮어 둥근 머리가 된다.
             float capSize = Mathf.Max(chargeSize, bandThickness * MuzzleCapWidthScale);
-            PlaceCap(glow, start, rotation, capSize, glowAlpha,
+            PlaceCap(glow, start, rotation, capSize, glowAlpha * (reduced ? .4f : 1f),
                 player ? PlayerCore : bandColor);
 
             // 착탄 캡도 실제 선분 끝에 고정한다. 예고 중에는 띄우지 않는다.
@@ -481,7 +489,7 @@ namespace Shmup.Presentation.Battle
                 end,
                 rotation,
                 hitting ? coreThickness * ImpactSizeScale : 0f,
-                hitting ? coreColor.a * 0.9f : 0f,
+                hitting ? coreColor.a * (reduced ? .35f : .9f) : 0f,
                 coreColor);
         }
 

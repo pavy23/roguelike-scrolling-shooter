@@ -14,6 +14,7 @@ namespace Shmup.Presentation.Tests
         LaserBeamView _view;
         Texture2D _texture;
         Sprite _sprite;
+        JuiceDirector _juice;
 
         [SetUp]
         public void SetUp()
@@ -26,6 +27,10 @@ namespace Shmup.Presentation.Tests
             typeof(LaserBeamView).GetField("_pixelSprite", PrivateInstance).SetValue(_view, _sprite);
             typeof(LaserBeamView).GetField("_capacity", PrivateInstance).SetValue(_view, 1);
             typeof(LaserBeamView).GetMethod("Start", PrivateInstance).Invoke(_view, null);
+            var director = _root.AddComponent<BattleDirector>();
+            _juice = _root.AddComponent<JuiceDirector>();
+            typeof(BattleDirector).GetField("_juice", PrivateInstance).SetValue(director, _juice);
+            typeof(LaserBeamView).GetField("_director", PrivateInstance).SetValue(_view, director);
         }
 
         [TearDown]
@@ -76,6 +81,48 @@ namespace Shmup.Presentation.Tests
             Assert.That(Thickness("Band"), Is.EqualTo(10f).Within(0.0001f));
             Draw(Beam(3, LaserSourceKind.BossPart, LaserPhase.Telegraph, Unit / 8, Unit / 4));
             Assert.That(Thickness("Band"), Is.EqualTo(0.5f).Within(0.0001f));
+        }
+
+        [Test]
+        public void ReducedFlashWarningStaysSteadyAndKeepsItsFullWidth()
+        {
+            typeof(JuiceDirector).GetField("_flashReduced", PrivateInstance).SetValue(_juice, true);
+            var beam = Beam(1, LaserSourceKind.Boss, LaserPhase.Telegraph, Unit / 8, Unit * 5);
+            Draw(beam);
+            var first = Renderer("Band").color;
+            for (int i = 0; i < 20; i++) Draw(beam);
+            Assert.AreEqual(first, Renderer("Band").color);
+            Assert.Greater(first.a, .4f);
+            Assert.That(Thickness("Band"), Is.EqualTo(10f).Within(.0001f));
+            Assert.Greater(Renderer("Core").color.a, .5f);
+        }
+
+        [TestCase(LaserPhase.Firing)]
+        [TestCase(LaserPhase.Sustaining)]
+        public void ReducedFlashPreservesDangerBodyAndAttenuatesOnlyDecoration(LaserPhase phase)
+        {
+            var beam = Beam(1, LaserSourceKind.Enemy, phase, Unit / 8, Unit);
+            Draw(beam);
+            float width = Thickness("Band");
+            float alpha = Renderer("Core").color.a;
+            float outer = Renderer("Outer").color.a;
+            typeof(JuiceDirector).GetField("_flashReduced", PrivateInstance).SetValue(_juice, true);
+            Draw(beam);
+            Assert.AreEqual(width, Thickness("Band"));
+            Assert.AreEqual(alpha, Renderer("Core").color.a);
+            Assert.Less(Renderer("Outer").color.a, outer);
+            Assert.LessOrEqual(Renderer("Impact").color.a, .35f);
+        }
+
+        [Test]
+        public void PooledLaserOrderingResetsBetweenHostileAndPlayerSources()
+        {
+            Draw(Beam(1, LaserSourceKind.Enemy, LaserPhase.Sustaining, Unit, Unit));
+            Assert.Greater(Renderer("Band").sortingOrder, CombatReadability.ExplosionOrder);
+            Draw(Beam(2, LaserSourceKind.Player, LaserPhase.Sustaining, Unit, Unit));
+            Assert.Less(Renderer("Core").sortingOrder, CombatReadability.ExplosionOrder);
+            Draw(Beam(3, LaserSourceKind.Boss, LaserPhase.Telegraph, Unit, Unit));
+            Assert.Greater(Renderer("Core").sortingOrder, CombatReadability.ExplosionOrder);
         }
 
         [Test]

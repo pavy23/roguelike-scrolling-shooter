@@ -183,6 +183,7 @@ namespace Shmup.Presentation.Battle
         readonly List<Transform> _activeFx = new List<Transform>(16);
         readonly List<SpriteRenderer> _activeFxRenderers = new List<SpriteRenderer>(16);
         readonly List<float> _activeFxAges = new List<float>(16);
+        readonly List<Color> _activeFxTints = new List<Color>(16);
         const float ExplosionDuration = 0.28f;
         int _lastHp = -1;
         float _damageFlashAge = float.MaxValue;
@@ -1371,6 +1372,7 @@ namespace Shmup.Presentation.Battle
 
         void Update()
         {
+            ApplyPlayerReadability();
             AnimateExplosions();
             AnimateDamageFlash();
             AnimatePunches();
@@ -2573,6 +2575,8 @@ namespace Shmup.Presentation.Battle
                     {
                         renderer.sprite = SpriteForBulletKind(bullet.Kind);
                         renderer.color = ColorForBulletKind(bullet.Kind);
+                        renderer.sortingOrder = bullet.Faction == BulletFaction.Enemy
+                            ? CombatReadability.HostileBulletOrder : CombatReadability.FriendlyBulletOrder;
                     }
                     view.localScale = Vector3.one * ScaleForBulletKind(bullet.Kind);
                 }
@@ -2768,13 +2772,17 @@ namespace Shmup.Presentation.Battle
             if (fx == null) return;
             fx.localPosition = position;
             var renderer = fx.GetComponent<SpriteRenderer>();
+            if (renderer != null)
+            {
+                renderer.sortingOrder = CombatReadability.ExplosionOrder;
+                renderer.color = CombatReadability.ExplosionColor(tint, 0f, FlashReduced);
+            }
             if (HasExplosionFrames)
             {
                 fx.localScale = Vector3.one * scale;
                 if (renderer != null)
                 {
                     renderer.sprite = _explosionFrames[0];
-                    renderer.color = tint;
                 }
             }
             else
@@ -2784,6 +2792,15 @@ namespace Shmup.Presentation.Battle
             _activeFx.Add(fx);
             _activeFxRenderers.Add(renderer);
             _activeFxAges.Add(0f);
+            _activeFxTints.Add(tint);
+        }
+
+        public bool FlashReduced => _juice != null && _juice.FlashReduced;
+
+        void ApplyPlayerReadability()
+        {
+            if (PlayerRenderer != null) PlayerRenderer.sortingOrder = CombatReadability.PlayerOrder;
+            if (_shieldView != null) _shieldView.sortingOrder = CombatReadability.PlayerOrder - 1;
         }
 
         /// <summary>적 피격 펀치: 짧은 스케일 팝 + 붉은 틴트. 원 스케일은 시작 시점 값을 복원한다.</summary>
@@ -3032,12 +3049,15 @@ namespace Shmup.Presentation.Battle
                     _activeFx.RemoveAt(i);
                     _activeFxRenderers.RemoveAt(i);
                     _activeFxAges.RemoveAt(i);
+                    _activeFxTints.RemoveAt(i);
                     continue;
                 }
 
                 _activeFxAges[i] = age;
                 float t = age / lifetime;
                 var renderer = _activeFxRenderers[i];
+                if (renderer != null)
+                    renderer.color = CombatReadability.ExplosionColor(_activeFxTints[i], t, FlashReduced);
                 if (HasExplosionFrames)
                 {
                     if (renderer != null)
@@ -3050,12 +3070,6 @@ namespace Shmup.Presentation.Battle
                 }
 
                 _activeFx[i].localScale = Vector3.one * Mathf.Lerp(0.6f, 1.8f, t);
-                if (renderer != null)
-                {
-                    var c = renderer.color;
-                    c.a = 1f - t;
-                    renderer.color = c;
-                }
             }
         }
 
@@ -3068,25 +3082,10 @@ namespace Shmup.Presentation.Battle
 
             if (_damageFlash == null) return;
 
-            bool flashReduced = _juice != null && _juice.FlashReduced;
-
-            // 폭탄이 피격보다 우선한다 — 화면을 지우는 사건이 더 크고, 폭탄 직후 피격이
-            // 겹칠 때(무적 만료 직전) 약한 쪽이 이기면 연출이 뒤바뀐다.
-            if (_bombFlashAge < BombFlashDuration)
-            {
-                _bombFlashAge += Time.deltaTime;
-                float t = Mathf.Clamp01(1f - _bombFlashAge / BombFlashDuration);
-                // 폭탄 아이콘과 같은 자홍 계열 — 무엇이 터졌는지 색으로 연결된다.
-                _damageFlash.color = new Color(1f, 0.55f, 1f, t * (flashReduced ? 0.3f : 0.7f));
-                return;
-            }
-
-            if (_damageFlashAge >= DamageFlashDuration) return;
-
-            _damageFlashAge += Time.deltaTime;
-            float intensity = flashReduced ? 0.15f : 0.35f;
-            float alpha = Mathf.Clamp01(1f - _damageFlashAge / DamageFlashDuration) * intensity;
-            _damageFlash.color = new Color(1f, 0.2f, 0.2f, alpha);
+            // Both clocks advance even while the other effect is visible; no delayed hit flash.
+            if (_bombFlashAge < BombFlashDuration) _bombFlashAge += Time.deltaTime;
+            if (_damageFlashAge < DamageFlashDuration) _damageFlashAge += Time.deltaTime;
+            _damageFlash.color = CombatReadability.ScreenFlash(_damageFlashAge, _bombFlashAge, FlashReduced);
         }
 
         /// <summary>
