@@ -1929,7 +1929,7 @@ namespace Shmup.Presentation.Battle
             SyncEnemies();
             SyncCapsules();
             SyncBombPickups();
-            SyncObstacles();
+            SyncObstacles(Time.deltaTime);
             SyncShield();
             SyncBoss();
         }
@@ -1969,7 +1969,7 @@ namespace Shmup.Presentation.Battle
         bool _playerBlinking;
 
         /// <summary>장애물 뷰 동기화 (REQ-023). 테마×계열로 스프라이트를 고른다.</summary>
-        void SyncObstacles()
+        void SyncObstacles(float deltaTime)
         {
             if (_obstaclePool == null) return;
             var obstacles = _sim.Obstacles;
@@ -1984,6 +1984,7 @@ namespace Shmup.Presentation.Battle
                 // 여기서 새로 얻는데, 이때 스폰 페이드가 아니라 성장 연출을 걸어야 한다.
                 bool regenerating = _obstacleRegenAges.TryGetValue(obstacle.Id, out float regenAge)
                     && regenAge < ObstacleRegenSeconds;
+                float baseScale = ObstacleViewScale * ObstacleSizeRatio(in obstacle);
 
                 if (!_obstacleViews.TryGetValue(obstacle.Id, out var view))
                 {
@@ -1997,8 +1998,7 @@ namespace Shmup.Presentation.Battle
                     // 있으면(Core의 per-obstacle half) 기본값 대비 비율만큼 키운다 —
                     // 판정만 커지고 그림이 그대로면 "안 맞았는데 맞는" 판정이 되고,
                     // 반대면 "맞았는데 안 맞는" 판정이 된다.
-                    view.localScale = Vector3.one
-                        * ObstacleViewScale * ObstacleSizeRatio(in obstacle);
+                    view.localScale = Vector3.one * baseScale;
                     view.localRotation = Quaternion.identity;
                     var renderer = view.GetComponent<SpriteRenderer>();
                     if (renderer != null)
@@ -2030,12 +2030,12 @@ namespace Shmup.Presentation.Battle
                     var stateRenderer = view.GetComponent<SpriteRenderer>();
                     if (fading)
                     {
-                        age += Time.deltaTime;
+                        age += deltaTime;
                         _obstacleFadeAges[obstacle.Id] = age;
                     }
                     if (flashing)
                     {
-                        flash -= Time.deltaTime;
+                        flash -= deltaTime;
                         // 0에 닿는 프레임에 흰색으로 복원되고 키가 빠진다 — 잔틴트 방지
                         if (flash <= 0f) _obstacleHitFlashes.Remove(obstacle.Id);
                         else _obstacleHitFlashes[obstacle.Id] = flash;
@@ -2044,13 +2044,13 @@ namespace Shmup.Presentation.Battle
                     float regenT = 1f;
                     if (regenerating)
                     {
-                        regenAge += Time.deltaTime;
+                        regenAge += deltaTime;
                         regenT = Mathf.Clamp01(regenAge / ObstacleRegenSeconds);
                         // 마지막 프레임에 정확히 원 스케일/원 색으로 복귀시키고 키를 뺀다.
                         if (regenAge >= ObstacleRegenSeconds)
                         {
                             _obstacleRegenAges.Remove(obstacle.Id);
-                            view.localScale = Vector3.one * ObstacleViewScale;
+                            view.localScale = Vector3.one * baseScale;
                         }
                         else
                         {
@@ -2059,7 +2059,7 @@ namespace Shmup.Presentation.Battle
                             // 선형이면 "커진다"가 아니라 "늘어난다"로 읽힌다 (0.3 → 1.0).
                             float eased = Mathf.Sin(regenT * Mathf.PI * 0.5f);
                             float scale = Mathf.Lerp(ObstacleRegenStartScale, 1f, eased)
-                                          * ObstacleViewScale;
+                                          * baseScale;
                             view.localScale = new Vector3(scale, scale, 1f);
                         }
                     }

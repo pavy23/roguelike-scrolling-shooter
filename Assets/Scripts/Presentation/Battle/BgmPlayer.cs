@@ -47,6 +47,10 @@ namespace Shmup.Presentation.Battle
         {
             if (_director == null || _source == null) return;
 
+            // 격파·함체 붕괴 중에는 현재 곡을 이어간다. 결과/보상 화면이 열릴 때
+            // 클리어 징글과 다음 트랙으로 전환한다. 플레이어 사망은 지연하지 않는다.
+            if (_director.BossDeathCinematicActive && !_director.IsRunOver) return;
+
             // 런 종료: 루프 멈추고 스팅어 1회 (런당 1번). 완주는 승리 징글로 구분한다.
             if (_director.IsRunFinished)
             {

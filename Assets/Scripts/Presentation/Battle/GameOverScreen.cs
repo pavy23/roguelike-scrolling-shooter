@@ -412,7 +412,9 @@ namespace Shmup.Presentation.Battle
         {
             if (_director == null || _root == null) return;
             // 사망(RunOver)과 완주(RunCleared)를 같은 패널로 처리하되 문면을 바꾼다 (REQ-031)
-            bool finished = _director.IsRunFinished;
+            // 최종 격파도 보상 화면과 같은 연출 경계를 지킨다. 플레이어 사망은 즉시 표시한다.
+            bool finished = _director.IsRunFinished
+                && !(_director.IsRunCleared && _director.BossDeathCinematicActive);
             if (_root.activeSelf != finished)
                 _root.SetActive(finished);
             if (!finished) return;
