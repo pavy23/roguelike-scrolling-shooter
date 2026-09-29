@@ -85,7 +85,7 @@ namespace Shmup.Presentation.Battle
         /// <summary>화면 상단 ❙❙ 버튼용. 옵션이 열려 있으면 그쪽이 먼저 닫혀야 한다.</summary>
         void TogglePause()
         {
-            if (OptionsScreen.IsOpen) return;
+            if (OptionsScreen.BlocksPauseInput) return;
             SetPaused(!_paused);
         }
 
@@ -99,6 +99,7 @@ namespace Shmup.Presentation.Battle
 
         void Update()
         {
+            if (OptionsScreen.BlocksPauseInput) return;
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
 

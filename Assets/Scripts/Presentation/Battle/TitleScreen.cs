@@ -28,6 +28,8 @@ namespace Shmup.Presentation.Battle
         string _seedText;
         Text _promptText, _seedValueText;
         GameObject _devRoot;
+        Button _rankingCloseButton;
+        int _modalInputConsumedFrame = -1;
         string _shownSeed;
 
         /// <summary>
@@ -275,6 +277,9 @@ namespace Shmup.Presentation.Battle
             if (_rankingRoot == null) return;
             bool open = !_rankingRoot.activeSelf;
             _rankingRoot.SetActive(open);
+            _modalInputConsumedFrame = Time.frameCount;
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(
+                open && _rankingCloseButton != null ? _rankingCloseButton.gameObject : null);
             // 열 때마다 새로 받는다 — 데일리 보드는 하루 종일 움직인다.
             if (open) RequestRanking();
         }
@@ -282,6 +287,8 @@ namespace Shmup.Presentation.Battle
         void CloseRanking()
         {
             if (_rankingRoot != null) _rankingRoot.SetActive(false);
+            _modalInputConsumedFrame = Time.frameCount;
+            UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
         }
 
         /// <summary>
@@ -410,7 +417,7 @@ namespace Shmup.Presentation.Battle
             UiKit.CreateTouchButton(panel, _font, "DAILY / ALL", 11,
                 new Vector2(0.5f, 0f), new Vector2(-90f, 12f), new Vector2(140f, 34f),
                 ToggleRankingBoard, "RankToggle");
-            UiKit.CreateTouchButton(panel, _font, "CLOSE", 11,
+            _rankingCloseButton = UiKit.CreateTouchButton(panel, _font, "CLOSE", 11,
                 new Vector2(0.5f, 0f), new Vector2(90f, 12f), new Vector2(140f, 34f),
                 CloseRanking, "RankClose", accent: true);
 
@@ -794,6 +801,7 @@ namespace Shmup.Presentation.Battle
 
         void ToggleDevPanel()
         {
+            _modalInputConsumedFrame = Time.frameCount;
             if (_devRoot != null) _devRoot.SetActive(!_devRoot.activeSelf);
             var first = DevPanelOpen ? _devStageLabel?.GetComponentInParent<Button>() : null;
             UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(
@@ -934,10 +942,15 @@ namespace Shmup.Presentation.Battle
 
             // 랭킹이 열려 있는 동안에는 출격/시드 편집 입력을 받지 않는다 —
             // 모달 위에서 스페이스가 그대로 출격으로 새면 보드를 읽다가 런이 시작된다.
-            if (_rankingRoot != null && _rankingRoot.activeSelf) return;
-
             var keyboard = Keyboard.current;
             var gamepad = Gamepad.current;
+            if (_modalInputConsumedFrame == Time.frameCount) return;
+            if (RankingOpen)
+            {
+                if ((keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+                    || (gamepad != null && gamepad.buttonEast.wasPressedThisFrame)) CloseRanking();
+                return;
+            }
 
             bool toggleDev = _seedUi && ((keyboard != null && keyboard.f2Key.wasPressedThisFrame)
                 || (gamepad != null && gamepad.selectButton.wasPressedThisFrame));

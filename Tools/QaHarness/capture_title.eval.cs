@@ -20,6 +20,14 @@ hangar.GetType().GetMethod("Start", flags).Invoke(hangar, null);
 title.GetType().GetField("_seedText", flags).SetValue(title, "12345");
 title.GetType().GetMethod("RefreshSeedText", flags).Invoke(title, null);
 if (dev) title.GetType().GetMethod("ToggleDevPanel", flags).Invoke(title, null);
+if (dev)
+{
+    // EditMode has no running UI input loop. Send the same select event for a focus preview.
+    var stage = title.transform.Find("DevCanvas/DevPanel/DevStage");
+    UnityEngine.EventSystems.ExecuteEvents.Execute(stage.gameObject,
+        new UnityEngine.EventSystems.BaseEventData(UnityEngine.EventSystems.EventSystem.current),
+        UnityEngine.EventSystems.ExecuteEvents.selectHandler);
+}
 title.GetType().GetMethod("Update", flags).Invoke(title, null);
 hangar.GetType().GetMethod("Update", flags).Invoke(hangar, null);
 var camera = UnityEngine.Camera.main;

@@ -18,6 +18,8 @@ unity run . --command eval_file --timeout 180 --no-tail --format json --non-inte
   `RSS_CAPTURE_DEV=1`은 개발 모달(`-dev`), `RSS_CAPTURE_SCALE=1`은
   640×360 원본 배율(`-640`)로 출력한다. 예: `title-ui-review-touch-640.png`.
   비교 시드는 캡처 프로세스 안에서만 12345로 고정한다.
+- 개발 모달에서는 Stage 버튼에 표준 선택 이벤트를 주입해 포커스 테두리를 보여준다.
+  EditMode에는 실행 중인 UI 입력 루프가 없으므로 실제 키보드/패드 조작 증거는 아니다.
 - GPU가 있는 batch Editor가 필요하다. `-nographics`를 붙이지 않는다. 창은 표시하지 않는다.
 - 스크립트는 일반 GUI Editor나 Play Mode에서 실행을 거절한다. 실행 전 연결된 Editor가
   없는지 확인한다. UI를 초기화하고 Canvas를 임시로 카메라에 연결하며 씬은 저장하지 않는다.

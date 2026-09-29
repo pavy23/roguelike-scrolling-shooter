@@ -20,20 +20,29 @@ namespace Shmup.Presentation.Battle
         const int HintCount = 3;
 
         /// <summary>조작 안내는 기기에 맞는 문면이어야 한다 — 폰에 WASD를 알려줘도 소용없다.</summary>
-        static string HintAt(int index)
+        string HintAt(int index)
         {
             bool touch = UiPlatform.TouchMode;
             switch (index)
             {
-                case 0: return touch ? UiText.Onboarding1Touch : UiText.Onboarding1;
+                case 0: return touch ? UiText.Onboarding1Touch
+                    : PlayerBindings.MoveHint(_director?.Input?.MoveAction)
+                      + "\nFIRE AUTOMATIC   BOMB B / EAST   PAUSE ESC / START";
                 case 1: return UiText.Onboarding2;
-                default: return touch ? UiText.Onboarding3Touch : UiText.Onboarding3;
+                default:
+                    if (touch) return UiText.Onboarding3Touch;
+                    var activate = _director?.Input?.ActivateAction;
+                    string keys = activate != null
+                        ? PlayerBindings.KeyboardLabel(activate) + " / " + PlayerBindings.GamepadLabel(activate)
+                        : "X / Y"; // Same fallback as PlayerInputReader for legacy action assets.
+                    return $"Press {keys} to spend the gauge.\nWHERE you spend it is your build.";
             }
         }
 
         Text _text;
         GameObject _root;
         int _hintIndex = -1;
+        int _bindingRevision = -1;
         float _age;
         bool _done;
 
@@ -49,6 +58,8 @@ namespace Shmup.Presentation.Battle
                 UiKit.TextAccent, new Vector2(0.5f, 0f), new Vector2(0f, 40f),
                 TextAnchor.LowerCenter, "Hint");
             UiKit.AddShadow(_text);
+            _text.rectTransform.sizeDelta = new Vector2(600f, 42f);
+            _text.horizontalOverflow = HorizontalWrapMode.Wrap;
         }
 
         void Update()
@@ -63,9 +74,10 @@ namespace Shmup.Presentation.Battle
 
             _age += Time.deltaTime;
             int index = Mathf.Min((int)(_age / HintSeconds), HintCount - 1);
-            if (index != _hintIndex)
+            if (index != _hintIndex || _bindingRevision != PlayerBindings.Revision)
             {
                 _hintIndex = index;
+                _bindingRevision = PlayerBindings.Revision;
                 _text.text = HintAt(index);
             }
             if (_age >= HintSeconds * HintCount)

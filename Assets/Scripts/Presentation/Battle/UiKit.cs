@@ -127,6 +127,7 @@ namespace Shmup.Presentation.Battle
             colors.selectedColor = Color.white;
             colors.fadeDuration = 0.06f;
             button.colors = colors;
+            go.AddComponent<UiFocusOutline>().Initialize();
             if (onClick != null) button.onClick.AddListener(onClick);
             return button;
         }

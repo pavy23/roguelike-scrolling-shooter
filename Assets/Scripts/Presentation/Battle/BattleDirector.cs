@@ -23,6 +23,7 @@ namespace Shmup.Presentation.Battle
     {
         [Header("Scene wiring")]
         [SerializeField] PlayerInputReader _input;
+        public PlayerInputReader Input => _input;
         [SerializeField] Transform _playerTransform;
         [SerializeField] GameObject _bulletPrefab;
         [SerializeField] Transform _bulletRoot;

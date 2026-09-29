@@ -17,6 +17,8 @@ namespace Shmup.Presentation.Tests
         bool _touch, _autopilot;
         bool _hadAutoFirePref;
         int _autoFirePref;
+        bool _hadBindings;
+        string _savedBindings;
 
         [SetUp]
         public void SetUp()
@@ -26,6 +28,9 @@ namespace Shmup.Presentation.Tests
             PlayerInputReader.AutopilotEnabled = false;
             _hadAutoFirePref = PlayerPrefs.HasKey("rss.autofire");
             _autoFirePref = PlayerPrefs.GetInt("rss.autofire");
+            _hadBindings = PlayerPrefs.HasKey(PlayerBindings.PrefKey);
+            _savedBindings = PlayerPrefs.GetString(PlayerBindings.PrefKey);
+            PlayerPrefs.DeleteKey(PlayerBindings.PrefKey);
             _root = new GameObject("Menu regression fixture");
             _root.SetActive(false);
             // Supply our own EventSystem so UiKit does not leave a global object behind.
@@ -51,6 +56,8 @@ namespace Shmup.Presentation.Tests
             PlayerInputReader.AutopilotEnabled = _autopilot;
             if (_hadAutoFirePref) PlayerPrefs.SetInt("rss.autofire", _autoFirePref);
             else PlayerPrefs.DeleteKey("rss.autofire");
+            if (_hadBindings) PlayerPrefs.SetString(PlayerBindings.PrefKey, _savedBindings);
+            else PlayerPrefs.DeleteKey(PlayerBindings.PrefKey);
         }
 
         [TestCase(0)]
@@ -84,7 +91,7 @@ namespace Shmup.Presentation.Tests
             Invoke(options, "RefreshPanelText");
             string text = Get<string>(options, "_panelText");
             StringAssert.Contains("WEAPONS FIRE AUTOMATICALLY", text);
-            StringAssert.Contains("▶ CLOSE", text);
+            StringAssert.Contains("▶ BACK", text);
             StringAssert.DoesNotContain("REBIND FIRE", text);
             Set(options, "_open", true);
             Invoke(options, "ActivateItem", System.Enum.Parse(item, "Close"));

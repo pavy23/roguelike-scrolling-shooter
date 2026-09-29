@@ -15,7 +15,6 @@ namespace Shmup.Presentation.Battle
     {
         const string ResolutionPrefKey = "rss.resolution";
         const string FullscreenPrefKey = "rss.fullscreen";
-        const string BindingsPrefKey = "rss.bindings";
 
         static readonly Vector2Int[] Resolutions =
         {
@@ -35,6 +34,8 @@ namespace Shmup.Presentation.Battle
 
         /// <summary>PauseScreen이 입력 충돌(볼륨 화살표 등)을 피하기 위한 상태 공유.</summary>
         public static bool IsOpen { get; private set; }
+        static int _pauseInputConsumedFrame = -1;
+        public static bool BlocksPauseInput => IsOpen || _pauseInputConsumedFrame == Time.frameCount;
 
         [SerializeField] PlayerInputReader _input;
         [SerializeField] JuiceDirector _juice;
@@ -54,6 +55,9 @@ namespace Shmup.Presentation.Battle
         int _cursor;
         int _resolutionIndex;
         InputActionRebindingExtensions.RebindingOperation _rebind;
+        bool _rebindWasEnabled;
+        string _rebindPrompt;
+        int _rebindFinishedFrame = -1;
 
         GameObject _root;
         Text _bodyText;
@@ -68,15 +72,14 @@ namespace Shmup.Presentation.Battle
             bool fullscreen = PlayerPrefs.GetInt(FullscreenPrefKey, 0) == 1;
             // 에디터·웹·모바일에서는 창 크기를 여기서 건드리지 않는다 (CanSetResolution 참고)
             Apply(fullscreen);
-            LoadBindings();
 
             bool touch = UiPlatform.TouchMode;
             var canvas = UiKit.CreateCanvas("OptionsCanvas", 85);
             canvas.transform.SetParent(transform, false);
             _root = canvas.gameObject;
-            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.7f));
+            UiKit.CreateDim(canvas.transform, new Color(0f, 0.01f, 0.05f, 0.7f)).raycastTarget = true;
             var panel = UiKit.CreatePanel(canvas.transform,
-                touch ? new Vector2(300f, 200f) : new Vector2(360f, 238f));
+                touch ? new Vector2(300f, 200f) : new Vector2(360f, 258f));
             UiKit.CreateCornerText(panel, _fontBold, UiText.OptionsTitle, 16, UiKit.TextMain,
                 new Vector2(0.5f, 1f), new Vector2(0f, -10f), TextAnchor.UpperCenter, "Title");
             _bodyText = UiKit.CreateTextStretch(panel, _font, "", 11,
@@ -106,7 +109,7 @@ namespace Shmup.Presentation.Battle
                 _openButtonRoot = openCanvas.gameObject;
                 UiKit.CreateTouchButton(openCanvas.transform, _font, "OPTIONS", 11,
                     new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(120f, 34f),
-                    () => _open = true, "OpenOptions");
+                    () => SetOpen(true), "OpenOptions");
                 _openButtonRoot.SetActive(false);
             }
 
@@ -139,7 +142,18 @@ namespace Shmup.Presentation.Battle
 
         void OnDestroy()
         {
+            CancelRebind();
             IsOpen = false;
+        }
+
+        void SetOpen(bool open)
+        {
+            _pauseInputConsumedFrame = Time.frameCount;
+            if (!open) CancelRebind();
+            _open = open;
+            IsOpen = open;
+            _panelText = null;
+            if (!open) SetVisible(false, null);
         }
 
         void Update()
@@ -148,19 +162,26 @@ namespace Shmup.Presentation.Battle
             // 폰에는 키보드도 패드도 없다 — 여기서 일찍 리턴하면 터치 입구가 아예 안 뜬다.
             var gamepad = Gamepad.current;
 
-            // 리바인딩 대기 중에는 다른 입력 처리를 멈춘다
+            // A key captured/cancelled by the rebind must not also invoke a menu shortcut.
+            if (_rebindFinishedFrame == Time.frameCount) return;
             if (_rebind != null)
             {
-                if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) CancelRebind();
-                SetVisible(true, UiText.RebindPrompt);
+                if (Time.timeScale != 0f) SetOpen(false);
+                else
+                {
+                    if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) CancelRebind();
+                    SetVisible(true, _rebind != null ? _rebindPrompt : "KEY CHANGE CANCELLED");
+                }
                 return;
             }
 
             bool toggle = (keyboard != null && keyboard.oKey.wasPressedThisFrame)
                        || (gamepad != null && gamepad.selectButton.wasPressedThisFrame);
             if (toggle && Time.timeScale == 0f)
-                _open = !_open;
-            if (Time.timeScale != 0f) _open = false;   // 일시정지 해제 시 자동 닫힘
+                SetOpen(!_open);
+            if (_open && ((keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+                || (gamepad != null && gamepad.buttonEast.wasPressedThisFrame))) SetOpen(false);
+            if (Time.timeScale != 0f && _open) SetOpen(false);   // 일시정지 해제 시 자동 닫힘
             IsOpen = _open;
 
             // 옵션 입구는 일시정지 중, 옵션이 닫혀 있을 때만 보인다.
@@ -223,8 +244,8 @@ namespace Shmup.Presentation.Battle
 
             bool confirm = (keyboard != null && keyboard.enterKey.wasPressedThisFrame)
                         || (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame);
-            if (confirm)
-                ActivateItem((Item)_cursor);
+            if (confirm) ActivateItem((Item)_cursor);
+            if (!_open || _rebind != null) return;
 
             // 키보드 단축키 병행 (기존 사용자 습관 유지)
             if (keyboard != null)
@@ -241,6 +262,7 @@ namespace Shmup.Presentation.Battle
                 if (keyboard.gKey.wasPressedThisFrame) ActivateItem(Item.ReduceFlash);
             }
 
+            if (!_open || _rebind != null) return;
             RefreshPanelText();
             SetVisible(true, _panelText);
         }
@@ -269,7 +291,7 @@ namespace Shmup.Presentation.Battle
                     ToggleAccessibilityPref(JuiceDirector.FlashReducePrefKey, 0);
                     break;
                 case Item.Close:
-                    _open = false;
+                    SetOpen(false);
                     break;
             }
             _panelText = null;
@@ -295,28 +317,28 @@ namespace Shmup.Presentation.Battle
             AppendItem(sb, Item.Resolution, $"RESOLUTION   ◄ {resolution.x} x {resolution.y} ►");
             AppendItem(sb, Item.Fullscreen, $"FULLSCREEN   {(Screen.fullScreen ? "ON" : "OFF")}");
             var activate = FindActivateAction();
-            string activateBinding = activate != null
-                ? InputControlPath.ToHumanReadableString(
-                    activate.bindings[0].effectivePath,
-                    InputControlPath.HumanReadableStringOptions.OmitDevice)
-                : "?";
-            AppendItem(sb, Item.RebindActivate, $"REBIND ACTIVATE  (now: {activateBinding})");
-            AppendItem(sb, Item.RebindUp, "REBIND MOVE UP");
-            AppendItem(sb, Item.RebindDown, "REBIND MOVE DOWN");
-            AppendItem(sb, Item.RebindLeft, "REBIND MOVE LEFT");
-            AppendItem(sb, Item.RebindRight, "REBIND MOVE RIGHT");
+            string activateBinding = activate != null ? PlayerBindings.KeyboardLabel(activate) : "UNAVAILABLE";
+            AppendItem(sb, Item.RebindActivate, $"ACTIVATE KEY   {activateBinding}");
+            var move = _input != null ? _input.MoveAction : null;
+            AppendItem(sb, Item.RebindUp, $"MOVE UP KEY    {PlayerBindings.KeyboardLabel(move, "up")}");
+            AppendItem(sb, Item.RebindDown, $"MOVE DOWN KEY  {PlayerBindings.KeyboardLabel(move, "down")}");
+            AppendItem(sb, Item.RebindLeft, $"MOVE LEFT KEY  {PlayerBindings.KeyboardLabel(move, "left")}");
+            AppendItem(sb, Item.RebindRight, $"MOVE RIGHT KEY {PlayerBindings.KeyboardLabel(move, "right")}");
             AppendItem(sb, Item.ResetBindings, "RESET BINDINGS");
             AppendItem(sb, Item.ScreenShake, $"SCREEN SHAKE   {(shakeOn ? "ON" : "OFF")}");
             AppendItem(sb, Item.ReduceFlash, $"REDUCE FLASH   {(flashReduce ? "ON" : "OFF")}");
-            AppendItem(sb, Item.Close, "CLOSE  [O]/(Select)");
-            sb.Append("\n\nWEAPONS FIRE AUTOMATICALLY");
+            AppendItem(sb, Item.Close, "BACK  ESC / B");
+            sb.Append("\n\nKEYBOARD KEYS ONLY / ARROWS ALSO MOVE\nWEAPONS FIRE AUTOMATICALLY");
             _panelText = sb.ToString();
         }
 
         void AppendItem(System.Text.StringBuilder sb, Item item, string label)
         {
-            sb.Append((int)item == _cursor ? "▶ " : "   ");
+            bool selected = (int)item == _cursor;
+            if (selected) sb.Append("<color=#FFB31C>▶ ");
+            else sb.Append("   ");
             sb.Append(label);
+            if (selected) sb.Append("</color>");
             if (item != Item.Close) sb.Append('\n');
         }
 
@@ -349,84 +371,84 @@ namespace Shmup.Presentation.Battle
             _panelText = null;
         }
 
-        InputAction FindActivateAction()
-        {
-            if (_input == null || _input.Actions == null) return null;
-            return _input.Actions.FindAction(_input.ActivateActionName, throwIfNotFound: false);
-        }
+        InputAction FindActivateAction() => _input != null ? _input.ActivateAction : null;
 
         void StartRebindActivate()
         {
-            var activate = FindActivateAction();
-            if (activate == null) return;
-            StartRebind(activate, -1);
+            var action = FindActivateAction();
+            StartRebind(action, PlayerBindings.KeyboardIndex(action));
         }
 
-        /// <summary>Move 2D 컴포지트의 키보드 파트(up/down/left/right)를 리바인딩한다.</summary>
         void StartRebindMovePart(string partName)
         {
-            if (_input == null || _input.Actions == null) return;
-            var move = _input.Actions.FindAction("Move", throwIfNotFound: false);
-            if (move == null) return;
-            for (int i = 0; i < move.bindings.Count; i++)
-            {
-                var binding = move.bindings[i];
-                if (binding.isPartOfComposite
-                    && string.Equals(binding.name, partName, System.StringComparison.OrdinalIgnoreCase)
-                    && binding.path.StartsWith("<Keyboard>", System.StringComparison.Ordinal))
-                {
-                    StartRebind(move, i);
-                    return;
-                }
-            }
+            var action = _input != null ? _input.MoveAction : null;
+            StartRebind(action, PlayerBindings.KeyboardIndex(action, partName));
         }
 
         void StartRebind(InputAction action, int bindingIndex)
         {
+            if (_rebind != null || action == null || bindingIndex < 0) return;
+            _rebindWasEnabled = action.enabled;
             action.Disable();
-            var operation = bindingIndex >= 0
-                ? action.PerformInteractiveRebinding(bindingIndex)
-                : action.PerformInteractiveRebinding();
-            _rebind = operation
-                .WithControlsExcluding("<Mouse>/position")
-                .WithControlsExcluding("<Mouse>/delta")
+            _rebindPrompt = "PRESS A KEYBOARD KEY\nESC CANCEL / B RESERVED FOR BOMB";
+            _rebind = action.PerformInteractiveRebinding(bindingIndex)
+                .WithControlsHavingToMatchPath("<Keyboard>/*")
+                .WithExpectedControlType("Button")
                 .WithCancelingThrough("<Keyboard>/escape")
-                .OnComplete(_ => FinishRebind(action))
-                .OnCancel(_ => FinishRebind(action))
-                .Start();
+                .OnPotentialMatch(operation =>
+                {
+                    string conflict = BindingConflict(action, bindingIndex, operation.selectedControl);
+                    if (conflict != null)
+                    {
+                        _rebindPrompt = conflict + "\nCHOOSE ANOTHER KEY / ESC CANCEL";
+                        operation.RemoveCandidate(operation.selectedControl);
+                    }
+                    else operation.Complete();
+                })
+                .OnComplete(_ => FinishRebind(action, true))
+                .OnCancel(_ => FinishRebind(action, false));
+            _rebind.Start();
+            SetVisible(true, _rebindPrompt);
         }
 
-        void FinishRebind(InputAction fire)
+        string BindingConflict(InputAction target, int index, InputControl control)
+        {
+            if (control == null) return "CHOOSE A KEYBOARD KEY";
+            if (InputControlPath.Matches("<Keyboard>/b", control)) return "B IS RESERVED FOR BOMB";
+            if (_input == null) return null;
+            foreach (var action in new[] { _input.MoveAction, _input.ActivateAction })
+            {
+                if (action == null) continue;
+                for (int i = 0; i < action.bindings.Count; i++)
+                {
+                    var binding = action.bindings[i];
+                    if (binding.isComposite || (action == target && (i == index
+                        || (binding.isPartOfComposite && binding.name == target.bindings[index].name)))) continue;
+                    if (!string.IsNullOrEmpty(binding.effectivePath)
+                        && InputControlPath.Matches(binding.effectivePath, control))
+                        return "KEY IN USE: " + action.name.ToUpperInvariant();
+                }
+            }
+            return null;
+        }
+
+        void FinishRebind(InputAction action, bool save)
         {
             _rebind?.Dispose();
             _rebind = null;
-            fire.Enable();
-            if (_input != null && _input.Actions != null)
-                PlayerPrefs.SetString(BindingsPrefKey, _input.Actions.SaveBindingOverridesAsJson());
-            SaveFlush.Request();
-            _panelText = null;   // 바인딩 표시 갱신
+            if (_rebindWasEnabled) action.Enable();
+            _rebindFinishedFrame = Time.frameCount;
+            _pauseInputConsumedFrame = Time.frameCount;
+            if (save && _input != null) PlayerBindings.Save(_input.Actions);
+            _panelText = null;
         }
 
-        void CancelRebind()
-        {
-            _rebind?.Cancel();
-        }
+        void CancelRebind() => _rebind?.Cancel();
 
         void ResetBindings()
         {
-            if (_input == null || _input.Actions == null) return;
-            _input.Actions.RemoveAllBindingOverrides();
-            PlayerPrefs.DeleteKey(BindingsPrefKey);
-            SaveFlush.Request();
-            _panelText = null;   // 바인딩 표시 갱신
-        }
-
-        void LoadBindings()
-        {
-            if (_input == null || _input.Actions == null) return;
-            string json = PlayerPrefs.GetString(BindingsPrefKey, null);
-            if (!string.IsNullOrEmpty(json))
-                _input.Actions.LoadBindingOverridesFromJson(json);
+            if (_input != null) PlayerBindings.Reset(_input.Actions);
+            _panelText = null;
         }
     }
 }

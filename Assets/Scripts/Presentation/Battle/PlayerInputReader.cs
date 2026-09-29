@@ -26,6 +26,9 @@ namespace Shmup.Presentation.Battle
         /// <summary>옵션 화면(리바인딩)용 읽기 접근자.</summary>
         public InputActionAsset Actions => _actions;
         public string ActivateActionName => _activateActionName;
+        public InputAction MoveAction => FindPlayerAction(_moveActionName);
+        public InputAction ActivateAction => FindPlayerAction(_activateActionName);
+        InputAction FindPlayerAction(string name) => _actions?.FindActionMap(_actionMapName, false)?.FindAction(name, false);
 
         InputAction _moveAction;
         InputAction _activateAction;
@@ -53,6 +56,7 @@ namespace Shmup.Presentation.Battle
                 return;
             }
 
+            PlayerBindings.Load(_actions);
             _moveAction = map.FindAction(_moveActionName, throwIfNotFound: false);
             // 게이지 활성화 (REQ-019). 액션이 없는 구 에셋이면 직접 키 샘플링으로 폴백.
             _activateAction = map.FindAction(_activateActionName, throwIfNotFound: false);
@@ -73,11 +77,27 @@ namespace Shmup.Presentation.Battle
         {
             _moveAction?.Disable();
             _activateAction?.Disable();
+            ClearSample();
+        }
+
+        void ClearSample()
+        {
             _move = Vector2.zero;
+            _activateHeld = false;
+            _activatePressedThisFrame = false;
+            _bombPressedThisFrame = false;
         }
 
         void Update()
         {
+            // Menu/rebind keys must not become queued gameplay commands on resume.
+            if (Time.timeScale <= 0f)
+            {
+                ClearSample();
+                TouchControls.Instance?.ConsumeActivate();
+                BombButton.Instance?.ConsumePress();
+                return;
+            }
             _move = _moveAction.ReadValue<Vector2>();
 
             // 모바일 터치 조작 (원격 플레이). 이동은 아날로그 델타 경로로 따로 넘어가므로
