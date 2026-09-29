@@ -1529,6 +1529,7 @@ namespace Shmup.Presentation.Battle
 
             // 이벤트는 스텝 직후 같은 호출 안에서 소비한다 — 다음 Step에서 클리어되기 때문.
             var battle = _run.Battle;
+            if (!ReferenceEquals(battle, _lastEventSim) && _sfx != null) _sfx.ResetPlayback();
             bool freshEvents = !ReferenceEquals(battle, _lastEventSim) || battle.Tick != _lastEventTick;
             _lastEventSim = battle;
             _lastEventTick = battle.Tick;

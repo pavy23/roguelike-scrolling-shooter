@@ -2013,3 +2013,13 @@ AudioPreferences/AudioChannelSource, UiAudio, 공용 AudioSettingsPanel 및 타�
 참조를 추가했으며, BattleSceneBuilder에도 동일 배선을 반영했다. Core 597개, Unity
 683개 통과. 실제 장치에서 UI 소리 크기·음색 및 브라우저 오디오 시작 동작은 후속
 플레이 테스트 대상이다. 신규 음원은 채택하지 않았다.
+
+### 2026-09-30 전투 효과음 우선순위 대행분 리뷰 인계
+
+사용자의 개편 계속 지시에 따라 Codex가 Presentation/오케스트레이션을 대행했다.
+SfxPlayer의 6개 소스 재사용, SfxVoiceGate의 반복 간격과 우선순위, 위험 신호 중
+일반 효과음 덕킹, BattleDirector의 배틀 교체 시 재생 상태 초기화를 원 담당 복귀 시
+리뷰한다. Core 597개 및 Unity EditMode 705개 통과(신규 22개). 실제 Battle 씬 음원의
+600틱 밀집 이벤트 검사는 재생 시작 220회와 소스 6개를 확인했다. 청음/실플레이를
+대체하지 않으며, 경고 가청성과 35% 덕킹의 체감은 추후 장치 테스트 대상으로 남긴다.
+기존 채택 음원만 사용하고 주무기/미사일 발사음 무음 정책을 유지했다.
