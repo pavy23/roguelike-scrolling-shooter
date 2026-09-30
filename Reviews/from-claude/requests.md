@@ -2058,3 +2058,5 @@ BattleHudVisibility의 전투/선택/결과/일시정지 표시 전환, PauseScr
 Reward/Contract의 일시정지 시 표시 억제를 원 담당 복귀 시 리뷰한다.
 Core 597개 / Unity 743개 통과. 실제 Battle 씬의 통합 UI 렌더 24장으로 3가지 크기를
 확인했고, 사용자 기기의 전체 실주행은 미실시다. 상세 근거/범위는 REVAMP-LOG에 남겼다.
+소스 `eec91b9`와 `rss-play@7d0b9ff`를 원격에 게시했다. WebGL/Pages 작업
+`36654244651` 성공, 공개 게임 파일 4개 크기/SHA-256 일치 확인. 실주행 PASS는 아니다.

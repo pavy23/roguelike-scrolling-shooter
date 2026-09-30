@@ -86,3 +86,6 @@ UI·UX와 사운드·연출의 근거 및 검증 목록은 `UIUX-AUDIO-REVIEW.md
 - UI 표시 전환/복귀 회귀 검사 12개를 추가했다. Core 597개 / Unity 743개 통과,
   3개 화면 크기의 통합 UI 상태 24장 렌더를 남겼다. 선택 중 일시정지와 설정 닫기에서도
   선택 위치/잔고/RESUME 포커스를 보존한다. 실제 기기 플레이 검증은 별도다.
+- UI 수정 소스 `eec91b9`를 `rss-play@7d0b9ff`로 배포했다. WebGL/Pages 성공,
+  공개 파일 4개 크기/SHA-256 일치 확인.
+  [UI 수정판 플레이](https://pavy23.github.io/rss-play/?v=20260930-101448-eec91b9).

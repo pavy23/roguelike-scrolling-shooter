@@ -552,3 +552,16 @@ ui-layers-after.log와 title-ui-review-touch-640.png다.
 
 픽셀 기준/폰트/씬/아트/게임 수치는 변경하지 않았다. 실제 브라우저 실주행 및 모든
 모바일 안전 영역을 검증한 것은 아니며, 이번에 재현한 겹침과 복귀 동작에 대한 수정이다.
+
+배포 완료: 소스 `eec91b90d0d62f7e56b2639d8cf03c875e4a6c65`(clean)에서 Unity CLI
+WebGL 빌드 성공. 10:12:19–10:14:31 KST, 산출물 4개 **29,838,761 bytes**.
+기존 미사용 필드/라이선스 진단 외 빌드 실패는 없었다. 자동 생성 테스트 리소스는
+종료 후 정리됐고 소스 checkout에 설정 변경은 남지 않았다.
+`rss-play@7d0b9ffa935f80b3b0368c03b8344fbdb17d4cc1`으로 게시했으며
+[Pages 작업 36654244651](https://github.com/pavy23/rss-play/actions/runs/36654244651)이 성공했다.
+10:16:13 KST 공개 index/버전/소스 SHA 및 게임 파일 4개의 다운로드 크기·SHA-256을
+대조해 모두 일치했다. 기존 사이트 템플릿은 캐시 버전 한 줄만 갱신했다.
+근거는 ui-layers-webgl-build.log, CLI provenance, served-playtest/verification.json,
+공개 build-info.json이다. 브라우저 실주행은 실행하지 않았다.
+
+[UI 겹침 수정판 테스트](https://pavy23.github.io/rss-play/?v=20260930-101448-eec91b9).
