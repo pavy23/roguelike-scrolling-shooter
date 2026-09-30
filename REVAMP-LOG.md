@@ -628,3 +628,17 @@ Unity 플러그인의 구현·CLI·빌드 검증 지침을 계속 적용했으�
 stage-variety-core.trx, stage-variety-unity.xml/.log, stage-variety-before/after/comparison.json,
 save-roundtrip-audit.json/.log가 근거다. 생성 감사는 실제 RunManager 방 시드를 쓴
 런 재생이 아니며, 브라우저 플레이·회피성·체감 난이도 검증도 별도다.
+
+배포 완료: clean 소스 `e46297469866310c1c2543b998dcf2af27a7e402`에서 Unity CLI
+WebGL 빌드 성공(13:00:56–13:02:42 KST), 파일 4개 **29,844,050 bytes**.
+CLI 1.0.0-beta.11 / Editor 6000.5.3f1 / Pipeline 0.8.0-exp.1을 사용했다.
+기존 라이선스 진단 경고 외 새 빌드 실패는 없고 종료 후 소스 작업 트리는 깨끗했다.
+`rss-play@74d2725193284cda13ec0f202f2c0410e0bfc36a` 게시 및
+[Pages 작업 36667167301](https://github.com/pavy23/rss-play/actions/runs/36667167301) 성공.
+13:05:56 KST 공개 index/manifest의 버전·소스 SHA 및 게임 파일 4개 크기/SHA-256
+일치를 확인했다. 사이트 템플릿은 캐시 버전만 갱신했다. 브라우저 실주행은 미실시다.
+근거: stage-variety-webgl-build.log, unity-build.provenance.json,
+served-playtest/verification.json 및 공개 build-info.json.
+
+[후반 구성 개선판 플레이](https://pavy23.github.io/rss-play/?v=20260930-130302-e462974).
+이전 테스트판의 중단 런/리플레이는 호환되지 않아 새 런으로 시작한다. 영구 성장은 유지한다.
