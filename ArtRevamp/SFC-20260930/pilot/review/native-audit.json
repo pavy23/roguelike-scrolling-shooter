@@ -1,6 +1,6 @@
 {
   "kind": "Read-only native PNG audit; neither imports nor gameplay testing",
-  "productionArtUnchanged": {
+  "baselineArtUnchanged": {
     "checked": 338,
     "modified": []
   },
@@ -20,8 +20,9 @@
       ],
       "originalGeneratedBytes": true,
       "id": "starter",
-      "curation": "proposed_for_user_review",
-      "engineReady": false
+      "curation": "user_adopted",
+      "adoptedAsset": "Assets/Art/Sprites/sfc_player_ship.png",
+      "importedGeometryValidatedByThisAudit": false
     },
     {
       "file": "raw/drone.png",
@@ -38,8 +39,9 @@
       ],
       "originalGeneratedBytes": true,
       "id": "drone",
-      "curation": "proposed_for_user_review",
-      "engineReady": false
+      "curation": "user_adopted",
+      "adoptedAsset": "Assets/Art/Sprites/enemy_sfc_drone.png",
+      "importedGeometryValidatedByThisAudit": false
     },
     {
       "file": "raw/fast-v2.png",
@@ -56,8 +58,9 @@
       ],
       "originalGeneratedBytes": true,
       "id": "fast",
-      "curation": "proposed_for_user_review",
-      "engineReady": false
+      "curation": "user_adopted",
+      "adoptedAsset": "Assets/Art/Sprites/enemy_sfc_fast.png",
+      "importedGeometryValidatedByThisAudit": false
     },
     {
       "file": "raw/turret-v2.png",
@@ -74,8 +77,9 @@
       ],
       "originalGeneratedBytes": true,
       "id": "turret",
-      "curation": "proposed_for_user_review",
-      "engineReady": false
+      "curation": "user_adopted",
+      "adoptedAsset": "Assets/Art/Sprites/enemy_sfc_turret.png",
+      "importedGeometryValidatedByThisAudit": false
     }
   ],
   "engineLoop": {
@@ -329,6 +333,8 @@
     ],
     "originalGeneratedBytes": true
   },
-  "productionArtAdopted": false,
-  "gameplayAndMuzzleAttachmentValidated": false
+  "productionArtAdopted": true,
+  "adoptedAssetHashesVerified": 5,
+  "gameplayAndMuzzleAttachmentValidatedByThisAudit": false,
+  "runtimeValidationRecord": "../../adoption-review/VALIDATION.md"
 }

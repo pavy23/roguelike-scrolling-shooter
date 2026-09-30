@@ -391,7 +391,7 @@ MonoBehaviour:
   - interceptor
   - bulwark
   _shipSprites:
-  - {fileID: 21300000, guid: 07449a38a1c1b574cb0ddeb1a5a874fc, type: 3}
+  - {fileID: 21300000, guid: 91c09ea20ea401d4291311c38ed04ead, type: 3}
   - {fileID: 21300000, guid: a88a7e349225c56409e4e8f00a6c11dd, type: 3}
   - {fileID: 21300000, guid: 2d7740536ea4b4c48a8a40d6529bf449, type: 3}
 --- !u!114 &679807324

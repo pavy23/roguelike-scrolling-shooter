@@ -3,8 +3,10 @@
   "recordedDate": "2026-09-30",
   "selectedStyle": "../candidates/style-sheet-v2.png",
   "styleSha256": "0c8023e62ea82424a27f360146217a5d081c99443fafafad6481a66ba66e41f2",
-  "status": "native_candidates_pending_user_curation",
-  "productionAssetsChanged": false,
+  "status": "first_five_native_pngs_adopted_and_integrated_other_candidates_not_adopted",
+  "productionAssetsChanged": true,
+  "adoptionRecord": "../adoption.json",
+  "validationRecord": "../adoption-review/VALIDATION.md",
   "rasterPostprocessing": "None; generator bytes preserved",
   "generationRequests": [
     "requests/drone-sensor.json",

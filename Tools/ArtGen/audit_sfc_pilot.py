@@ -56,13 +56,23 @@ def main():
         if hashlib.sha256((ROOT / a["path"]).read_bytes()).hexdigest() != a["sha256"]]
     if modified:
         raise SystemExit("Production art unexpectedly changed: " + ", ".join(modified))
+    adoption_path = PILOT.parent / "adoption.json"
+    adopted = {}
+    if adoption_path.is_file():
+        for entry in json.loads(adoption_path.read_text(encoding="utf-8"))["assets"]:
+            for key in ("source", "asset"):
+                if hashlib.sha256((ROOT / entry[key]).read_bytes()).hexdigest() != entry["sha256"]:
+                    raise SystemExit("Adoption hash mismatch: " + entry[key])
+            adopted[entry["source"]] = entry["asset"]
 
     candidates = []
     for identity, relative, size in PROPOSED:
         row = audit_png(PILOT / relative)
         if (row["width"], row["height"]) != size or row["partialAlphaPixels"] or row["visibleColors"] > 48:
             raise SystemExit("Proposed sprite failed native size / alpha / palette: " + relative)
-        row.update(id=identity, curation="proposed_for_user_review", engineReady=False)
+        asset = adopted.get((PILOT / relative).relative_to(ROOT).as_posix())
+        row.update(id=identity, curation="user_adopted" if asset else "proposed_for_user_review",
+            adoptedAsset=asset, importedGeometryValidatedByThisAudit=False)
         candidates.append(row)
 
     base = pixels(PILOT / PROPOSED[0][1])
@@ -90,7 +100,7 @@ def main():
 
     result = {
         "kind": "Read-only native PNG audit; neither imports nor gameplay testing",
-        "productionArtUnchanged": {"checked": len(inventory["assets"]), "modified": modified},
+        "baselineArtUnchanged": {"checked": len(inventory["assets"]), "modified": modified},
         "proposedStaticSprites": candidates,
         "engineLoop": {"frames": [PROPOSED[0][1], selected["file"]], "fps": 10,
             "periodSeconds": 0.2, "changedExhaustPixels": selected["changedPixels"],
@@ -100,8 +110,10 @@ def main():
         "droneAnimation": {"candidateFrames": drone,
             "decision": "Keep original static drone; moving output frames drift vertically and are rejected."},
         "experimentalExplosion": audit_png(PILOT / "raw/explosion-v2.png"),
-        "productionArtAdopted": False,
-        "gameplayAndMuzzleAttachmentValidated": False,
+        "productionArtAdopted": bool(adopted),
+        "adoptedAssetHashesVerified": len(adopted),
+        "gameplayAndMuzzleAttachmentValidatedByThisAudit": False,
+        "runtimeValidationRecord": "../../adoption-review/VALIDATION.md" if adopted else None,
     }
     (REVIEW / "native-audit.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"originalPngUnchanged": len(inventory["assets"]),

@@ -552,7 +552,7 @@ namespace Shmup.EditorTools
                 CopyGameDataToResources();
                 EnsureSpriteAtlas();
 
-                var shipSprite = WriteExternalOrPixelSprite(ShipSpritePath, "player_ship.png", ShipPixels, ShipPalette);
+                var shipSprite = LoadAdoptedSprite("sfc_player_ship");
                 var bulletSprite = WritePixelSprite(BulletSpritePath, BulletPixels, BulletPalette);
                 var hudSlotSprite = WritePixelSprite(HudSlotSpritePath, HudSlotPixels, HudPalette);
                 var hudPipSprite = WritePixelSprite(HudPipSpritePath, HudPipPixels, HudPalette);
@@ -787,7 +787,31 @@ namespace Shmup.EditorTools
 
         static Sprite[] LoadShipAnimationFrames()
         {
-            return LoadFrameSequence("ship_anim_");
+            // The curated loop has two stable poses. Do not append old ship_anim frames.
+            return new[] { LoadAdoptedSprite("sfc_player_ship"), LoadAdoptedSprite("sfc_player_engine_01") };
+        }
+
+        // Approved SFC originals live in this repository. Untracked legacy art-input
+        // must never overwrite them during scene regeneration on another machine.
+        static Sprite LoadAdoptedSprite(string assetName)
+        {
+            string path = $"{SpriteDir}/{assetName}.png";
+            if (!File.Exists(path)) throw new InvalidOperationException($"채택한 원본 누락: {path}");
+            ApplySpriteImporter(path);
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite == null) throw new InvalidOperationException($"채택한 스프라이트 로드 실패: {path}");
+            return sprite;
+        }
+
+        static Sprite LoadSfcPilotEnemySprite(string prefix)
+        {
+            switch (prefix)
+            {
+                case "zako_straight": return LoadAdoptedSprite("enemy_sfc_drone");
+                case "zako_fast": return LoadAdoptedSprite("enemy_sfc_fast");
+                case "turret": return LoadAdoptedSprite("enemy_sfc_turret");
+                default: return null;
+            }
         }
 
         static Sprite[] LoadFrameSequence(string prefix)
@@ -1096,11 +1120,10 @@ namespace Shmup.EditorTools
                 enemyTypePrefixes.Add(prefix);
                 enemyTypeSprites.Add(sprite);
             }
-            var enemySpriteDefault = AssetDatabase.LoadAssetAtPath<Sprite>(EnemySpritePath);
-            AddEnemySprite("zako_straight", enemySpriteDefault);
-            AddEnemySprite("zako_fast", enemySpriteDefault);
+            AddEnemySprite("zako_straight", LoadSfcPilotEnemySprite("zako_straight"));
+            AddEnemySprite("zako_fast", LoadSfcPilotEnemySprite("zako_fast"));
             AddEnemySprite("zako_sine", LoadExternalSprite("enemy_scarab.png", "enemy_scarab"));
-            AddEnemySprite("turret", LoadExternalSprite("enemy_turret.png", "enemy_turret"));
+            AddEnemySprite("turret", LoadSfcPilotEnemySprite("turret"));
             AddEnemySprite("zako_tank", LoadExternalSprite("enemy_tank.png", "enemy_tank"));
             AddEnemySprite("elite", LoadExternalSprite("enemy_elite.png", "enemy_elite"));
             AddEnemySprite("spore", LoadExternalSprite("enemy_spore.png", "enemy_spore"));
@@ -1148,7 +1171,10 @@ namespace Shmup.EditorTools
             var animFlat = new List<Sprite>();
             void AddAnim(string prefix)
             {
-                var frames = LoadFrameSequence($"anim_{prefix}_");
+                // These three new originals have no approved body-motion loop yet.
+                // A one-frame clip prevents the old five-frame art from reappearing.
+                var adopted = LoadSfcPilotEnemySprite(prefix);
+                var frames = adopted != null ? new[] { adopted } : LoadFrameSequence($"anim_{prefix}_");
                 if (frames.Length == 0) return;
                 animPrefixes.Add(prefix);
                 animCounts.Add(frames.Length);
@@ -1173,7 +1199,7 @@ namespace Shmup.EditorTools
             SetIntArray(director, "_animFrameCounts", animCounts.ToArray());
             SetReferenceArray(director, "_animFrames", animFlat.ToArray());
 
-            // 기체 애니메이션 (art-input/ship_anim_XX.png 있으면)
+            // 큐레이션한 SFC 기체 엔진 2자세.
             var shipFrames = LoadShipAnimationFrames();
             if (shipFrames.Length > 0)
             {
@@ -1951,7 +1977,7 @@ namespace Shmup.EditorTools
             SetStringArray(hangar, "_shipIds", new[] { "starter", "interceptor", "bulwark" });
             SetReferenceArray(hangar, "_shipSprites", new Sprite[]
             {
-                LoadExternalSprite("player_ship.png", "player_ship"),
+                LoadAdoptedSprite("sfc_player_ship"),
                 LoadExternalSprite("ship_interceptor.png", "ship_interceptor"),
                 LoadExternalSprite("ship_bulwark.png", "ship_bulwark")
             });

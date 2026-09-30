@@ -711,3 +711,27 @@ out/revamp/sfc-pilot/starter-capture.log 및 scene-capture.log.
 아니다. 생산 Assets·씬·Core·게임 수치·배경 변경이나 WebGL 재배포는 없다.
 첫 원본 묶음의 사람 채택을 요청했으며, 뱅킹·탄·캡슐·폭발 전체 프레임 제작과
 Unity 런타임 연결·회귀·WebGL 검증은 남아 있다. 기존 rss-play 버전은 계속 사용 가능하다.
+
+## 2026-09-30 — SFC 2안 첫 native 묶음 채택·씬 적용
+
+사용자의 “계속 가자” 지시로 검수한 기본 기체·적 3종·엔진 2자세를 채택했다.
+Codex가 명시적 개편 요청과 AGENTS §9-1에 따라 RENDERER/QA/오케스트레이션을
+대행했다. 원 담당 복귀 시 빌더·씬 연결·Presentation 회귀 검사·아트 해시 검사를
+리뷰하도록 Reviews/from-claude/requests.md에 인계한다. 새 유료 생성은 없었다.
+
+- 원본 PNG 5개를 새 이름으로 임포트해 기존 338개 PNG/GUID와 배경 52개를 보존했다.
+  몸체가 고정된 엔진 A/B만 10 fps로 사용하고, 드론·고속 적·포탑은 정적 클립으로
+  연결해 기존 5프레임 그림이 재등장하지 않도록 했다. 격납고 초상도 갱신했다.
+- BattleSceneBuilder가 채택 원본만 읽도록 하여 미추적 art-input이 옛 그림을 덮는
+  경로를 차단했다. 현재 씬은 Editor API로 필요한 참조만 수정했고 전체 재생성은 하지 않았다.
+- CoreStandalone 611 / Unity EditMode 786 통과. 새 회귀 검사는 60틱·정지·재시작·기종
+  전환·적 변형·재사용 renderer·피격 tint를 확인한다. 원본/임포트 검사도 통과했다.
+- 실제 씬 표시 메서드에 격리 상태를 넣어 3테마×3틱 전후 18장을 비교했다.
+  별도 판정/포구 오버레이로 기존 크기와 포구 좌표를 확인했다. 풀 재사용에도 새 그림을
+  유지하며 5개 임포트의 실제 rect/피벗/PPU/필터/압축 설정이 정확하다.
+- Core·GameData·발사/충돌 수치는 바꾸지 않았다. 테스트의 TimeManager 재직렬화는 원복했다.
+  브라우저 실주행은 미실시이며 정적 캡처를 실플레이 PASS로 표시하지 않는다.
+
+대표 화면/바인딩 JSON/확인 범위는 ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md.
+기본 기체 뱅킹·탄/캡슐·폭발 연속 프레임은 다음 범위다. 이 소스의 clean 커밋으로
+WebGL 빌드 및 rss-play 배포를 이어가며, 성공 후 별도로 배포 근거를 추가한다.

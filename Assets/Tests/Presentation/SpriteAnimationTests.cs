@@ -237,6 +237,62 @@ namespace Shmup.Presentation.Tests
             Set(_director, "_animFrameCounts", new[] { 5 });
             Set(_director, "_animFrames", _frames);
         }
+
+        [Test]
+        public void AdoptedSfcSceneKeepsItsNewArtAcrossTicksShipSwitchesAndReusedRenderer()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity", OpenSceneMode.Additive);
+            try
+            {
+                BattleDirector director = null;
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    director = root.GetComponentInChildren<BattleDirector>(true);
+                    if (director != null) break;
+                }
+                Assert.IsNotNull(director);
+                var serialized = new SerializedObject(director);
+                var player = (Transform)serialized.FindProperty("_playerTransform").objectReferenceValue;
+                var renderer = player.GetComponent<SpriteRenderer>();
+                var sim = NewSim();
+                Set(director, "_sim", sim);
+                Invoke(director, "ApplyShipSprite", "starter");
+                string[] engine = { "sfc_player_ship", "sfc_player_engine_01" };
+                var ids = new[] { "zako_straight", "zako_straight_elite", "zako_fast", "turret_ground", "turret_ceiling" };
+                var art = new[] { "enemy_sfc_drone", "enemy_sfc_drone", "enemy_sfc_fast", "enemy_sfc_turret", "enemy_sfc_turret" };
+                _renderer.color = Color.magenta;
+                for (int tick = 0; tick < 60; tick++)
+                {
+                    while (sim.Tick < tick) sim.Step(InputCommand.None);
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreEqual("Assets/Art/Sprites/" + engine[(tick / 6) % 2] + ".png", AssetDatabase.GetAssetPath(renderer.sprite));
+                    var held = renderer.sprite;
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreSame(held, renderer.sprite, "Paused rendering must hold its engine pose.");
+                    Assert.AreEqual(tick, sim.Tick, "Presentation must not advance Core.");
+                    for (int i = 0; i < ids.Length; i++)
+                    {
+                        // Reuse one renderer between enemy types and per-instance phases.
+                        Invoke(director, "ApplyIdleAnimation", _renderer, ids[i], 17 + i, false);
+                        Assert.AreEqual("Assets/Art/Sprites/" + art[i] + ".png", AssetDatabase.GetAssetPath(_renderer.sprite));
+                        Assert.AreEqual(Color.magenta, _renderer.color, "Hit feedback must survive idle sampling.");
+                    }
+                }
+                foreach (string id in new[] { "interceptor", "bulwark" })
+                {
+                    Invoke(director, "ApplyShipSprite", id);
+                    var selected = renderer.sprite;
+                    Assert.IsFalse(player.GetComponent<PlayerShipAnimator>().enabled);
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreSame(selected, renderer.sprite);
+                }
+                Set(director, "_sim", NewSim());
+                Invoke(director, "ApplyShipSprite", "starter");
+                Invoke(director, "SyncPlayerAnimation");
+                Assert.AreEqual("Assets/Art/Sprites/sfc_player_ship.png", AssetDatabase.GetAssetPath(renderer.sprite));
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); }
+        }
         void SetSim(BattleSim sim) { _sim = sim; Set(_director, "_sim", sim); }
         void AdvanceTo(int tick) { while (_sim.Tick < tick) _sim.Step(InputCommand.None); }
         void Draw(string id, int phase = 0, bool exact = false)

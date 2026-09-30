@@ -1,0 +1,240 @@
+{
+  "label": "before",
+  "kind": "Real scene bindings, SyncPlayerAnimation/SyncEnemies/SyncBullets with isolated injected state; not a playthrough; UI hidden",
+  "sourceSeed": 12345,
+  "samples": [
+    {
+      "theme": 0,
+      "tick": 0,
+      "player": "Assets/Art/Sprites/ship_anim_00.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_01.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_02.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_03.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 0,
+      "tick": 6,
+      "player": "Assets/Art/Sprites/ship_anim_01.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_01.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_02.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_03.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 0,
+      "tick": 12,
+      "player": "Assets/Art/Sprites/ship_anim_02.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_02.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_03.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_04.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 2,
+      "tick": 0,
+      "player": "Assets/Art/Sprites/ship_anim_00.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_01.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_02.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_03.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 2,
+      "tick": 6,
+      "player": "Assets/Art/Sprites/ship_anim_01.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_01.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_02.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_03.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 2,
+      "tick": 12,
+      "player": "Assets/Art/Sprites/ship_anim_02.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_02.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_03.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_04.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 4,
+      "tick": 0,
+      "player": "Assets/Art/Sprites/ship_anim_00.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_01.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_02.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_03.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 4,
+      "tick": 6,
+      "player": "Assets/Art/Sprites/ship_anim_01.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_01.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_02.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_03.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    },
+    {
+      "theme": 4,
+      "tick": 12,
+      "player": "Assets/Art/Sprites/ship_anim_02.png",
+      "enemies": [
+        {
+          "DefinitionId": "zako_straight",
+          "sprite": "Assets/Art/Sprites/anim_zako_straight_02.png",
+          "scaleX": 2.109375,
+          "scaleY": 2.109375
+        },
+        {
+          "DefinitionId": "zako_fast",
+          "sprite": "Assets/Art/Sprites/anim_zako_fast_03.png",
+          "scaleX": 1.875,
+          "scaleY": 1.875
+        },
+        {
+          "DefinitionId": "turret_ground",
+          "sprite": "Assets/Art/Sprites/anim_turret_04.png",
+          "scaleX": 1.5625,
+          "scaleY": 1.5625
+        }
+      ]
+    }
+  ],
+  "muzzleLocalPosition": [
+    0.85,
+    0.0,
+    0.0
+  ],
+  "reusedSprite": "Assets/Art/Sprites/anim_zako_fast_00.png",
+  "sceneSaved": false,
+  "playerSavesAccessed": false
+}
