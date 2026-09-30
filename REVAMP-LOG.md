@@ -735,3 +735,14 @@ Codex가 명시적 개편 요청과 AGENTS §9-1에 따라 RENDERER/QA/오케스
 대표 화면/바인딩 JSON/확인 범위는 ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md.
 기본 기체 뱅킹·탄/캡슐·폭발 연속 프레임은 다음 범위다. 이 소스의 clean 커밋으로
 WebGL 빌드 및 rss-play 배포를 이어가며, 성공 후 별도로 배포 근거를 추가한다.
+
+### 첫 SFC 교체판 WebGL·rss-play 배포 완료
+
+적용 커밋 c5c0ab8 이후 Unity가 생성한 Atlas의 5개 GUID/이름 인덱스도 4767e78에
+반영했다. 이 clean 소스의 WebGL BuildReport Success / exit 0을 확인하고
+rss-play@98b4d5d에 게시했다. 기존 사이트 템플릿은 BUILD_STAMP 한 줄만 바꿨다.
+Pages 작업 36698090375 성공, 공개 index/build-info 버전 및 4개 게임 파일의
+HTTP 200·크기·SHA-256 일치를 확인했다. 브라우저 실주행은 미실시다.
+
+[첫 SFC 교체판 플레이](https://pavy23.github.io/rss-play/?v=20260930-184433-4767e78).
+전체 배포 근거는 ArtRevamp/SFC-20260930/adoption-review/에 보존했다.

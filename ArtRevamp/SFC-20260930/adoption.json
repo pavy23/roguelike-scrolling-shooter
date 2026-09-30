@@ -2,7 +2,9 @@
   "schemaVersion": 1,
   "curation": "ArtRevamp/SFC-20260930/CURATION.md",
   "userApproval": "계속 가자",
-  "status": "adopted_and_scene_integrated",
+  "status": "adopted_integrated_and_deployed",
+  "deployedSourceCommit": "4767e78d888031ed19fdecf1d226b5ca15a6f3b9",
+  "playUrl": "https://pavy23.github.io/rss-play/?v=20260930-184433-4767e78",
   "validationRecord": "ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md",
   "assets": [
     {

@@ -66,5 +66,17 @@ UI를 숨겼으며 브라우저 실플레이 PASS를 뜻하지 않는다. 연속
 
 ## 배포 상태
 
-소스 검증 완료. 이 소스의 clean 커밋으로 WebGL을 빌드한 뒤 rss-play에 배포하고,
-이 절에 소스/배포 커밋·Pages 작업·공개 파일 해시 확인 결과를 추가한다.
+2026-09-30 18:46 KST 공개 파일 검증 완료.
+
+- [플레이](https://pavy23.github.io/rss-play/?v=20260930-184433-4767e78)
+- 적용 커밋 `c5c0ab8`, 최종 clean 빌드 소스 `4767e78d888031ed19fdecf1d226b5ca15a6f3b9`.
+- 배포 저장소 `pavy23/rss-play`의 `98b4d5d73c435b686d65928ce23ca5feb3b8384c`.
+- [Pages 작업 36698090375](https://github.com/pavy23/rss-play/actions/runs/36698090375) 성공.
+- index / build-info 버전 일치, 게임 파일 4개 HTTP 200 및 크기·SHA-256 모두 일치.
+- [빌드 provenance](webgl-provenance.json), [파일 목록](build-info.json),
+  [공개 파일 검증](served-verification.json)을 보존했다. `source.dirty=false`, BuildReport
+  Success, 프로세스 종료 코드 0이며 빌드 전후 소스 상태도 확인했다.
+
+CLI는 기존 LicensingClient validation 진단 1건을 editorErrors에 표시했으나
+Editor가 라이선스를 획득하고 빌드에 성공했다. 오류 0건이었다고 표현하지 않는다.
+브라우저 실주행은 미실시이며 사용자 플레이 피드백을 다음 수정에 반영한다.

@@ -2130,3 +2130,8 @@ Core 611개 / Unity 786개 통과. 18개 전후 표시 코드 캡처·판정/포
 미제작 뱅킹/탄/캡슐/폭발 및 붉은 배경의 드론 장갑 가독성을 후속 검수한다.
 새 유료 생성·배경·Core·게임 수치 변경은 없다. 채택/검증 근거는 CURATION.md와
 ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md에 남긴다.
+
+최종 clean WebGL 소스 4767e78, rss-play 배포 98b4d5d, Pages 36698090375 성공.
+Unity 생성 Atlas 인덱스 5개를 함께 보존했다. 공개 파일 4개의 크기/해시 일치와
+버전 스탬프를 확인했으며, 실플레이 검증은 아직이다. 새 테스트판 링크와 전체 근거는
+ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md에 기록했다.
