@@ -288,7 +288,7 @@ namespace Shmup.Presentation.Battle
                 renderer.sprite = _shipSprites[i];
                 // 엔진 프레임 애니는 starter 전용 아트 — 다른 함선은 정지 스프라이트 유지
                 var animator = _playerTransform.GetComponent<PlayerShipAnimator>();
-                if (animator != null) animator.enabled = i == 0;
+                if (animator != null) animator.enabled = shipId == "starter";
                 return;
             }
         }
@@ -652,6 +652,7 @@ namespace Shmup.Presentation.Battle
         // (실제 원인이 그것이었다 — 하단 게이지 HUD, PowerUpHudView 참조).
 
         SpriteRenderer _playerRendererCache;
+        PlayerShipAnimator _playerAnimatorCache;
 
         /// <summary>기체 스프라이트 렌더러 (지연 캐시 — 배선 검증 실패 런에서도 안전하다).</summary>
         SpriteRenderer PlayerRenderer
@@ -1929,6 +1930,7 @@ namespace Shmup.Presentation.Battle
         void SyncViews()
         {
             _playerTransform.localPosition = SimView.ToWorld(_sim.PlayerX, _sim.PlayerY);
+            SyncPlayerAnimation();
             SyncPlayerInvulnerabilityBlink();
 
             TrackWeaponTypeChange();
@@ -1941,6 +1943,14 @@ namespace Shmup.Presentation.Battle
             SyncObstacles(Time.deltaTime);
             SyncShield();
             SyncBoss();
+        }
+
+        void SyncPlayerAnimation()
+        {
+            if (_playerTransform == null) return;
+            if (_playerAnimatorCache == null)
+                _playerAnimatorCache = _playerTransform.GetComponent<PlayerShipAnimator>();
+            if (_playerAnimatorCache != null) _playerAnimatorCache.RenderAtTick(Tick);
         }
 
         /// <summary>
@@ -3185,11 +3195,8 @@ namespace Shmup.Presentation.Battle
         }
 
         /// <summary>
-        /// 아이들 애니 프레임 조회. 반환: 평탄 배열의 (시작, 개수). 없으면 count 0.
-        /// 순수 표현 — 시간 기반 프레임 순환이라 시뮬 결정론과 무관하다.
-        /// </summary>
-        /// <summary>
-        /// 애니 프레임 구간을 찾는다. <paramref name="exact"/>면 접두사가 아니라
+        /// 애니 프레임 구간과 실제 매칭된 클립 이름을 찾는다. 없으면 count 0.
+        /// <paramref name="exact"/>면 접두사가 아니라
         /// **id가 완전히 같을 때만** 잡는다.
         ///
         /// 접두사 매칭은 적에게는 맞다(zako_sine_slow가 zako_sine을 물려받는다).
@@ -3199,13 +3206,15 @@ namespace Shmup.Presentation.Battle
         /// 원본이 그대로 서 있다 (사람 보고 2026-08-05: "첫 파괴 이후 코어 보스가
         /// 나와야하는데 원본 보스 그대로야" — 두 번 보고받고서야 여기까지 왔다).
         /// </summary>
-        void GetAnimRange(string id, out int start, out int count, bool exact = false)
+        string GetAnimRange(string id, out int start, out int count, bool exact = false)
         {
             start = 0;
             count = 0;
-            if (_animPrefixes == null || _animFrameCounts == null || _animFrames == null) return;
+            if (string.IsNullOrEmpty(id) || _animPrefixes == null || _animFrameCounts == null || _animFrames == null)
+                return null;
             int bestLength = -1;
             int offset = 0;
+            string clipId = null;
             int total = Mathf.Min(_animPrefixes.Length, _animFrameCounts.Length);
             for (int i = 0; i < total; i++)
             {
@@ -3220,10 +3229,12 @@ namespace Shmup.Presentation.Battle
                     bestLength = _animPrefixes[i].Length;
                     start = offset;
                     count = _animFrameCounts[i];
+                    clipId = _animPrefixes[i];
                 }
                 offset += _animFrameCounts[i];
             }
             if (start + count > _animFrames.Length) count = 0;
+            return count > 0 ? clipId : null;
         }
 
         /// <summary>
@@ -3263,10 +3274,12 @@ namespace Shmup.Presentation.Battle
             SpriteRenderer renderer, string id, int desyncSalt, bool exact = false)
         {
             if (renderer == null) return;
-            GetAnimRange(id, out int start, out int count, exact);
+            string clipId = GetAnimRange(id, out int start, out int count, exact);
             if (count <= 0) return;
-            int frame = ((int)(Time.time * _animFramesPerSecond) + desyncSalt) % count;
-            renderer.sprite = _animFrames[start + frame];
+            int frame = SpriteAnimationPlayback.IdleFrameAt(
+                clipId, Tick, _animFramesPerSecond, count, desyncSalt, FlashReduced);
+            var sprite = _animFrames[start + frame];
+            if (sprite != null) renderer.sprite = sprite;
         }
 
         /// <summary>가장 긴 접두어 매칭 — zako_sine_slow가 zako_sine보다 구체적 매칭을 이기게.</summary>

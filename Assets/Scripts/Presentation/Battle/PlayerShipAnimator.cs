@@ -3,8 +3,8 @@ using UnityEngine;
 namespace Shmup.Presentation.Battle
 {
     /// <summary>
-    /// 플레이어 기체 프레임 순환 (엔진 화염 등, M2). 순수 표현 — 시뮬 상태와 무관한
-    /// 시간 기반 루프라 결정론에 영향 없다. 프레임이 없으면 아무것도 하지 않는다.
+    /// 플레이어 엔진 프레임. BattleDirector가 관측한 전투 틱에서 샘플링한다.
+    /// 전투가 멈추면 같은 프레임을 유지하며, 시뮬 상태나 판정은 수정하지 않는다.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PlayerShipAnimator : MonoBehaviour
@@ -13,11 +13,11 @@ namespace Shmup.Presentation.Battle
         [SerializeField] Sprite[] _frames;
         [SerializeField] float _framesPerSecond = 10f;
 
-        void Update()
+        public void RenderAtTick(int tick)
         {
-            if (_renderer == null || _frames == null || _frames.Length == 0) return;
-            int index = (int)(Time.time * _framesPerSecond) % _frames.Length;
-            _renderer.sprite = _frames[index];
+            if (!enabled || _renderer == null || _frames == null || _frames.Length == 0) return;
+            int index = SpriteAnimationPlayback.FrameAt(tick, _framesPerSecond, _frames.Length);
+            if (_frames[index] != null) _renderer.sprite = _frames[index];
         }
     }
 }
