@@ -506,3 +506,17 @@ echo_wisp의 소멸 반복이 없어지고 감소 모드 void_moth의 프레임 
 근거는 out/revamp/animation-audit.json, animation-unity.xml/.log,
 animation-frames-{0,1}.png, animation-playback-comparison.png와 Tools/QaHarness의
 동명 진단/캡처 스크립트다. 기존 순서를 같은 틱에 재구성한 프레임 비교이며 실플레이가 아니다.
+
+배포 완료: 소스 `f4e143a3452295c29f04f1500c8ff3b4eb322f5b`(clean)에서 Unity CLI
+WebGL 빌드를 실행해 성공했다. 09:29:53–09:32:03 KST, Unity BuildReport 성공,
+산출물 4개 **29,844,981 bytes**. 기존 미사용 필드/라이선스 진단 외 신규 오류는 없었다.
+`rss-play@23dd1e3f1fa0b3f4d744c1a43f1938167d2b10b0`으로 게시했으며
+[Pages 작업 36650854981](https://github.com/pavy23/rss-play/actions/runs/36650854981)이 성공했다.
+09:33:33 KST 공개 index/버전/소스 SHA 및 게임 파일 4개의 다운로드 크기·SHA-256을
+원본과 대조해 전부 일치했다. 근거는 animation-webgl-build.log, CLI provenance와
+served-playtest/verification.json이다. 자동 생성 리소스는 빌드 종료 후 정리됐고
+소스에 의도하지 않은 설정 변경은 없다.
+
+[애니메이션 개선판 테스트](https://pavy23.github.io/rss-play/?v=20260930-093215-f4e143a).
+앞선 버전에 대한 사용자 플레이 피드백과 이번 버전의 자동·정적 검증은 구분한다.
+이번 버전 자체의 실제 브라우저 주행은 실행하지 않았다.

@@ -79,3 +79,6 @@ UI·UX와 사운드·연출의 근거 및 검증 목록은 `UIUX-AUDIO-REVIEW.md
   기체/적 프레임은 전투 틱을 관측해 재생·정지·초기화를 일치시킨다.
 - 기체 뱅킹 아트, 다른 기종의 엔진, 빠른 적의 외형 구분, 일부 보스 이음새는
   다음 아트 검토 항목이다. 세부 근거와 한계는 `ANIMATION-REVIEW.md`를 따른다.
+- `f4e143a`를 `rss-play@23dd1e3`으로 배포했다. Core 597개 / Unity 731개 통과,
+  WebGL/Pages 성공 및 공개 파일 4개 SHA-256 일치 확인.
+  [최신 테스트 플레이](https://pavy23.github.io/rss-play/?v=20260930-093215-f4e143a).
