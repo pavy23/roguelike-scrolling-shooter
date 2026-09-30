@@ -1,0 +1,334 @@
+{
+  "kind": "Read-only native PNG audit; neither imports nor gameplay testing",
+  "productionArtUnchanged": {
+    "checked": 338,
+    "modified": []
+  },
+  "proposedStaticSprites": [
+    {
+      "file": "raw/starter/candidate_05.png",
+      "width": 48,
+      "height": 30,
+      "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097",
+      "visibleColors": 30,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        0,
+        2,
+        45,
+        23
+      ],
+      "originalGeneratedBytes": true,
+      "id": "starter",
+      "curation": "proposed_for_user_review",
+      "engineReady": false
+    },
+    {
+      "file": "raw/drone.png",
+      "width": 24,
+      "height": 24,
+      "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35",
+      "visibleColors": 44,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        2,
+        1,
+        23,
+        20
+      ],
+      "originalGeneratedBytes": true,
+      "id": "drone",
+      "curation": "proposed_for_user_review",
+      "engineReady": false
+    },
+    {
+      "file": "raw/fast-v2.png",
+      "width": 24,
+      "height": 24,
+      "sha256": "c01068e8e9f3786219481cf59ff9e08b41a34b30f0dfaff722d87a5370cfd343",
+      "visibleColors": 41,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        3,
+        5,
+        21,
+        19
+      ],
+      "originalGeneratedBytes": true,
+      "id": "fast",
+      "curation": "proposed_for_user_review",
+      "engineReady": false
+    },
+    {
+      "file": "raw/turret-v2.png",
+      "width": 24,
+      "height": 24,
+      "sha256": "b033e0f64e905d577aaf17d91dde11505ba40c027f3607777216e9e0e671b9b5",
+      "visibleColors": 26,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        3,
+        5,
+        21,
+        20
+      ],
+      "originalGeneratedBytes": true,
+      "id": "turret",
+      "curation": "proposed_for_user_review",
+      "engineReady": false
+    }
+  ],
+  "engineLoop": {
+    "frames": [
+      "raw/starter/candidate_05.png",
+      "raw/starter-engine/frame_01.png"
+    ],
+    "fps": 10,
+    "periodSeconds": 0.2,
+    "changedExhaustPixels": 26,
+    "hullAndMuzzlePixelDifferences": 0,
+    "candidateFrames": [
+      {
+        "file": "raw/starter-engine/frame_00.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "e7cc2c6a40c179876922f23e272caa95dd2375552e23a5f32ca91865c01425a0",
+        "visibleColors": 29,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          2,
+          45,
+          23
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 2,
+        "changesOutsideFlameContract": 2,
+        "usableWithStationaryHull": false
+      },
+      {
+        "file": "raw/starter-engine/frame_01.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "e42f487cd7fe2a0574efcc1b33e9318cdc28480d68dc835656d23ad48b607dfa",
+        "visibleColors": 29,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          2,
+          45,
+          23
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 26,
+        "changesOutsideFlameContract": 0,
+        "usableWithStationaryHull": true
+      },
+      {
+        "file": "raw/starter-engine/frame_02.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "72c86ba021d5c267eff48cf44428de9bf574a918be8304053ffa1a261c205804",
+        "visibleColors": 29,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          3,
+          45,
+          24
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 436,
+        "changesOutsideFlameContract": 384,
+        "usableWithStationaryHull": false
+      },
+      {
+        "file": "raw/starter-engine/frame_03.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "11610827063da36f7bd5e011ffdaeaf22a804cc978eb0b6dbf7eb373f279b821",
+        "visibleColors": 29,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          3,
+          45,
+          24
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 431,
+        "changesOutsideFlameContract": 386,
+        "usableWithStationaryHull": false
+      },
+      {
+        "file": "raw/starter-engine/frame_04.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "69cac239c718b2e3028dffb0429898ef35d22c5d72b52ef94104cb164f4ab160",
+        "visibleColors": 30,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          3,
+          45,
+          24
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 430,
+        "changesOutsideFlameContract": 386,
+        "usableWithStationaryHull": false
+      },
+      {
+        "file": "raw/starter-engine/frame_05.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "38794bb914492a0e51bf14bdea25082d53063b4bde18d60559ce7c46233c466d",
+        "visibleColors": 34,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          3,
+          45,
+          24
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 434,
+        "changesOutsideFlameContract": 392,
+        "usableWithStationaryHull": false
+      },
+      {
+        "file": "raw/starter-engine/frame_06.png",
+        "width": 48,
+        "height": 30,
+        "sha256": "88895654bd9a0ecb7e17e9b2ecb4dffd7c16f003dfd03d8e43ac908ff168f401",
+        "visibleColors": 30,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          0,
+          2,
+          45,
+          23
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 1,
+        "changesOutsideFlameContract": 1,
+        "usableWithStationaryHull": false
+      }
+    ],
+    "firstJobIdPrefix": "dd9e97b7",
+    "firstJobIdRecordedInFull": false,
+    "note": "Initial legacy client saved 7 image items for a 6-frame request; no order/count assumption is used. Only the independently checked pose is proposed."
+  },
+  "droneAnimation": {
+    "candidateFrames": [
+      {
+        "file": "raw/drone-sensor/frame_00.png",
+        "width": 24,
+        "height": 24,
+        "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35",
+        "visibleColors": 44,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          2,
+          1,
+          23,
+          20
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 0,
+        "changesOutsideSensorArea": 0,
+        "usableSensorLoopPose": false
+      },
+      {
+        "file": "raw/drone-sensor/frame_01.png",
+        "width": 24,
+        "height": 24,
+        "sha256": "f495d43205d9385982cc0f47fb14951c8f2b6138bdc6268c6e6ce5afb9162711",
+        "visibleColors": 42,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          2,
+          2,
+          23,
+          21
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 248,
+        "changesOutsideSensorArea": 200,
+        "usableSensorLoopPose": false
+      },
+      {
+        "file": "raw/drone-sensor/frame_02.png",
+        "width": 24,
+        "height": 24,
+        "sha256": "18d1ee64158a90f1f3f7cb271018b6d70093cc28a9d37b67edb39a00325c4d4f",
+        "visibleColors": 35,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          2,
+          3,
+          23,
+          23
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 272,
+        "changesOutsideSensorArea": 214,
+        "usableSensorLoopPose": false
+      },
+      {
+        "file": "raw/drone-sensor/frame_03.png",
+        "width": 24,
+        "height": 24,
+        "sha256": "82b4ddea539a42677a03d2692b79c44e2c1bde82bddb14ed6cc7e1f14dbede40",
+        "visibleColors": 41,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          2,
+          2,
+          23,
+          21
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 241,
+        "changesOutsideSensorArea": 196,
+        "usableSensorLoopPose": false
+      },
+      {
+        "file": "raw/drone-sensor/frame_04.png",
+        "width": 24,
+        "height": 24,
+        "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35",
+        "visibleColors": 44,
+        "partialAlphaPixels": 0,
+        "opaqueBoundsTopLeft": [
+          2,
+          1,
+          23,
+          20
+        ],
+        "originalGeneratedBytes": true,
+        "changedPixels": 0,
+        "changesOutsideSensorArea": 0,
+        "usableSensorLoopPose": false
+      }
+    ],
+    "decision": "Keep original static drone; moving output frames drift vertically and are rejected."
+  },
+  "experimentalExplosion": {
+    "file": "raw/explosion-v2.png",
+    "width": 48,
+    "height": 48,
+    "sha256": "2a1d756ea94399781094b93de888150c6d4497584d4a70c1e1bed0ee9414f246",
+    "visibleColors": 17,
+    "partialAlphaPixels": 0,
+    "opaqueBoundsTopLeft": [
+      3,
+      3,
+      45,
+      45
+    ],
+    "originalGeneratedBytes": true
+  },
+  "productionArtAdopted": false,
+  "gameplayAndMuzzleAttachmentValidated": false
+}

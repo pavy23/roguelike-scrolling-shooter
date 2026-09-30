@@ -1,0 +1,10 @@
+{
+  "endpoint": "/animate-with-text-v3",
+  "first_frame_file": "ArtRevamp/SFC-20260930/pilot/raw/drone.png",
+  "last_frame_file": "ArtRevamp/SFC-20260930/pilot/raw/drone.png",
+  "action": "A motionless pixel art game icon. The circular amber sensor on the LEFT gently changes brightness in a subtle repeating cycle. Only pixels inside the existing amber sensor change between yellow and orange. Every red armor, navy chassis, fin, rear engine and transparent outline pixel stays EXACTLY in place, with NO movement, bobbing, stretching, rotation, flying or camera motion. No bright white flash or new objects. Very subtle classic 16-bit sensor idle glow, 24x24 native canvas, hard alpha.",
+  "frame_count": 4,
+  "seed": 2026093011,
+  "no_background": true,
+  "drift_threshold": 0
+}

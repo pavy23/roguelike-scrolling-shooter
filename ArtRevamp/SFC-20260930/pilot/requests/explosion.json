@@ -1,0 +1,11 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "A single small ignition flash, the FIRST animation frame of a refined 16-bit console pixel-art explosion. Compact irregular white-yellow core inside golden yellow and orange sharp diamond-like lobes, only 12 pixels wide and 12 pixels tall, perfectly centered at (24,24) in a native 48x48 transparent canvas. Leave the rest of the canvas transparent for later animation expansion. About 8 opaque colors with clean contiguous pixel clusters. A tight initial spark, not a full fireball yet. Pure transparent background, hard alpha, no blur, no halo, no smoke cloud yet, no unrelated sparks at the edges, no text, grid, scene or shadow. Symmetrical visual center, deliberately asymmetric tips.",
+  "image_size": { "width": 48, "height": 48 },
+  "seed": 2026093005,
+  "outline": "lineless",
+  "detail": "medium detail",
+  "view": "side",
+  "no_background": true
+}

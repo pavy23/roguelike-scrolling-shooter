@@ -1,0 +1,12 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "One compact ground-mounted armored gun turret for an exquisite 16-bit side-scrolling space shooter, horizontal side view facing LEFT, native 24x24 sprite. Tall sturdy stacked structure occupying 21 pixels width and 21 pixels height, fully centered with at least one clear pixel margin. A wide heavy dark navy base with two mechanical feet touching the same baseline, thick vertical pivot, rounded ivory upper gun housing with shaded pale gold planes, a long thick barrel pointing horizontally LEFT, and a small amber aiming sensor above the barrel. Cream highlight, bone midtone, warm ochre armor shadow, deep navy interior. The mounting pedestal is substantial and visibly connects the upper cannon to the floor. Controlled clean clusters, simple readable large armor planes, limited palette about 20 colors, three tones per material. No detached pieces, text, floor, cast shadow, soft glow or antialiasing. Transparent background, hard alpha, complete unclipped silhouette.",
+  "image_size": { "width": 24, "height": 24 },
+  "seed": 2026093009,
+  "outline": "selective outline",
+  "detail": "medium detail",
+  "view": "side",
+  "direction": "west",
+  "no_background": true
+}

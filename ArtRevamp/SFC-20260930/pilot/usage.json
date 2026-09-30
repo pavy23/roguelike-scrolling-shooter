@@ -1,0 +1,12 @@
+{
+  "provider": "PixelLab",
+  "destination": "https://api.pixellab.ai/v2",
+  "checkedAtUtc": "2026-09-30T06:41:53.374611+00:00",
+  "approval": "Existing account credits, up to USD 1 for this pilot; no top-up, no source-code upload. See ../CURATION.md.",
+  "observedCreditDecreaseUsd": 0.111962457948,
+  "authorizedCapUsd": 1,
+  "withinCap": true,
+  "billingNote": "Balance delta observed across pilot jobs, not a per-job invoice. Async accept responses report usage null.",
+  "newPaymentOrTopUp": false,
+  "privacyNote": "Only project spend is published; account balance details remain in ignored local QA output."
+}

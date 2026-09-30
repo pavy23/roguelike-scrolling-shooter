@@ -19,7 +19,7 @@
       "height": 1024,
       "bytes": 1895118,
       "sha256": "01f1ad34f50a66f81d85acd10a0ef36fdf4d1546973f905d7e7331a77d8dffab",
-      "status": "candidate_pending_user_curation",
+      "status": "not_selected_by_user",
       "nativePixelGridVerified": false,
       "engineReady": false
     },
@@ -36,9 +36,11 @@
       "height": 1024,
       "bytes": 1573319,
       "sha256": "0c8023e62ea82424a27f360146217a5d081c99443fafafad6481a66ba66e41f2",
-      "status": "candidate_pending_user_curation",
+      "status": "style_selected_by_user_native_production_review_pending",
       "nativePixelGridVerified": false,
       "engineReady": false
     }
-  ]
+  ],
+  "curationRecord": "CURATION.md",
+  "nativePilotManifest": "pilot/manifest.json"
 }

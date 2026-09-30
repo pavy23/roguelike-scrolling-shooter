@@ -1,0 +1,12 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "One RED ARMORED ENEMY INTERCEPTOR spaceship flying LEFT, clean horizontal side view, native 24x24 pixel sprite for an exquisite late 16-bit console shooter. A substantial bright scarlet main hull, at least 8 pixels thick, broad swept wings creating a 16 pixel tall angular arrowhead silhouette. Sharp ivory left-facing nose, luminous amber cockpit near the front, burgundy lower shadow planes, navy recessed mechanics, a short orange engine at the RIGHT. Most of the ship is luminous scarlet armor, with cream top-edge highlights. Clearly visible against dark space. Different from a round drone: use a broad angular delta shape, NOT a thin needle. Clean connected pixel clusters and three discrete tones per material, limited palette around 24 colors. Centered within 22 by 20 pixels, with transparent margin on all sides. Hard alpha, crisp native pixels. No text, floor, shadow, blur, glow, panels or detached sparks.",
+  "image_size": { "width": 24, "height": 24 },
+  "seed": 2026093008,
+  "outline": "selective outline",
+  "detail": "medium detail",
+  "view": "side",
+  "direction": "west",
+  "no_background": true
+}

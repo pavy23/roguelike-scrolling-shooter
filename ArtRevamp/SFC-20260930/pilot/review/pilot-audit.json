@@ -1,0 +1,86 @@
+{
+  "kind": "GPU Editor art fixtures, not gameplay; UI hidden; backgrounds unchanged; candidates never imported",
+  "ppu": 16,
+  "referenceWidth": 640,
+  "referenceHeight": 360,
+  "metrics": [
+    {
+      "label": "STARTER / candidate 05",
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+      "width": 48,
+      "height": 30,
+      "visibleRgbaColors": 30,
+      "partialAlphaPixels": 0,
+      "visiblePixels": 478,
+      "paletteBudgetPass": true,
+      "postprocessed": false
+    },
+    {
+      "label": "ROUND DRONE",
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/drone.png",
+      "width": 24,
+      "height": 24,
+      "visibleRgbaColors": 44,
+      "partialAlphaPixels": 0,
+      "visiblePixels": 285,
+      "paletteBudgetPass": true,
+      "postprocessed": false
+    },
+    {
+      "label": "FAST INTERCEPTOR / revised",
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/fast-v2.png",
+      "width": 24,
+      "height": 24,
+      "visibleRgbaColors": 41,
+      "partialAlphaPixels": 0,
+      "visiblePixels": 126,
+      "paletteBudgetPass": true,
+      "postprocessed": false
+    },
+    {
+      "label": "TURRET / revised",
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/turret-v2.png",
+      "width": 24,
+      "height": 24,
+      "visibleRgbaColors": 26,
+      "partialAlphaPixels": 0,
+      "visiblePixels": 190,
+      "paletteBudgetPass": true,
+      "postprocessed": false
+    }
+  ],
+  "battleCaptures": [
+    "battle-theme-0-baseline.png",
+    "battle-theme-0-candidate.png",
+    "battle-theme-2-baseline.png",
+    "battle-theme-2-candidate.png",
+    "battle-theme-4-baseline.png",
+    "battle-theme-4-candidate.png"
+  ],
+  "fixtureScales": [
+    {
+      "id": "zako_straight",
+      "halfWidthWorld": 1.58203125,
+      "scale": 2.109375
+    },
+    {
+      "id": "zako_fast",
+      "halfWidthWorld": 1.40625,
+      "scale": 1.875
+    },
+    {
+      "id": "turret_ground",
+      "halfWidthWorld": 1.171875,
+      "scale": 1.5625
+    }
+  ],
+  "engine": {
+    "frames": 2,
+    "framesPerSecond": 10,
+    "flameChanges": 26,
+    "hullAndMuzzleUnchanged": true
+  },
+  "sceneSaved": false,
+  "playerSavesAccessed": false,
+  "productionArtAdopted": false
+}
