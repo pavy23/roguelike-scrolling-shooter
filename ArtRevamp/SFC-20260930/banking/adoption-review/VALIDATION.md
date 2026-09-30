@@ -37,5 +37,20 @@ Play Mode/브라우저 실플레이 검증이 아니다. 사용자 저장이나 
 
 ## 배포 상태
 
-채택 연결/테스트/캡처 완료. clean 소스 커밋에서 WebGL 빌드와 rss-play 배포를 진행한다.
-최종 소스·배포 커밋, 공개 파일 검증 기록은 완료 후 이 절에 추가한다.
+2026-09-30 22:31 KST 공개 파일 검증 완료.
+
+- [지금 플레이](https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c)
+- 적용 커밋 `98e4e6e`, 최종 clean 빌드 소스 `7eefb4c6d9cb6dd2ee2df238228743aceadb01eb`.
+- `rss-play` 배포 커밋 `6f676fb5f7255776928a6c546df5a9b736afbbbe`.
+- [Pages 작업 36722079804](https://github.com/pavy23/rss-play/actions/runs/36722079804) 성공.
+- index/build-info의 버전 일치, 게임 파일 4개 HTTP 200 및 크기·SHA-256 일치.
+- [빌드 provenance](webgl-provenance.json), [파일 목록](build-info.json),
+  [공개 파일 확인](served-verification.json), [검사 결과](validation-results.json).
+
+첫 빌드에서 추가된 네 원본의 Unity Atlas GUID/이름 인덱스를 커밋한 뒤 최종 빌드를
+다시 만들었다. `source.dirty=false`, BuildReport Success, 종료 코드 0, 빌드 후 clean을
+확인했다. CLI가 기존 LicensingClient validation 진단 1건을 표시했으나 라이선스
+획득과 빌드는 성공했다. 전체 오류 0건이었다고 표현하지 않는다.
+
+공유 PC 규칙에 따라 브라우저 자동화/실주행은 하지 않았다. 자동 테스트·Editor
+캡처·공개 파일 검증과 사용자 실제 플레이 검증을 구분한다.

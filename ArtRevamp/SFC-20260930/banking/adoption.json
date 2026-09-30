@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "curation": "ArtRevamp/SFC-20260930/CURATION.md",
   "userApproval": "현재후보 ㄱㄱ 그리고 다음작업",
-  "status": "adopted_integrated_pending_deployment",
+  "status": "adopted_deployed",
   "assets": [
     {
       "source": "ArtRevamp/SFC-20260930/banking/raw/masked-up-fold/candidate_00.png",
@@ -55,5 +55,10 @@
   ],
   "engineFps": 10,
   "legacyArtInputMayOverride": false,
-  "rasterPostprocessing": "none; approved PNG bytes copied unchanged"
+  "rasterPostprocessing": "none; approved PNG bytes copied unchanged",
+  "webglDeployed": true,
+  "deployedSourceCommit": "7eefb4c6d9cb6dd2ee2df238228743aceadb01eb",
+  "deploymentCommit": "6f676fb5f7255776928a6c546df5a9b736afbbbe",
+  "playUrl": "https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c",
+  "servedVerification": "adoption-review/served-verification.json"
 }

@@ -1,10 +1,10 @@
 {
-  "status": "adopted_integrated_pending_deployment",
+  "status": "adopted_deployed",
   "style": "SFC style-sheet-v2",
   "runtimeDriverImplemented": true,
   "productionArtAdopted": true,
   "savedSceneChanged": true,
-  "webglDeployed": false,
+  "webglDeployed": true,
   "clips": {
     "up": [
       "up-A",
@@ -63,5 +63,9 @@
   "pixelAudit": "review/native-audit.json",
   "usage": "usage.json",
   "humanApproval": "현재후보 ㄱㄱ 그리고 다음작업",
-  "adoption": "adoption.json"
+  "adoption": "adoption.json",
+  "deployedSourceCommit": "7eefb4c6d9cb6dd2ee2df238228743aceadb01eb",
+  "deploymentCommit": "6f676fb5f7255776928a6c546df5a9b736afbbbe",
+  "playUrl": "https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c",
+  "servedVerification": "adoption-review/served-verification.json"
 }

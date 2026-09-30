@@ -794,3 +794,8 @@ Codex가 사용자 개편 지시와 AGENTS §9-1에 따라 RENDERER/QA/오케스
 
 검증과 배포 추적: ArtRevamp/SFC-20260930/banking/adoption-review/VALIDATION.md.
 다음 묶음: ArtRevamp/SFC-20260930/combat/README.md. 원시 로그는 out/revamp에만 보관한다.
+
+최종 clean WebGL 소스 `7eefb4c`, `rss-play@6f676fb`, Pages `36722079804` 성공.
+22:31 KST 공개 게임 파일 4개의 크기/SHA-256과 버전 스탬프 일치 확인.
+[뱅킹 적용판 플레이](https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c).
+Unity가 추가한 Atlas 인덱스 네 개도 커밋했으며 브라우저 실주행은 미실시다.

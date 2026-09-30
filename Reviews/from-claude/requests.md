@@ -2162,3 +2162,7 @@ Core 611개 / Unity 792개 통과. 저장된 씬으로 24상태를 재검수했�
 기록한 네 장뿐이다. 다음 탄·캡슐·폭발은 연구 시트와 native 제작 기준 단계다.
 새 PixelLab 요청/비용은 없으며 실주행 PASS로 보고하지 않는다. 빌드/배포 근거는
 ArtRevamp/SFC-20260930/banking/adoption-review/VALIDATION.md에 기록한다.
+
+최종 clean 빌드 소스 `7eefb4c`, `rss-play@6f676fb`, Pages `36722079804` 성공.
+공개 파일 4개의 크기/해시와 버전 스탬프 일치를 확인했다. 네 새 Atlas 인덱스도
+소스에 보존했다. 최신 링크와 증거는 위 VALIDATION.md에 기록했다.

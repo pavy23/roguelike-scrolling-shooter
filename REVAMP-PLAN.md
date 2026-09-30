@@ -16,6 +16,8 @@
 기본 기체 뱅킹의 이동/정지/반전 처리와 승인된 상승/하강 A/B 4장을 씬·빌더에 연결했다.
 추가 연결 회귀를 포함해 Unity 792개 / Core 611개 통과, 저장된 씬의 24상태를 검수했다.
 [뱅킹 적용·배포 기록](ArtRevamp/SFC-20260930/banking/adoption-review/VALIDATION.md) 참고.
+`7eefb4c`의 clean WebGL 빌드를 `rss-play@6f676fb`로 배포했고 공개 파일 4개 해시를 확인했다.
+[최신 플레이](https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c).
 다음은 기본탄·캡슐·소형 폭발이다. [디자인 연구와 제작 기준](ArtRevamp/SFC-20260930/combat/README.md)을
 준비했으며 실제 원본/연속 프레임 제작과 큐레이션은 남아 있다.
 

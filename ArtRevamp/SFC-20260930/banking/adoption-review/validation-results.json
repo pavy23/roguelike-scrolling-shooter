@@ -1,0 +1,28 @@
+{
+  "unity": {
+    "passed": 792,
+    "failed": 0,
+    "skipped": 0,
+    "rawResult": "out/revamp/sfc-banking-adoption/unity.xml",
+    "sha256": "b4f8a339f15f8153e9f69f46c76bce870c1e6cd577e2d5646822a06e8eed3ded"
+  },
+  "core": {
+    "passed": 611,
+    "failed": 0,
+    "skipped": 0,
+    "rawResult": "out/revamp/sfc-banking-adoption/core.trx",
+    "sha256": "d568b03f4e21578be9548035fa29de2633fde5d2c5712ccc5c36619ede4c5145"
+  },
+  "sourceCommit": "7eefb4c6d9cb6dd2ee2df238228743aceadb01eb",
+  "savedSceneCaptureCount": 24,
+  "adoptedSourceHashesVerified": 4,
+  "atlasGuidAndNameEntriesVerified": 4,
+  "browserPlaytestPerformed": false,
+  "webglBuildReport": "Success",
+  "webglExitCode": 0,
+  "editorDiagnostics": {
+    "count": 1,
+    "licensingClientValidation": true
+  },
+  "rawLogsTracked": false
+}
