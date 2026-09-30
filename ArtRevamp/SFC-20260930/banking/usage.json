@@ -1,0 +1,13 @@
+{
+  "provider": "PixelLab",
+  "observedPilotCumulativeSpendUsd": 0.262163876712,
+  "priorPilotSpendUsd": 0.111962457948,
+  "bankingApiReportedUsageUsd": 0.1502014187640614,
+  "expectedPilotCumulativeSpendUsd": 0.262163876712,
+  "authorizedPilotCapUsd": 1,
+  "withinCap": true,
+  "newPaymentOrTopUp": false,
+  "sourceCodeUploaded": false,
+  "scope": "Existing user-authorized pilot; native ship and control PNGs only",
+  "note": "Balance is private; only cumulative task cost and API job usage are recorded."
+}

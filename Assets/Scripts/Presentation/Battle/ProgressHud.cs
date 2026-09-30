@@ -55,6 +55,7 @@ namespace Shmup.Presentation.Battle
         {
             var canvas = UiKit.CreateCanvas("ProgressCanvas", 43);
             canvas.transform.SetParent(transform, false);
+            canvas.gameObject.AddComponent<BattleHudVisibility>().Initialize(_director);
 
             // 데일리 뱃지 — 진행도 바로 위. "지금 어떤 모드인가"를 런 내내 알 수 있어야 한다
             // (사람 피드백 2026-08-01). 앰버 한 색 액센트라 계기판 언어를 깨지 않는다.

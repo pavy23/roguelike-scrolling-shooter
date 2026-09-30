@@ -1,0 +1,17 @@
+{
+  "description": "Two very short bright orange rocket exhaust flames pointing LEFT from the unchanged rear of this right-facing SFC starfighter. Make this alternate engine animation frame slightly shorter and narrower than the reference exhaust. Tiny pale yellow hot core, golden yellow center and orange tip pixels. Transparent background between and around the two flames. Preserve the exact ship everywhere outside the mask. Only orange/yellow fire in the mask; no metal, blue, white armor, smoke or sparks. Crisp hard pixel edges, a compact two-frame exhaust flicker, native 48x30 pixels. Do not move or redesign the ship.",
+  "image_size": {
+    "width": 48,
+    "height": 30
+  },
+  "no_background": true,
+  "seed": 2026093023,
+  "text_guidance_scale": 5.0,
+  "endpoint": "/inpaint",
+  "source_file": "ArtRevamp/SFC-20260930/banking/raw/masked-down-fold/candidate_00.png",
+  "mask_file": "ArtRevamp/SFC-20260930/banking/control/engine-tight-mask.png",
+  "source_sha256": "264c9147d77b35634d2bd86c8c77d6dd866539055c07dbd87ec59509915c8b94",
+  "mask_sha256": "8b34bbd5f95496db932c0dcf6ad699cdc7448c4b5392eb1fd757b06ea9690868",
+  "color_reference": "ArtRevamp/SFC-20260930/banking/control/flame-palette.png",
+  "palette_sha256": "6f035d0c102190a1f4ff85acbfece76aa8efeb998e43a6f1319d23f3a0529704"
+}

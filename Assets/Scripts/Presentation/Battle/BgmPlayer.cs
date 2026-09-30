@@ -29,6 +29,8 @@ namespace Shmup.Presentation.Battle
         const float DuckLerpSpeed = 6f;
 
         float _baseVolume = 1f;   // 빌더가 지정한 믹스 레벨을 기준으로 덕킹/복원
+        AudioChannelSource _channel;
+        float _duckGain = 1f;
         string _activeThemeId;
         bool _bossTrackActive;
         RunStageSection _bossTrackSection;
@@ -40,12 +42,24 @@ namespace Shmup.Presentation.Battle
         void Awake()
         {
             if (_source != null)
-                _baseVolume = _source.volume;
+            {
+                _channel = _source.GetComponent<AudioChannelSource>();
+                if (_channel == null)
+                {
+                    _channel = _source.gameObject.AddComponent<AudioChannelSource>();
+                    _channel.Configure(AudioChannel.Music);
+                }
+                _baseVolume = _channel.BaseVolume;
+            }
         }
 
         void Update()
         {
             if (_director == null || _source == null) return;
+
+            // 격파·함체 붕괴 중에는 현재 곡을 이어간다. 결과/보상 화면이 열릴 때
+            // 클리어 징글과 다음 트랙으로 전환한다. 플레이어 사망은 지연하지 않는다.
+            if (_director.BossDeathCinematicActive && !_director.IsRunOver) return;
 
             // 런 종료: 루프 멈추고 스팅어 1회 (런당 1번). 완주는 승리 징글로 구분한다.
             if (_director.IsRunFinished)
@@ -110,11 +124,10 @@ namespace Shmup.Presentation.Battle
             }
 
             // 덕킹 볼륨 복원
-            float targetVolume = Time.realtimeSinceStartup < _duckUntilRealtime
-                ? _baseVolume * 0.4f
-                : _baseVolume;
-            _source.volume = Mathf.MoveTowards(
-                _source.volume, targetVolume, DuckLerpSpeed * Time.unscaledDeltaTime);
+            float targetGain = Time.realtimeSinceStartup < _duckUntilRealtime ? 0.4f : 1f;
+            _duckGain = Mathf.MoveTowards(_duckGain, targetGain,
+                DuckLerpSpeed * Time.unscaledDeltaTime / Mathf.Max(_baseVolume, 0.001f));
+            if (_channel != null) _channel.SetMixGain(_duckGain);
         }
 
         void Duck(float seconds)

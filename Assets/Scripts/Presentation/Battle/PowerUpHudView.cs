@@ -33,6 +33,7 @@ namespace Shmup.Presentation.Battle
         static readonly Color FrameCursor = new Color(1f, 0.70f, 0.11f, 1f);
         static readonly Color FrameMaxed = new Color(0.35f, 0.62f, 0.42f, 0.95f);
         static readonly Color FrameActiveMode = new Color(0.78f, 0.42f, 0.68f, 0.95f);
+        static readonly Color ShieldEmpty = new Color(1f, 0.40f, 0.32f, 1f);
         static readonly Color32 PipFilled = new Color32(0x9C, 0xD4, 0xFF, 0xFF);
         static readonly Color32 PipEmpty = new Color32(0x22, 0x2C, 0x44, 0xFF);
         static readonly Color32 PipBanking = new Color32(0x4E, 0x7A, 0xB8, 0xFF);
@@ -45,13 +46,15 @@ namespace Shmup.Presentation.Battle
 
         /// <summary>게이지 슬롯 식별용 — 실드만 표기 규칙이 다르다(레벨 아님, 스톡).</summary>
         const string ShieldNameKey = "shield";
-        const string MissileNameKey = "missile";
-        const string OptionNameKey = "option";
         int _builtCount = -1;
 
         // 계약 잠금 플래시 (REQ-094). SELECT를 눌렀는데 게이지가 꿈쩍도 않으면 고장으로
         // 읽힌다 — 계약이 막고 있다는 말을 게이지 바로 위에서 한 번 해 준다.
         Text _contractLockText;
+        Text _selectionText;
+        int _hintCursor = int.MinValue, _hintLevel, _hintProgress, _hintRequired, _hintRevision = -1;
+        string _hintName;
+        bool _hintCanActivate, _hintTouch;
         int _shownLockPulse;
         float _lockFlashAge = float.MaxValue;
 
@@ -93,6 +96,7 @@ namespace Shmup.Presentation.Battle
         {
             _canvas = UiKit.CreateCanvas("GaugeCanvas", 42);
             _canvas.transform.SetParent(transform, false);
+            _canvas.gameObject.AddComponent<BattleHudVisibility>().Initialize(_director);
 
             // 알파만 쓴다. 이 캔버스에는 raycastTarget이 켜진 그래픽이 없지만,
             // 흐려진 게이지가 조작 터치를 먹는 일이 절대 없도록 못을 박아 둔다.
@@ -111,6 +115,12 @@ namespace Shmup.Presentation.Battle
                 TextAnchor.LowerCenter, "ContractLock");
             UiKit.AddShadow(_contractLockText);
             _contractLockText.gameObject.SetActive(false);
+            _selectionText = UiKit.CreateCornerText(_canvas.transform, _font, "", 10,
+                UiKit.TextAccent, new Vector2(0.5f, 0f), new Vector2(-43f, SlotHeight + 10f),
+                TextAnchor.LowerCenter, "SelectionHint");
+            _selectionText.rectTransform.sizeDelta = new Vector2(548f, 18f);
+            _selectionText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            UiKit.AddShadow(_selectionText, 1f);
         }
 
         void Build(int count)
@@ -185,18 +195,15 @@ namespace Shmup.Presentation.Battle
         /// <summary>데이터의 nameKey를 HUD 표기로. 모르는 키는 대문자로 그대로 쓴다.</summary>
         static string DisplayName(string nameKey)
         {
+            if (nameKey != null && nameKey.StartsWith("powerUp.", System.StringComparison.OrdinalIgnoreCase))
+                nameKey = nameKey.Substring("powerUp.".Length);
             // Core가 함선 게이지의 주무기 축에 붙이는 고정 키 (REQ-082 D).
             // 스위치의 소문자 케이스와 달리 이 키만 혼합 대소문자라 별도 처리한다 —
             // 그대로 두면 "POWERUP.MAINSHOT"이 화면에 노출된다 (로컬 검증에서 발견).
             if (!string.IsNullOrEmpty(nameKey)
                 && nameKey.IndexOf("mainShot", System.StringComparison.OrdinalIgnoreCase) >= 0)
                 return "SHOT";
-            // 주의: 아래 case들은 **소문자 키에만** 걸린다. 현재 GameData는 "Speed",
-            // "Shield"처럼 대문자로 시작하는 키를 쓰므로 대부분 기본 분기로 흘러
-            // ToUpperInvariant 결과가 표시된다("DOUBLE SHOT" 등). 표기가 우연히
-            // 맞아떨어져 있을 뿐이라, 여기를 고칠 때는 실제로 어떤 키가 오는지
-            // 먼저 확인해라 (nameKey 대소문자 함정 — 2026-08-03).
-            switch (nameKey)
+            switch (nameKey?.ToLowerInvariant())
             {
                 case "speed": return "SPEED";
                 case "mainshot":
@@ -271,15 +278,18 @@ namespace Shmup.Presentation.Battle
             if (count <= 0) return;
             Build(count);
             UpdateOcclusionFade();
+            RefreshSelectionHint(gauge);
 
             for (int i = 0; i < count; i++)
             {
                 var view = gauge.GetGaugeSlotView(i);
                 bool isCursor = gauge.Cursor == i;
                 bool maxed = view.Level >= view.MaxLevel;
+                bool emptyShield = view.Slot == PowerUpSlot.Shield && _director.ShieldRemaining == 0;
 
                 _frames[i].color =
                     isCursor ? FrameCursor :
+                    emptyShield ? ShieldEmpty :
                     view.IsActiveWeaponMode ? FrameActiveMode :
                     maxed ? FrameMaxed : FrameNormal;
 
@@ -291,26 +301,20 @@ namespace Shmup.Presentation.Battle
                 // 슬롯 레벨이 오르는 순간 RecoverShieldStock(+1)이 돌아 재고가 한 장 느는
                 // 것뿐이고, 방어력이 세지지는 않는다. "SHIELD LV3"은 강해진 것처럼 읽혀
                 // 거짓말이 된다 — 지금 들고 있는 재고를 그대로 보여 준다.
-                // 대소문자 무시 비교가 필수다: GameData의 nameKey는 "Shield"(대문자 S)라
-                // Ordinal 비교로는 영영 안 걸린다. 아래 DisplayName의 소문자 case들이
-                // 전부 죽은 코드인 것도 같은 이유다 — 실제 표기는 기본 분기의
-                // ToUpperInvariant가 만들고 있었다.
-                bool shieldSlot = string.Equals(
-                    view.NameKey, ShieldNameKey, System.StringComparison.OrdinalIgnoreCase);
-                bool missileSlot = _director != null && string.Equals(
-                    view.NameKey, MissileNameKey, System.StringComparison.OrdinalIgnoreCase);
-                bool optionSlot = _director != null && string.Equals(
-                    view.NameKey, OptionNameKey, System.StringComparison.OrdinalIgnoreCase);
+                // Slot identity is stable even when content uses a localized/prefixed name key.
+                bool shieldSlot = view.Slot == PowerUpSlot.Shield;
+                bool missileSlot = view.Slot == PowerUpSlot.Missile;
+                bool optionSlot = view.Slot == PowerUpSlot.Option;
 
                 // 슬롯마다 **읽고 싶은 정보가 다르다** (사람 지시 2026-08-03).
                 //   샷    = 위력      → 레벨이 곧 화력이라 LV 그대로가 맞다
                 //   미사일 = 유형      → 기체·보상마다 계열이 달라 "LV2"로는 뭐가 달렸는지 모른다
                 //   옵션   = 편대 형태 → 마찬가지로 숫자가 아니라 배치가 정체다
                 //   실드   = 재고      → 애초에 레벨이 아니다
-                _labels[i].text = view.IsActiveWeaponMode
+                string label = view.IsActiveWeaponMode
                     ? $"{EvolutionName(view.NameKey, view.Level)}\n{(view.Level >= view.MaxLevel ? "MAX" : $"MK{view.Level}")}"
                     : shieldSlot
-                        ? $"{name}\nx{(_director != null ? _director.ShieldRemaining : 0)}"
+                        ? $"{name}\n{(emptyShield ? "EMPTY" : "x" + _director.ShieldRemaining)}"
                     : missileSlot && view.Level > 0
                         ? $"{name}\n{MissileFamilyName(_director.CurrentMissileFamily)}"
                     : optionSlot && view.Level > 0
@@ -318,7 +322,10 @@ namespace Shmup.Presentation.Battle
                     : view.MaxLevel <= 1 ? name
                     : maxed ? $"{name}\nMAX"
                     : $"{name}\nLV{view.Level}";
+                if (isCursor) label = "> " + label;
+                if (_labels[i].text != label) _labels[i].text = label;
                 _labels[i].color =
+                    emptyShield ? ShieldEmpty :
                     isCursor ? new Color(1f, 0.88f, 0.55f, 1f) :
                     view.IsActiveWeaponMode ? new Color(1f, 0.6f, 0.9f, 1f) :
                     maxed ? new Color(0.48f, 0.88f, 0.61f, 1f) : UiKit.TextMain;
@@ -360,6 +367,45 @@ namespace Shmup.Presentation.Battle
                     }
                 }
             }
+        }
+
+        void RefreshSelectionHint(PowerUpGauge gauge)
+        {
+            bool visible = _director.IsPlaying && !_director.ReplayMode && Time.timeScale > 0f
+                && !_contractLockText.gameObject.activeSelf;
+            _selectionText.gameObject.SetActive(visible);
+            if (!visible) return;
+            var selected = gauge.HasSelection ? gauge.GetGaugeSlotView(gauge.Cursor) : default;
+            bool canActivate = gauge.CanActivate, touch = UiPlatform.TouchMode;
+            if (_hintCursor == gauge.Cursor && _hintName == selected.NameKey && _hintLevel == selected.Level
+                && _hintProgress == selected.Progress && _hintRequired == selected.RequiredCapsules
+                && _hintCanActivate == canActivate && _hintTouch == touch
+                && _hintRevision == PlayerBindings.Revision) return;
+            _hintCursor = gauge.Cursor;
+            _hintName = selected.NameKey;
+            _hintLevel = selected.Level;
+            _hintProgress = selected.Progress;
+            _hintRequired = selected.RequiredCapsules;
+            _hintCanActivate = canActivate;
+            _hintTouch = touch;
+            _hintRevision = PlayerBindings.Revision;
+            string hint = SelectionHint(gauge);
+            if (_selectionText.text != hint) _selectionText.text = hint;
+            _selectionText.color = canActivate ? UiKit.TextAccent : UiKit.TextMain;
+        }
+
+        string SelectionHint(PowerUpGauge gauge)
+        {
+            if (!gauge.HasSelection) return UiText.GaugeCollect;
+            var view = gauge.GetGaugeSlotView(gauge.Cursor);
+            string name = DisplayName(view.NameKey);
+            // Read the Core's eligibility; do not promise an upgrade that a contract blocks.
+            if (!gauge.CanActivate)
+                return string.Format(view.Level >= view.MaxLevel ? UiText.GaugeMax : UiText.GaugeLocked, name);
+            string key = PlayerBindings.ActivateHint(_director?.Input?.ActivateAction);
+            return view.Progress + 1 >= view.RequiredCapsules
+                ? string.Format(UiText.GaugeUpgrade, name, key)
+                : string.Format(UiText.GaugeInvest, name, view.Progress, view.RequiredCapsules, key);
         }
 
         /// <summary>

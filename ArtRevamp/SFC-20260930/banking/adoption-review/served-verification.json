@@ -1,0 +1,34 @@
+{
+  "verifiedAtUtc": "2026-09-30T13:31:32.3045790Z",
+  "url": "https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c",
+  "sourceCommit": "7eefb4c6d9cb6dd2ee2df238228743aceadb01eb",
+  "stamp": "20260930-222926-7eefb4c",
+  "indexStatus": 200,
+  "browserPlaytestPerformed": false,
+  "files": [
+    {
+      "name": "Web.data.unityweb",
+      "status": 200,
+      "bytes": 18957561,
+      "sha256": "a0fbefcb17a6edb9fd5cdb2ab8dbcc818b806ab7e07f8caea9da17e2c57be8ce"
+    },
+    {
+      "name": "Web.framework.js.unityweb",
+      "status": 200,
+      "bytes": 88024,
+      "sha256": "a71e87971bed438ef102b5af825b07737398e18d74d23352aa5c0d0f304af70c"
+    },
+    {
+      "name": "Web.loader.js",
+      "status": 200,
+      "bytes": 47866,
+      "sha256": "cb79d71756c4f60db4a231b2d95a5ca9e9559e5fdbaf8618ed8e86d086b99d96"
+    },
+    {
+      "name": "Web.wasm.unityweb",
+      "status": 200,
+      "bytes": 10753045,
+      "sha256": "80bc179e8fe32766e46a2c1299e88e6dd1d26def0b295479409ef59d70cc8161"
+    }
+  ]
+}

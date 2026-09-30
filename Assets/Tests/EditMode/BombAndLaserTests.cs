@@ -247,6 +247,29 @@ namespace Shmup.Core.Tests
                 SimEventType.LaserEnded));
         }
 
+        [TestCase(4)]
+        [TestCase(5 * SimSpace.SubUnitsPerWorldUnit)]
+        public void FirstLaserCycleExposesFullWarningWidthWithoutChangingCollisionWidth(int fullHalfWidth)
+        {
+            var laser = new LaserAttackDefinition(
+                8, 2, 2, 2, 1, -100, 0, 100, 0, 1, fullHalfWidth, 1);
+            var obstacle = new ObstacleSpawn(ObstacleType.LaserEmitter, 0, 0, 0, laser);
+            BattleSimConfig config = Config();
+            config.PlayerSpawnY = 900;
+            var sim = Sim(config, ObstacleSegment("warning_width", 100, obstacle),
+                Array.Empty<EnemyDefinition>());
+
+            for (int tick = 0; tick < laser.LifetimeTicks; tick++)
+            {
+                LaserState state = sim.Lasers[0];
+                Assert.AreEqual(fullHalfWidth, state.FullHalfWidth, $"Warning at tick {tick}");
+                int expectedCollisionWidth = tick >= 4 && tick < 6 ? fullHalfWidth : 1;
+                Assert.AreEqual(expectedCollisionWidth, state.HalfWidth, $"Collision at tick {tick}");
+                Assert.AreEqual(tick >= 2 && tick < 6, state.IsDamaging, $"Damage at tick {tick}");
+                Step(sim, InputCommand.None);
+            }
+        }
+
         [Test]
         public void EnemyLaserUsesItsAttackProfileInsteadOfPointBullets()
         {

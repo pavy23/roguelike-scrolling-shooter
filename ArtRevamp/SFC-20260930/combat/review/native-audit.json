@@ -1,0 +1,1362 @@
+{
+  "kind": "Read-only candidate audit; not art acceptance or gameplay verification",
+  "controls": [
+    {
+      "id": "player-shot",
+      "source": "Assets/Art/Sprites/bullet.png",
+      "textureSize": [
+        16,
+        16
+      ],
+      "spriteRectBottomLeft": [
+        4,
+        6,
+        8,
+        3
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "ppu": 16,
+      "sourcePixelsChanged": false,
+      "sourceSha256": "45148ff4669bbf69905884ba4a6a69535284fb9c8b2173d8681f31b92f828291",
+      "unchangedSourcePixels": true
+    },
+    {
+      "id": "enemy-shot",
+      "source": "Assets/Art/Sprites/enemy_shot.png",
+      "textureSize": [
+        16,
+        16
+      ],
+      "spriteRectBottomLeft": [
+        5,
+        5,
+        6,
+        6
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "ppu": 16,
+      "sourcePixelsChanged": false,
+      "sourceSha256": "d33355a505dc5fc10f387112c194a716474de744ebb7c49d16971dca42634201",
+      "unchangedSourcePixels": true
+    },
+    {
+      "id": "capsule",
+      "source": "Assets/Art/Sprites/capsule.png",
+      "textureSize": [
+        16,
+        16
+      ],
+      "spriteRectBottomLeft": [
+        3,
+        4,
+        10,
+        8
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "ppu": 16,
+      "sourcePixelsChanged": false,
+      "sourceSha256": "662deef94bf34e383242c06f076474e9926d130587221b3517793a6dff4922ea",
+      "unchangedSourcePixels": true
+    }
+  ],
+  "batches": [
+    {
+      "name": "explosion-ignition",
+      "requestedFrames": null,
+      "returnedFrames": 16,
+      "usage": {
+        "type": "usd",
+        "usd": 0.095
+      },
+      "frames": [
+        {
+          "file": "raw/explosion-ignition/candidate_00.png",
+          "sha256": "3dd9936c4f964663560140d4188814c99a7c82ac38e5bd4acb8ab97663eb2908",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 84,
+          "visibleColors": 11,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            12,
+            11,
+            30,
+            29
+          ],
+          "visibleCentroidTopLeft": [
+            21.0,
+            20.0
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_01.png",
+          "sha256": "64bed3fa9c0db8dc2f1e2f5c8f7e8da20f2050ee691a03ded47db5c3c0d8bd94",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 168,
+          "visibleColors": 10,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            14,
+            7,
+            32,
+            31
+          ],
+          "visibleCentroidTopLeft": [
+            23.0,
+            19.048
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_02.png",
+          "sha256": "24be3090a827cd44afdcdd7452fe3cb5857bed565c4d0b559884ae608e641371",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 190,
+          "visibleColors": 16,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            15,
+            11,
+            35,
+            29
+          ],
+          "visibleCentroidTopLeft": [
+            25.089,
+            20.358
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_03.png",
+          "sha256": "4793d18eada9ac55064712ce5d38dd1bc6cbaeeee3cbfdf458d40a145c3bd38e",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 248,
+          "visibleColors": 16,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            14,
+            5,
+            40,
+            35
+          ],
+          "visibleCentroidTopLeft": [
+            27.871,
+            19.613
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_04.png",
+          "sha256": "21037d5974fd5075e42698a2038e6cf6abcc43f16153f00db04578c49fcef0db",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 208,
+          "visibleColors": 14,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            8,
+            9,
+            34,
+            35
+          ],
+          "visibleCentroidTopLeft": [
+            21.0,
+            22.106
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_05.png",
+          "sha256": "2182d68ade4213ebc5ca66a16527ff7ea2f8d999d37a85e8ccfbe7aa0ffced27",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 196,
+          "visibleColors": 9,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            13,
+            11,
+            33,
+            33
+          ],
+          "visibleCentroidTopLeft": [
+            23.0,
+            22.0
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_06.png",
+          "sha256": "b48b30310a09cd481ead7d081ad6436ba77070b4b9a2f52d79ed2a03987e35f5",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 175,
+          "visibleColors": 11,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            14,
+            11,
+            36,
+            33
+          ],
+          "visibleCentroidTopLeft": [
+            25.14,
+            21.963
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_07.png",
+          "sha256": "1580dede69aeaa6172faf57e47251935f57e051f7c43a7f6c3463985b358c09c",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 324,
+          "visibleColors": 23,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            14,
+            9,
+            40,
+            35
+          ],
+          "visibleCentroidTopLeft": [
+            25.58,
+            21.265
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_08.png",
+          "sha256": "e269c0dd949a34992c54c6263ba3ff8d3db38da9720ea9f227a90ad14844ac01",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 196,
+          "visibleColors": 15,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            9,
+            12,
+            34,
+            38
+          ],
+          "visibleCentroidTopLeft": [
+            21.582,
+            25.005
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_09.png",
+          "sha256": "050fdd47980d38eca0ab65086e57ee642727023ec84109f2d64dce32b0e62a01",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 167,
+          "visibleColors": 8,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            12,
+            14,
+            34,
+            36
+          ],
+          "visibleCentroidTopLeft": [
+            22.961,
+            25.045
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_10.png",
+          "sha256": "b2281456f4b38f1405d5ecd8c33b6a2ed8ad40293f4a347caaca33690b7151a9",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 192,
+          "visibleColors": 14,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            12,
+            12,
+            38,
+            38
+          ],
+          "visibleCentroidTopLeft": [
+            24.948,
+            24.536
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_11.png",
+          "sha256": "e3a1fa9b9901e433bc67e8978c46d5441360d2d8d4d4f48028deb66eb33305a3",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 209,
+          "visibleColors": 14,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            14,
+            12,
+            40,
+            38
+          ],
+          "visibleCentroidTopLeft": [
+            26.978,
+            24.974
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_12.png",
+          "sha256": "f57aeee297f0e078e266453fd3614e15f384a5a05e8ebe7be9ab1ede892737b3",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 134,
+          "visibleColors": 11,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            10,
+            13,
+            34,
+            38
+          ],
+          "visibleCentroidTopLeft": [
+            22.239,
+            25.575
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_13.png",
+          "sha256": "67a4cc6eae3b580dc34034f97cf423db1a82380696ecb78b098a06c5056faecb",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 200,
+          "visibleColors": 12,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            11,
+            13,
+            35,
+            39
+          ],
+          "visibleCentroidTopLeft": [
+            23.0,
+            26.0
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_14.png",
+          "sha256": "9e54d8c2de5bade621d1930298a8d9a13714382bdca88ca360004b4370d95bae",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 200,
+          "visibleColors": 7,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            13,
+            14,
+            37,
+            38
+          ],
+          "visibleCentroidTopLeft": [
+            24.88,
+            26.12
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/explosion-ignition/candidate_15.png",
+          "sha256": "8bbb90075b25dad11db99a00147c223563cf71bd133285ef621d7f2c77cd03ef",
+          "canvas": [
+            48,
+            48
+          ],
+          "visiblePixels": 198,
+          "visibleColors": 12,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            14,
+            13,
+            38,
+            36
+          ],
+          "visibleCentroidTopLeft": [
+            26.944,
+            25.591
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "explosion-nine-sheet",
+      "requestedFrames": null,
+      "returnedFrames": 4,
+      "usage": {
+        "type": "usd",
+        "usd": 0.125
+      },
+      "frames": [
+        {
+          "file": "raw/explosion-nine-sheet/candidate_00.png",
+          "sha256": "ea5aa2ed1328266f5e2458379ddf3692a13b9a7e8e1496ce0e265751b00053ec",
+          "canvas": [
+            144,
+            144
+          ],
+          "visiblePixels": 2210,
+          "visibleColors": 20,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            17,
+            29,
+            144,
+            144
+          ],
+          "visibleCentroidTopLeft": [
+            86.828,
+            112.37
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false,
+          "nineFrameGrid": [
+            {
+              "frame": 0,
+              "spriteRectBottomLeft": [
+                0,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 12,
+              "opaqueBoundsTopLeft": [
+                41,
+                43,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                45.667,
+                46.25
+              ],
+              "visiblePixelsInFourPixelMargin": 12,
+              "brightPixels": 5
+            },
+            {
+              "frame": 1,
+              "spriteRectBottomLeft": [
+                48,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 13,
+              "opaqueBoundsTopLeft": [
+                0,
+                43,
+                7,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                2.5,
+                46.269
+              ],
+              "visiblePixelsInFourPixelMargin": 13,
+              "brightPixels": 3
+            },
+            {
+              "frame": 2,
+              "spriteRectBottomLeft": [
+                96,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 138,
+              "opaqueBoundsTopLeft": [
+                32,
+                29,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                42.101,
+                41.565
+              ],
+              "visiblePixelsInFourPixelMargin": 92,
+              "brightPixels": 44
+            },
+            {
+              "frame": 3,
+              "spriteRectBottomLeft": [
+                0,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 49,
+              "opaqueBoundsTopLeft": [
+                41,
+                0,
+                48,
+                11
+              ],
+              "visibleCentroidTopLeft": [
+                45.071,
+                4.52
+              ],
+              "visiblePixelsInFourPixelMargin": 41,
+              "brightPixels": 26
+            },
+            {
+              "frame": 4,
+              "spriteRectBottomLeft": [
+                48,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 52,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                7,
+                11
+              ],
+              "visibleCentroidTopLeft": [
+                2.942,
+                4.712
+              ],
+              "visiblePixelsInFourPixelMargin": 44,
+              "brightPixels": 25
+            },
+            {
+              "frame": 5,
+              "spriteRectBottomLeft": [
+                96,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 257,
+              "opaqueBoundsTopLeft": [
+                24,
+                0,
+                48,
+                26
+              ],
+              "visibleCentroidTopLeft": [
+                40.224,
+                8.329
+              ],
+              "visiblePixelsInFourPixelMargin": 151,
+              "brightPixels": 101
+            },
+            {
+              "frame": 6,
+              "spriteRectBottomLeft": [
+                0,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 559,
+              "opaqueBoundsTopLeft": [
+                17,
+                12,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                36.364,
+                36.775
+              ],
+              "visiblePixelsInFourPixelMargin": 235,
+              "brightPixels": 0
+            },
+            {
+              "frame": 7,
+              "spriteRectBottomLeft": [
+                48,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 491,
+              "opaqueBoundsTopLeft": [
+                0,
+                12,
+                26,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                10.321,
+                36.918
+              ],
+              "visiblePixelsInFourPixelMargin": 221,
+              "brightPixels": 0
+            },
+            {
+              "frame": 8,
+              "spriteRectBottomLeft": [
+                96,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 639,
+              "opaqueBoundsTopLeft": [
+                14,
+                13,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                33.574,
+                32.591
+              ],
+              "visiblePixelsInFourPixelMargin": 168,
+              "brightPixels": 0
+            }
+          ],
+          "nineFrameTimingSeconds": 0.3
+        },
+        {
+          "file": "raw/explosion-nine-sheet/candidate_01.png",
+          "sha256": "a0d2e8c0405aa435911cb12007eedd8b35c6a1f9081dc028e06adabedc962b24",
+          "canvas": [
+            144,
+            144
+          ],
+          "visiblePixels": 3327,
+          "visibleColors": 22,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            27,
+            132,
+            144
+          ],
+          "visibleCentroidTopLeft": [
+            72.1,
+            84.648
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false,
+          "nineFrameGrid": [
+            {
+              "frame": 0,
+              "spriteRectBottomLeft": [
+                0,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 126,
+              "opaqueBoundsTopLeft": [
+                0,
+                27,
+                16,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                5.659,
+                41.714
+              ],
+              "visiblePixelsInFourPixelMargin": 86,
+              "brightPixels": 35
+            },
+            {
+              "frame": 1,
+              "spriteRectBottomLeft": [
+                48,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 311,
+              "opaqueBoundsTopLeft": [
+                26,
+                30,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                38.683,
+                40.079
+              ],
+              "visiblePixelsInFourPixelMargin": 131,
+              "brightPixels": 0
+            },
+            {
+              "frame": 2,
+              "spriteRectBottomLeft": [
+                96,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 323,
+              "opaqueBoundsTopLeft": [
+                0,
+                32,
+                24,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                10.463,
+                40.704
+              ],
+              "visiblePixelsInFourPixelMargin": 140,
+              "brightPixels": 0
+            },
+            {
+              "frame": 3,
+              "spriteRectBottomLeft": [
+                0,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 238,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                23,
+                26
+              ],
+              "visibleCentroidTopLeft": [
+                7.55,
+                8.004
+              ],
+              "visiblePixelsInFourPixelMargin": 139,
+              "brightPixels": 92
+            },
+            {
+              "frame": 4,
+              "spriteRectBottomLeft": [
+                48,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 435,
+              "opaqueBoundsTopLeft": [
+                25,
+                0,
+                48,
+                23
+              ],
+              "visibleCentroidTopLeft": [
+                38.118,
+                10.286
+              ],
+              "visiblePixelsInFourPixelMargin": 164,
+              "brightPixels": 0
+            },
+            {
+              "frame": 5,
+              "spriteRectBottomLeft": [
+                96,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 456,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                24,
+                23
+              ],
+              "visibleCentroidTopLeft": [
+                10.474,
+                10.515
+              ],
+              "visiblePixelsInFourPixelMargin": 158,
+              "brightPixels": 0
+            },
+            {
+              "frame": 6,
+              "spriteRectBottomLeft": [
+                0,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 596,
+              "opaqueBoundsTopLeft": [
+                0,
+                12,
+                32,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                14.812,
+                33.698
+              ],
+              "visiblePixelsInFourPixelMargin": 150,
+              "brightPixels": 0
+            },
+            {
+              "frame": 7,
+              "spriteRectBottomLeft": [
+                48,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 446,
+              "opaqueBoundsTopLeft": [
+                13,
+                15,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                32.451,
+                31.267
+              ],
+              "visiblePixelsInFourPixelMargin": 113,
+              "brightPixels": 0
+            },
+            {
+              "frame": 8,
+              "spriteRectBottomLeft": [
+                96,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 396,
+              "opaqueBoundsTopLeft": [
+                0,
+                15,
+                36,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                18.389,
+                33.614
+              ],
+              "visiblePixelsInFourPixelMargin": 114,
+              "brightPixels": 0
+            }
+          ],
+          "nineFrameTimingSeconds": 0.3
+        },
+        {
+          "file": "raw/explosion-nine-sheet/candidate_02.png",
+          "sha256": "3a85109f0d4c45fc5a56d9c88583501201626966fe1fd5e68bbb3e689e114a83",
+          "canvas": [
+            144,
+            144
+          ],
+          "visiblePixels": 2819,
+          "visibleColors": 17,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            15,
+            0,
+            144,
+            117
+          ],
+          "visibleCentroidTopLeft": [
+            65.683,
+            31.678
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false,
+          "nineFrameGrid": [
+            {
+              "frame": 0,
+              "spriteRectBottomLeft": [
+                0,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 825,
+              "opaqueBoundsTopLeft": [
+                15,
+                0,
+                48,
+                29
+              ],
+              "visibleCentroidTopLeft": [
+                33.268,
+                13.315
+              ],
+              "visiblePixelsInFourPixelMargin": 220,
+              "brightPixels": 0
+            },
+            {
+              "frame": 1,
+              "spriteRectBottomLeft": [
+                48,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 803,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                30,
+                29
+              ],
+              "visibleCentroidTopLeft": [
+                14.211,
+                13.692
+              ],
+              "visiblePixelsInFourPixelMargin": 212,
+              "brightPixels": 0
+            },
+            {
+              "frame": 2,
+              "spriteRectBottomLeft": [
+                96,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 608,
+              "opaqueBoundsTopLeft": [
+                14,
+                0,
+                48,
+                32
+              ],
+              "visibleCentroidTopLeft": [
+                31.204,
+                15.781
+              ],
+              "visiblePixelsInFourPixelMargin": 129,
+              "brightPixels": 0
+            },
+            {
+              "frame": 3,
+              "spriteRectBottomLeft": [
+                0,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 115,
+              "opaqueBoundsTopLeft": [
+                30,
+                37,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                37.291,
+                42.63
+              ],
+              "visiblePixelsInFourPixelMargin": 40,
+              "brightPixels": 0
+            },
+            {
+              "frame": 4,
+              "spriteRectBottomLeft": [
+                48,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 111,
+              "opaqueBoundsTopLeft": [
+                0,
+                34,
+                12,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                6.392,
+                40.842
+              ],
+              "visiblePixelsInFourPixelMargin": 48,
+              "brightPixels": 0
+            },
+            {
+              "frame": 5,
+              "spriteRectBottomLeft": [
+                96,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 8,
+              "opaqueBoundsTopLeft": [
+                35,
+                41,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                43.75,
+                45.75
+              ],
+              "visiblePixelsInFourPixelMargin": 6,
+              "brightPixels": 0
+            },
+            {
+              "frame": 6,
+              "spriteRectBottomLeft": [
+                0,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 177,
+              "opaqueBoundsTopLeft": [
+                30,
+                0,
+                48,
+                21
+              ],
+              "visibleCentroidTopLeft": [
+                39.997,
+                9.212
+              ],
+              "visiblePixelsInFourPixelMargin": 59,
+              "brightPixels": 0
+            },
+            {
+              "frame": 7,
+              "spriteRectBottomLeft": [
+                48,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 143,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                15,
+                21
+              ],
+              "visibleCentroidTopLeft": [
+                7.038,
+                9.381
+              ],
+              "visiblePixelsInFourPixelMargin": 45,
+              "brightPixels": 0
+            },
+            {
+              "frame": 8,
+              "spriteRectBottomLeft": [
+                96,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 29,
+              "opaqueBoundsTopLeft": [
+                39,
+                0,
+                48,
+                11
+              ],
+              "visibleCentroidTopLeft": [
+                42.741,
+                7.466
+              ],
+              "visiblePixelsInFourPixelMargin": 8,
+              "brightPixels": 0
+            }
+          ],
+          "nineFrameTimingSeconds": 0.3
+        },
+        {
+          "file": "raw/explosion-nine-sheet/candidate_03.png",
+          "sha256": "d0bc2c2b6a734566c52abcc586a35ca88b735addc523ed304047abd35215f532",
+          "canvas": [
+            144,
+            144
+          ],
+          "visiblePixels": 1630,
+          "visibleColors": 20,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            0,
+            132,
+            110
+          ],
+          "visibleCentroidTopLeft": [
+            58.133,
+            22.982
+          ],
+          "changedRgbaPixelsOutsideMask": null,
+          "pngPostprocessed": false,
+          "nineFrameGrid": [
+            {
+              "frame": 0,
+              "spriteRectBottomLeft": [
+                0,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 646,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                33,
+                34
+              ],
+              "visibleCentroidTopLeft": [
+                16.717,
+                17.073
+              ],
+              "visiblePixelsInFourPixelMargin": 127,
+              "brightPixels": 0
+            },
+            {
+              "frame": 1,
+              "spriteRectBottomLeft": [
+                48,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 402,
+              "opaqueBoundsTopLeft": [
+                13,
+                0,
+                48,
+                32
+              ],
+              "visibleCentroidTopLeft": [
+                30.318,
+                15.577
+              ],
+              "visiblePixelsInFourPixelMargin": 83,
+              "brightPixels": 0
+            },
+            {
+              "frame": 2,
+              "spriteRectBottomLeft": [
+                96,
+                96,
+                48,
+                48
+              ],
+              "visiblePixels": 432,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                36,
+                34
+              ],
+              "visibleCentroidTopLeft": [
+                17.938,
+                16.674
+              ],
+              "visiblePixelsInFourPixelMargin": 105,
+              "brightPixels": 0
+            },
+            {
+              "frame": 3,
+              "spriteRectBottomLeft": [
+                0,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 105,
+              "opaqueBoundsTopLeft": [
+                0,
+                24,
+                19,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                11.976,
+                31.852
+              ],
+              "visiblePixelsInFourPixelMargin": 2,
+              "brightPixels": 0
+            },
+            {
+              "frame": 4,
+              "spriteRectBottomLeft": [
+                48,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 5,
+              "opaqueBoundsTopLeft": [
+                37,
+                33,
+                48,
+                48
+              ],
+              "visibleCentroidTopLeft": [
+                44.9,
+                44.5
+              ],
+              "visiblePixelsInFourPixelMargin": 4,
+              "brightPixels": 0
+            },
+            {
+              "frame": 5,
+              "spriteRectBottomLeft": [
+                96,
+                48,
+                48,
+                48
+              ],
+              "visiblePixels": 2,
+              "opaqueBoundsTopLeft": [
+                9,
+                37,
+                11,
+                38
+              ],
+              "visibleCentroidTopLeft": [
+                10.0,
+                37.5
+              ],
+              "visiblePixelsInFourPixelMargin": 0,
+              "brightPixels": 0
+            },
+            {
+              "frame": 6,
+              "spriteRectBottomLeft": [
+                0,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 27,
+              "opaqueBoundsTopLeft": [
+                0,
+                0,
+                13,
+                11
+              ],
+              "visibleCentroidTopLeft": [
+                9.056,
+                7.611
+              ],
+              "visiblePixelsInFourPixelMargin": 1,
+              "brightPixels": 0
+            },
+            {
+              "frame": 7,
+              "spriteRectBottomLeft": [
+                48,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 4,
+              "opaqueBoundsTopLeft": [
+                40,
+                0,
+                48,
+                8
+              ],
+              "visibleCentroidTopLeft": [
+                45.0,
+                2.25
+              ],
+              "visiblePixelsInFourPixelMargin": 3,
+              "brightPixels": 0
+            },
+            {
+              "frame": 8,
+              "spriteRectBottomLeft": [
+                96,
+                0,
+                48,
+                48
+              ],
+              "visiblePixels": 7,
+              "opaqueBoundsTopLeft": [
+                3,
+                11,
+                6,
+                14
+              ],
+              "visibleCentroidTopLeft": [
+                4.214,
+                12.357
+              ],
+              "visiblePixelsInFourPixelMargin": 3,
+              "brightPixels": 0
+            }
+          ],
+          "nineFrameTimingSeconds": 0.3
+        }
+      ]
+    }
+  ],
+  "existingProductionPngUnchanged": 347,
+  "newCombatArtAdopted": false,
+  "productionPngEdited": false
+}

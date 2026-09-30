@@ -1,0 +1,12 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "Single beautiful small hero space fighter for a premium 16-bit console side-scrolling shooter. Straight horizontal side view facing RIGHT. Pearl ivory armor and broad royal cobalt blue panels, elegant swept upper and lower wings, deep navy machinery, one clearly separated cyan glass cockpit above the forward fuselage, long tapered ivory nose tipped in blue. Twin orange exhaust flames at the left rear. Clear large armor planes with deliberate 3-tone hue-shifted shading, selective dark navy outline, small restrained ivory highlights, about 24 colors. Entire fighter including flame fits within 44x24 native pixels, centered on a 48x32 transparent canvas: leave at least 2 pixels of TRANSPARENT BORDER on every side, no disconnected pixels. Nose/muzzle on the horizontal midline y=16. Refined readable SFC pixel clusters, no tiny etched scratches or excessive black divisions. Transparent background, hard alpha, no text, no grid, no ground, no diagonal angle, no airbrush or bloom. One sprite only.",
+  "image_size": { "width": 48, "height": 32 },
+  "seed": 2026093006,
+  "outline": "selective outline",
+  "detail": "medium detail",
+  "view": "side",
+  "direction": "east",
+  "no_background": true
+}

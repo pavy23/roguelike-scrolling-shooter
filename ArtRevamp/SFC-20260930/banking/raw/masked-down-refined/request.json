@@ -1,0 +1,16 @@
+{
+  "description": "Pixel art downward banking pose of the EXACT same right-facing SFC starfighter. Keep both swept wings thin, sharply tapered and aerodynamic like the original. In the masked wings, reveal bright IVORY TOP ARMOR with cobalt edge shadows and a different overlap to suggest rolling opposite the dark-underside upward pose. Preserve elegant pointed wing tips, diagonal stepped pixel contours and the source's tightly controlled palette. Keep transparent negative space around wing edges. NO rectangular wings, NO square blocks, NO flat-ended tips, NO extra fins. Do NOT fill the mask shape. All unmasked pixels including cockpit, nose, fuselage and engines are fixed. This is a small art-directed bank, not a new ship or broad wing extension. Crisp 48x30 sprite, no antialiasing or gradients.",
+  "image_size": {
+    "width": 48,
+    "height": 30
+  },
+  "no_background": true,
+  "seed": 2026093017,
+  "text_guidance_scale": 5.0,
+  "endpoint": "/inpaint",
+  "source_file": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+  "mask_file": "ArtRevamp/SFC-20260930/banking/control/wing-silhouette-mask.png",
+  "source_sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097",
+  "mask_sha256": "2091271c641ac190c0a6ccf44fe274a1beee42bc7aa53da659df70df75345ad3",
+  "color_reference": "same source PNG"
+}

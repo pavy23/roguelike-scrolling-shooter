@@ -55,48 +55,56 @@ namespace Shmup.Presentation.Battle
 
             var canvas = UiKit.CreateCanvas("HangarCanvas", 55);
             canvas.transform.SetParent(transform, false);
-            _headerText = UiKit.CreateCornerText(canvas.transform, _fontBold, "", 12,
-                UiKit.TextAccent, new Vector2(0.5f, 0f), new Vector2(0f, 46f),
+            // Reserve a central ship card and a separate left inventory card at 640x360.
+            var card = UiKit.CreatePanel(canvas.transform, new Vector2(272f, 166f), "HangarPanel");
+            card.anchorMin = card.anchorMax = card.pivot = new Vector2(0.5f, 0f);
+            card.anchoredPosition = new Vector2(0f, 74f);
+            _headerText = UiKit.CreateCornerText(canvas.transform, _fontBold, "", 11,
+                UiKit.TextAccent, new Vector2(0.5f, 0f), new Vector2(0f, 136f),
                 TextAnchor.LowerCenter, "Header");
-            _bodyText = UiKit.CreateCornerText(canvas.transform, _font, "", 11,
-                UiKit.TextMain, new Vector2(0.5f, 0f), new Vector2(0f, 14f),
+            _headerText.rectTransform.sizeDelta = new Vector2(260f, 28f);
+            _bodyText = UiKit.CreateCornerText(canvas.transform, _font, "", 10,
+                UiKit.TextMain, new Vector2(0.5f, 0f), new Vector2(0f, 82f),
                 TextAnchor.LowerCenter, "Body");
+            _bodyText.rectTransform.sizeDelta = new Vector2(260f, 42f);
 
-            // 기체 미리보기 (픽셀 ×2 확대)
             var previewGo = new GameObject("ShipPreview");
             previewGo.transform.SetParent(canvas.transform, false);
             _preview = previewGo.AddComponent<Image>();
             _preview.raycastTarget = false;
             var rect = _preview.rectTransform;
-            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
-            rect.pivot = new Vector2(0.5f, 0f);
-            rect.anchoredPosition = new Vector2(0f, 74f);
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0f);
+            rect.anchoredPosition = new Vector2(0f, 170f);
             _preview.enabled = false;
 
-            // 컨티뉴 재고 — 격납고 왼쪽 아래. 함선 정보(가운데)와 겹치지 않고,
-            // "출격 전에 사 두는 물건"이라는 점에서 해금과 같은 층위에 둔다.
-            _continueText = UiKit.CreateCornerText(canvas.transform, _font, "", 10,
-                // 62 = BUY 버튼(y14, 높이34) 위로 확실히 띄운다. 52였을 때는 버튼
-                // 테두리에 글자가 걸쳐 겹쳐 보였다 (사람 지적 2026-08-03).
-                UiKit.TextDim, new Vector2(0f, 0f), new Vector2(10f, 62f),
-                TextAnchor.LowerLeft, "ContinueStock");
-            _continueText.rectTransform.sizeDelta = new Vector2(220f, 44f);
+            var stock = UiKit.CreatePanel(canvas.transform, new Vector2(166f, 80f), "ContinuePanel");
+            stock.anchorMin = stock.anchorMax = stock.pivot = Vector2.zero;
+            stock.anchoredPosition = new Vector2(12f, 10f);
+            _continueText = UiKit.CreateCornerText(stock, _font, "", 10,
+                UiKit.TextMain, new Vector2(0.5f, 1f), new Vector2(0f, -4f),
+                TextAnchor.UpperCenter, "ContinueStock");
+            _continueText.rectTransform.sizeDelta = new Vector2(158f, 30f);
 
-            if (UiPlatform.TouchMode)
+            Button Add(string label, Vector2 anchor, Vector2 offset, Vector2 size,
+                UnityEngine.Events.UnityAction action, string name)
             {
-                UiKit.CreateTouchButton(canvas.transform, _fontBold, "◄", 16,
-                    new Vector2(0.5f, 0f), new Vector2(-146f, 36f), new Vector2(36f, 36f),
-                    () => MoveCursor(-1), "HangarPrev");
-                UiKit.CreateTouchButton(canvas.transform, _fontBold, "►", 16,
-                    new Vector2(0.5f, 0f), new Vector2(146f, 36f), new Vector2(36f, 36f),
-                    () => MoveCursor(1), "HangarNext");
-                _unlockButton = UiKit.CreateTouchButton(canvas.transform, _font, "UNLOCK", 10,
-                    new Vector2(1f, 0f), new Vector2(-10f, 14f), new Vector2(104f, 34f),
-                    TryUnlockCurrent, "HangarUnlock");
-                _continueButton = UiKit.CreateTouchButton(canvas.transform, _font, "BUY", 10,
-                    new Vector2(0f, 0f), new Vector2(10f, 14f), new Vector2(104f, 34f),
-                    TryBuyContinue, "HangarBuyContinue");
+                var button = UiKit.CreateTouchButton(canvas.transform, _font, label, 10,
+                    anchor, offset, size, () =>
+                    {
+                        if (_title == null) _title = GetComponent<TitleScreen>();
+                        if (_title == null || !_title.ModalOpen) action();
+                    }, name);
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
+                return button;
             }
+            Add("◄", new Vector2(0.5f, 0f), new Vector2(-110f, 180f), new Vector2(40f, 40f),
+                () => MoveCursor(-1), "HangarPrev");
+            Add("►", new Vector2(0.5f, 0f), new Vector2(110f, 180f), new Vector2(40f, 40f),
+                () => MoveCursor(1), "HangarNext");
+            _unlockButton = Add("UNLOCK", new Vector2(1f, 0f), new Vector2(-12f, 10f),
+                new Vector2(166f, 40f), TryUnlockCurrent, "HangarUnlock");
+            _continueButton = Add("BUY", new Vector2(0f, 0f), new Vector2(16f, 14f),
+                new Vector2(158f, 40f), TryBuyContinue, "HangarBuyContinue");
         }
 
         /// <summary>
@@ -110,6 +118,7 @@ namespace Shmup.Presentation.Battle
             var result = _meta.TryPurchaseContinue();
             if (result.Purchased)
             {
+                UiAudio.Play(UiCue.Confirm);
                 MetaSave.Save(_meta);
                 _continueNotice = null;
                 _continueNoticeTimer = 0f;
@@ -122,6 +131,7 @@ namespace Shmup.Presentation.Battle
                         ? $"NEED {result.Price:N0} cr"
                         : UiText.HangarContinueFull;
                 _continueNoticeTimer = 2f;
+                UiAudio.Play(UiCue.Reject);
             }
             _shownContinueStock = -1;   // 표시 갱신
             _shownCurrency = -1;
@@ -131,6 +141,7 @@ namespace Shmup.Presentation.Battle
         {
             if (_data == null || _data.Ships.Count == 0) return;
             _cursor = (_cursor + delta + _data.Ships.Count) % _data.Ships.Count;
+            if (delta != 0) UiAudio.Play(UiCue.Navigate);
         }
 
         /// <summary>커서의 함선을 해금한다 (크레딧이 모자라면 Core가 거부한다).</summary>
@@ -140,7 +151,11 @@ namespace Shmup.Presentation.Battle
             var ship = _data.Ships[_cursor];
             if (_meta.IsUnlocked(ship.Id)) return;
             if (_meta.TryUnlock(ship))
+            {
                 MetaSave.Save(_meta);
+                UiAudio.Play(UiCue.Confirm);
+            }
+            else UiAudio.Play(UiCue.Reject);
             _shownCursor = -1;   // 표시 갱신
         }
 
@@ -158,10 +173,10 @@ namespace Shmup.Presentation.Battle
         {
             if (_data == null || _meta == null || _data.Ships.Count == 0) return;
 
-            // 랭킹 모달이 떠 있으면 격납고는 입력을 받지 않는다 — 보드를 읽는 동안
+            // 랭킹/개발 도구 모달이 떠 있으면 격납고는 입력을 받지 않는다 — 모달 안에서
             // 화살표가 함선을 넘기거나 [B]가 크레딧을 쓰면 안 된다(타이틀도 같은 규칙).
             if (_title == null) _title = GetComponent<TitleScreen>();
-            if (_title != null && _title.RankingOpen)
+            if (_title != null && _title.ModalOpen)
             {
                 RefreshTexts(_data.Ships[_cursor]);
                 RefreshContinue();
@@ -183,6 +198,7 @@ namespace Shmup.Presentation.Battle
                 if (gamepad.dpad.right.wasPressedThisFrame) move = 1;
             }
             _cursor = (_cursor + move + _data.Ships.Count) % _data.Ships.Count;
+            if (move != 0) UiAudio.Play(UiCue.Navigate);
 
             var ship = _data.Ships[_cursor];
             bool unlockPressed = (keyboard != null && keyboard.uKey.wasPressedThisFrame)
@@ -240,12 +256,9 @@ namespace Shmup.Presentation.Battle
                 sb.Append('\n').Append(_continueNotice);
             else if (full)
                 sb.Append('\n').Append(UiText.HangarContinueFull);
-            else if (!UiPlatform.TouchMode)
-                sb.Append('\n').Append(
-                    string.Format(UiText.HangarContinueHint, price.ToString("N0")));
             _continueText.text = sb.ToString();
             // 재고가 있으면 "죽어도 이어서 갈 수 있다"는 사실 자체가 정보다 — 앰버로 켠다.
-            _continueText.color = stock > 0 ? UiKit.TextAccent : UiKit.TextDim;
+            _continueText.color = stock > 0 ? UiKit.TextAccent : UiKit.TextMain;
 
             if (_continueButton != null)
             {
@@ -254,8 +267,8 @@ namespace Shmup.Presentation.Battle
                 {
                     var label = _continueButton.GetComponentInChildren<Text>();
                     if (label != null)
-                        label.text = string.Format(
-                            UiText.HangarContinueBuyFormat, price.ToString("N0"));
+                        label.text = (UiPlatform.TouchMode ? "BUY CONTINUE" : "BUY [B]/DOWN")
+                            + $"\n{price:N0} cr";
                 }
             }
         }
@@ -284,7 +297,11 @@ namespace Shmup.Presentation.Battle
                 if (previewSprite != null)
                 {
                     _preview.sprite = previewSprite;
-                    _preview.rectTransform.sizeDelta = previewSprite.rect.size * 2f;
+                    // Use an integer sprite scale that stays inside the preview slot.
+                    var size = previewSprite.rect.size;
+                    float scale = Mathf.Max(1f, Mathf.Min(2f,
+                        Mathf.Floor(Mathf.Min(176f / size.x, 56f / size.y))));
+                    _preview.rectTransform.sizeDelta = size * scale;
                     // 미해금 함선은 실루엣으로
                     _preview.color = _meta.IsUnlocked(ship.Id) ? Color.white : new Color(0.1f, 0.12f, 0.2f, 0.9f);
                 }
@@ -297,19 +314,18 @@ namespace Shmup.Presentation.Battle
                 if (!unlocked)
                 {
                     var label = _unlockButton.GetComponentInChildren<Text>();
-                    if (label != null) label.text = $"UNLOCK\n{ship.UnlockCost:N0} cr";
+                    if (label != null) label.text = (UiPlatform.TouchMode ? "UNLOCK" : "UNLOCK [U]/Y")
+                        + $"\n{ship.UnlockCost:N0} cr";
                 }
             }
             string status = unlocked
-                ? (_meta.SelectedShipId == ship.Id ? "[SELECTED]" : "[OWNED]")
-                : (UiPlatform.TouchMode
-                    ? $"[LOCKED — {ship.UnlockCost:N0} cr]"
-                    : $"[LOCKED — {ship.UnlockCost:N0} cr, U/(Y) to unlock]");
+                ? (_meta.SelectedShipId == ship.Id ? "SELECTED" : "OWNED")
+                : $"LOCKED / {ship.UnlockCost:N0} cr";
             // 기체를 가르는 수치는 **이동 속도와 실드 재고** 둘뿐이다. 시작 파워업
             // 레벨은 세 기체 모두 전부 0이라 "start S0 M0 O0 B0"은 아무 정보도 주지
             // 않으면서 고르는 데 방해만 됐다 (사람 지시 2026-08-03).
             _bodyText.text =
-                $"{ship.DisplayName}  {status}\n" +
+                $"{ship.DisplayName}\n{status}\n" +
                 $"speed x{(float)ship.MoveSpeedMultiplierNumerator / ship.MoveSpeedMultiplierDenominator:0.##}   " +
                 $"shield x{ship.StartingShieldStock ?? 0}";
         }

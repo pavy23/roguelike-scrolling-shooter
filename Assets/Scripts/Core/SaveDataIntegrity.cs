@@ -35,7 +35,8 @@ namespace Shmup.Core
                 || source.schemaVersion == 24
                 || source.schemaVersion == 25
                 || source.schemaVersion == 26
-                || source.schemaVersion == 27)
+                || source.schemaVersion == 27
+                || source.schemaVersion == 28)
                 throw Unsupported(
                     "run suspend",
                     source.schemaVersion);
@@ -336,7 +337,8 @@ namespace Shmup.Core
                 || source.schemaVersion == 21
                 || source.schemaVersion == 22
                 || source.schemaVersion == 23
-                || source.schemaVersion == 24)
+                || source.schemaVersion == 24
+                || source.schemaVersion == 25)
                 throw Unsupported(
                     "input recording",
                     source.schemaVersion);
@@ -628,7 +630,9 @@ namespace Shmup.Core
             hash.Add(data.stageStartMultiplierLevel);
             hash.Add(data.stageStartComboGauge);
             hash.Add(data.stageStartTicksSinceLastKill);
-            hash.Add(data.activeContractId);
+            // Both spellings mean no contract. Unity's JSON serializer turns
+            // a null string into an empty string, so hash the semantic value.
+            hash.Add(data.activeContractId ?? string.Empty);
             Add(ref hash, data.contractChoices);
             hash.Add(data.capsuleDropWeightReduction);
             hash.Add(data.capsuleBalance);

@@ -1,0 +1,472 @@
+using System;
+using System.Reflection;
+using NUnit.Framework;
+using Shmup.Core;
+using Shmup.Core.Generation;
+using Shmup.Core.Simulation;
+using Shmup.Presentation.Battle;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+namespace Shmup.Presentation.Tests
+{
+    public sealed class SpriteAnimationTests
+    {
+        const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
+        GameObject _root;
+        BattleDirector _director;
+        JuiceDirector _juice;
+        SpriteRenderer _renderer;
+        PlayerShipAnimator _player;
+        Texture2D _texture;
+        Sprite[] _frames;
+        BattleSim _sim;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _root = new GameObject("Sprite animation fixture");
+            _root.SetActive(false);
+            _director = _root.AddComponent<BattleDirector>();
+            _juice = _root.AddComponent<JuiceDirector>();
+            var ship = new GameObject("Ship", typeof(SpriteRenderer), typeof(PlayerShipAnimator));
+            ship.transform.SetParent(_root.transform);
+            _renderer = ship.GetComponent<SpriteRenderer>();
+            _player = ship.GetComponent<PlayerShipAnimator>();
+            _texture = new Texture2D(10, 2);
+            _frames = new Sprite[5];
+            for (int i = 0; i < _frames.Length; i++)
+                _frames[i] = Sprite.Create(_texture, new Rect(i * 2, 0, 2, 2), Vector2.one * .5f, 16);
+            Set(_player, "_renderer", _renderer);
+            Set(_player, "_frames", _frames);
+            Set(_director, "_playerTransform", ship.transform);
+            Set(_director, "_juice", _juice);
+            SetSim(NewSim());
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            Object.DestroyImmediate(_root);
+            foreach (var sprite in _frames) Object.DestroyImmediate(sprite);
+            Object.DestroyImmediate(_texture);
+        }
+
+        [Test]
+        public void PlayerEngineFollowsBattleProgressAndRestartsWithNewBattle()
+        {
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+            AdvanceTo(6);
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[1], _renderer.sprite);
+            for (int i = 0; i < 20; i++) Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[1], _renderer.sprite, "Rendering a paused tick must not advance the engine.");
+            Assert.AreEqual(6, _sim.Tick, "Rendering must never step Core.");
+            SetSim(NewSim());
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+        }
+
+        [Test]
+        public void ShipSelectionDoesNotOverwriteOtherShipsAndDoesNotDependOnArrayOrder()
+        {
+            Set(_director, "_shipSpriteIds", new[] { "interceptor", "starter", "bulwark" });
+            Set(_director, "_shipSprites", new[] { _frames[3], _frames[0], _frames[4] });
+            AdvanceTo(6);
+            foreach (string id in new[] { "interceptor", "bulwark", "starter" })
+            {
+                Invoke(_director, "ApplyShipSprite", id);
+                Invoke(_director, "SyncPlayerAnimation");
+                Assert.AreSame(_frames[id == "starter" ? 1 : id == "interceptor" ? 3 : 4], _renderer.sprite);
+                Assert.AreEqual(id == "starter", _player.enabled);
+            }
+        }
+
+        [Test]
+        public void MissingEngineFrameDoesNotEraseCurrentShip()
+        {
+            Set(_player, "_frames", new Sprite[] { null });
+            _renderer.sprite = _frames[2];
+            _player.RenderAtTick(100);
+            Assert.AreSame(_frames[2], _renderer.sprite);
+        }
+
+        [TestCase("echo_wisp", 0)]
+        [TestCase("void_moth", 1)]
+        [TestCase("phase_disc", 0)]
+        [TestCase("rift_blade", 0)]
+        [TestCase("mini_crystal", 0)]
+        [TestCase("zako_sine", 0)]
+        [TestCase("interceptor", 0)]
+        public void ReducedFlashHoldsReadableFrameAcrossWholeLoopAndVariant(string clip, int frame)
+        {
+            Clip(clip);
+            Set(_juice, "_flashReduced", true);
+            var position = _renderer.transform.localPosition = new Vector3(2, 3, 0);
+            var scale = _renderer.transform.localScale = Vector3.one * 1.5f;
+            _renderer.color = Color.cyan;
+            for (int tick = 0; tick < 90; tick++)
+            {
+                AdvanceTo(tick);
+                Draw(clip + "_elite", 11);
+                Assert.AreSame(_frames[frame], _renderer.sprite);
+            }
+            Assert.AreEqual(position, _renderer.transform.localPosition);
+            Assert.AreEqual(scale, _renderer.transform.localScale);
+            Assert.AreEqual(Color.cyan, _renderer.color, "Idle sampling must not clear hit feedback.");
+        }
+
+        [Test]
+        public void EchoLoopKeepsBodyVisibleAndReturnsThroughIntermediatePose()
+        {
+            Clip("echo_wisp");
+            int[] ticks = { 0, 8, 15, 23, 30, 38, 45, 53, 60 };
+            int[] frames = { 0, 1, 2, 1, 0, 1, 2, 1, 0 };
+            for (int i = 0; i < ticks.Length; i++)
+            {
+                AdvanceTo(ticks[i]);
+                Draw("echo_wisp");
+                Assert.AreSame(_frames[frames[i]], _renderer.sprite);
+            }
+        }
+
+        [Test]
+        public void ReducedFlashToggleAndReusedViewRestoreCurrentClipAndPhase()
+        {
+            Clip("phase_disc");
+            AdvanceTo(15);
+            Draw("phase_disc");
+            Assert.AreSame(_frames[2], _renderer.sprite);
+            Set(_juice, "_flashReduced", true);
+            Draw("phase_disc");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+            Set(_juice, "_flashReduced", false);
+            Draw("phase_disc");
+            Assert.AreSame(_frames[2], _renderer.sprite);
+            // Same renderer reused with another id phase: no held-frame state leaks.
+            Draw("phase_disc", 2);
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            Draw("phase_disc");
+            Assert.AreSame(_frames[2], _renderer.sprite);
+        }
+
+        [Test]
+        public void OtherClipsKeepMotionInReducedModeAndBossSecondFormDoesNotInheritFirstForm()
+        {
+            Clip("boss_stage1");
+            Set(_juice, "_flashReduced", true);
+            AdvanceTo(15);
+            Draw("boss_stage1", exact: true);
+            Assert.AreSame(_frames[2], _renderer.sprite);
+            _renderer.sprite = _frames[4]; // replacement form's static art
+            Draw("boss_stage1_core", exact: true);
+            Assert.AreSame(_frames[4], _renderer.sprite);
+        }
+
+        [Test]
+        public void MoreSpecificClipKeepsItsOwnPlaybackPolicy()
+        {
+            Set(_director, "_animPrefixes", new[] { "echo_wisp", "echo_wisp_armored" });
+            Set(_director, "_animFrameCounts", new[] { 0, 5 });
+            Set(_director, "_animFrames", _frames);
+            AdvanceTo(30);
+            Draw("echo_wisp_armored");
+            Assert.AreSame(_frames[4], _renderer.sprite, "A separately authored clip must not inherit the five-frame echo repair.");
+        }
+
+        [Test]
+        public void EngineSamplingRemainsValidAtLongRunningTickAndInvalidRate()
+        {
+            _player.RenderAtTick(int.MaxValue);
+            CollectionAssert.Contains(_frames, _renderer.sprite);
+            Set(_player, "_framesPerSecond", 0f);
+            _player.RenderAtTick(int.MaxValue);
+            Assert.AreSame(_frames[0], _renderer.sprite);
+        }
+
+        [Test]
+        public void AdoptedPulseFramesAndPlayerClipRemainWiredWithConsistentGeometry()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity", OpenSceneMode.Additive);
+            try
+            {
+                BattleDirector director = null;
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    director = root.GetComponentInChildren<BattleDirector>(true);
+                    if (director != null) break;
+                }
+                Assert.IsNotNull(director);
+                var serialized = new SerializedObject(director);
+                var ids = serialized.FindProperty("_animPrefixes");
+                var counts = serialized.FindProperty("_animFrameCounts");
+                var frames = serialized.FindProperty("_animFrames");
+                int offset = 0, checkedClips = 0;
+                for (int i = 0; i < ids.arraySize; i++)
+                {
+                    string id = ids.GetArrayElementAtIndex(i).stringValue;
+                    int count = counts.GetArrayElementAtIndex(i).intValue;
+                    if (id == "echo_wisp" || id == "void_moth")
+                    {
+                        Assert.AreEqual(5, count, id + " changed; re-review the frame policy.");
+                        for (int f = 0; f < count; f++)
+                        {
+                            var sprite = frames.GetArrayElementAtIndex(offset + f).objectReferenceValue as Sprite;
+                            Assert.IsNotNull(sprite);
+                            Assert.AreEqual(new Vector2(24, 24), sprite.rect.size);
+                            Assert.AreEqual(new Vector2(12, 12), sprite.pivot);
+                            Assert.AreEqual(16, sprite.pixelsPerUnit);
+                        }
+                        checkedClips++;
+                    }
+                    offset += count;
+                }
+                Assert.AreEqual(2, checkedClips);
+                var transform = serialized.FindProperty("_playerTransform").objectReferenceValue as Transform;
+                Assert.IsNotNull(transform.GetComponent<PlayerShipAnimator>());
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); }
+        }
+
+        void Clip(string id)
+        {
+            Set(_director, "_animPrefixes", new[] { id });
+            Set(_director, "_animFrameCounts", new[] { 5 });
+            Set(_director, "_animFrames", _frames);
+        }
+
+        [Test]
+        public void AdoptedSfcSceneKeepsItsNewArtAcrossTicksShipSwitchesAndReusedRenderer()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity", OpenSceneMode.Additive);
+            try
+            {
+                BattleDirector director = null;
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    director = root.GetComponentInChildren<BattleDirector>(true);
+                    if (director != null) break;
+                }
+                Assert.IsNotNull(director);
+                var serialized = new SerializedObject(director);
+                var player = (Transform)serialized.FindProperty("_playerTransform").objectReferenceValue;
+                var renderer = player.GetComponent<SpriteRenderer>();
+                var sim = NewSim();
+                Set(director, "_sim", sim);
+                Invoke(director, "ApplyShipSprite", "starter");
+                string[] engine = { "sfc_player_ship", "sfc_player_engine_01" };
+                var ids = new[] { "zako_straight", "zako_straight_elite", "zako_fast", "turret_ground", "turret_ceiling" };
+                var art = new[] { "enemy_sfc_drone", "enemy_sfc_drone", "enemy_sfc_fast", "enemy_sfc_turret", "enemy_sfc_turret" };
+                _renderer.color = Color.magenta;
+                for (int tick = 0; tick < 60; tick++)
+                {
+                    while (sim.Tick < tick) sim.Step(InputCommand.None);
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreEqual("Assets/Art/Sprites/" + engine[(tick / 6) % 2] + ".png", AssetDatabase.GetAssetPath(renderer.sprite));
+                    var held = renderer.sprite;
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreSame(held, renderer.sprite, "Paused rendering must hold its engine pose.");
+                    Assert.AreEqual(tick, sim.Tick, "Presentation must not advance Core.");
+                    for (int i = 0; i < ids.Length; i++)
+                    {
+                        // Reuse one renderer between enemy types and per-instance phases.
+                        Invoke(director, "ApplyIdleAnimation", _renderer, ids[i], 17 + i, false);
+                        Assert.AreEqual("Assets/Art/Sprites/" + art[i] + ".png", AssetDatabase.GetAssetPath(_renderer.sprite));
+                        Assert.AreEqual(Color.magenta, _renderer.color, "Hit feedback must survive idle sampling.");
+                    }
+                }
+                foreach (string id in new[] { "interceptor", "bulwark" })
+                {
+                    Invoke(director, "ApplyShipSprite", id);
+                    var selected = renderer.sprite;
+                    Assert.IsFalse(player.GetComponent<PlayerShipAnimator>().enabled);
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreSame(selected, renderer.sprite);
+                }
+                Set(director, "_sim", NewSim());
+                Invoke(director, "ApplyShipSprite", "starter");
+                Invoke(director, "SyncPlayerAnimation");
+                Assert.AreEqual("Assets/Art/Sprites/sfc_player_ship.png", AssetDatabase.GetAssetPath(renderer.sprite));
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); }
+        }
+        [Test]
+        public void BankingFollowsActualMovementAndReversesThroughNeutralWithoutMovingTheShip()
+        {
+            Set(_player, "_bankUpFrames", new[] { _frames[3] });
+            Set(_player, "_bankDownFrames", new[] { _frames[4] });
+            _renderer.color = Color.magenta;
+            var position = _renderer.transform.localPosition = new Vector3(4, 2, 0);
+            var rotation = _renderer.transform.localRotation = Quaternion.Euler(0, 0, 12);
+            _player.ObserveMovementAtTick(0, 0);
+            for (int tick = 1; tick <= 4; tick++)
+            {
+                _player.ObserveMovementAtTick(tick, tick * 8);
+                _player.RenderAtTick(tick);
+                Assert.AreSame(_frames[tick < 4 ? 0 : 3], _renderer.sprite);
+            }
+            _player.ObserveMovementAtTick(4, -999); // Repeated paused tick cannot change its pose.
+            _player.RenderAtTick(4);
+            Assert.AreSame(_frames[3], _renderer.sprite);
+            _player.ObserveMovementAtTick(5, 24);
+            _player.RenderAtTick(5);
+            Assert.AreSame(_frames[0], _renderer.sprite, "Reverse through neutral first.");
+            for (int tick = 6; tick <= 8; tick++) _player.ObserveMovementAtTick(tick, 64 - tick * 8);
+            _player.RenderAtTick(8);
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            _player.ObserveMovementAtTick(9, 0); // Same position: released or blocked by boundary.
+            _player.RenderAtTick(9);
+            Assert.AreSame(_frames[1], _renderer.sprite);
+            Assert.AreEqual(position, _renderer.transform.localPosition);
+            Assert.AreEqual(rotation, _renderer.transform.localRotation);
+            Assert.AreEqual(Color.magenta, _renderer.color);
+        }
+
+        [Test]
+        public void AdoptedBankingSceneUsesBothEngineFramesAndPreservesNativeGeometry()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity", OpenSceneMode.Additive);
+            try
+            {
+                BattleDirector director = null;
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    director = root.GetComponentInChildren<BattleDirector>(true);
+                    if (director != null) break;
+                }
+                var fields = new SerializedObject(director);
+                var player = (Transform)fields.FindProperty("_playerTransform").objectReferenceValue;
+                var renderer = player.GetComponent<SpriteRenderer>();
+                var animator = new SerializedObject(player.GetComponent<PlayerShipAnimator>());
+                foreach (string direction in new[] { "up", "down" })
+                {
+                    var clip = animator.FindProperty(direction == "up" ? "_bankUpFrames" : "_bankDownFrames");
+                    Assert.AreEqual(2, clip.arraySize);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var sprite = (Sprite)clip.GetArrayElementAtIndex(i).objectReferenceValue;
+                        Assert.AreEqual("Assets/Art/Sprites/sfc_player_bank_" + direction + "_0" + i + ".png", AssetDatabase.GetAssetPath(sprite));
+                        Assert.AreEqual(new Rect(0, 0, 48, 30), sprite.rect);
+                        Assert.AreEqual(new Vector2(24, 15), sprite.pivot);
+                        Assert.AreEqual(16, sprite.pixelsPerUnit);
+                    }
+                }
+                var sim = NewSim(); Set(director, "_sim", sim);
+                Invoke(director, "ApplyShipSprite", "starter");
+                var position = player.localPosition;
+                var muzzle = (SpriteRenderer)fields.FindProperty("_muzzleFlash").objectReferenceValue;
+                var muzzlePosition = muzzle.transform.localPosition;
+                for (int tick = 0; tick <= 21; tick++)
+                {
+                    int direction = tick <= 8 ? 1 : tick <= 12 ? 0 : tick <= 20 ? -1 : 0;
+                    if (tick > 0) sim.Step(new InputCommand(0, direction, false));
+                    Invoke(director, "ObservePlayerAnimation", sim);
+                    Invoke(director, "SyncPlayerAnimation");
+                    string expected = tick >= 4 && tick <= 8 ? "sfc_player_bank_up_0" + ((tick / 6) % 2)
+                        : tick >= 16 && tick <= 20 ? "sfc_player_bank_down_0" + ((tick / 6) % 2)
+                        : (tick / 6) % 2 == 0 ? "sfc_player_ship" : "sfc_player_engine_01";
+                    Assert.AreEqual(expected, renderer.sprite.name, "Tick " + tick);
+                    var held = renderer.sprite;
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreSame(held, renderer.sprite);
+                }
+                Assert.AreEqual(position, player.localPosition);
+                Assert.AreEqual(muzzlePosition, muzzle.transform.localPosition);
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); }
+        }
+
+        [Test]
+        public void BankingObservationsSurviveSparseRenderingAndResetOnSeekOrTickRewind()
+        {
+            Set(_player, "_bankUpFrames", new[] { _frames[3], _frames[4] });
+            _player.ObserveMovementAtTick(0, 0);
+            for (int tick = 1; tick <= 7; tick++) _player.ObserveMovementAtTick(tick, tick * 8);
+            _player.RenderAtTick(7); // Observations ran at 60 Hz even if rendering skipped frames.
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            _player.ObserveMovementAtTick(100, 9999);
+            _player.RenderAtTick(100);
+            Assert.AreSame(_frames[1], _renderer.sprite, "A seek must not infer a bank from a teleport.");
+            for (int tick = 101; tick <= 104; tick++) _player.ObserveMovementAtTick(tick, 10000 + tick);
+            _player.RenderAtTick(104);
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            _player.ObserveMovementAtTick(0, 0);
+            _player.RenderAtTick(0);
+            Assert.AreSame(_frames[0], _renderer.sprite);
+        }
+
+        [Test]
+        public void MissingBankArtAndNullBankFramesFallBackToNeutralEngine()
+        {
+            Set(_player, "_bankUpFrames", new Sprite[] { null });
+            _player.ObserveMovementAtTick(0, 0);
+            for (int tick = 1; tick <= 6; tick++) _player.ObserveMovementAtTick(tick, tick);
+            _player.RenderAtTick(6);
+            Assert.AreSame(_frames[1], _renderer.sprite);
+            for (int tick = 7; tick <= 12; tick++) _player.ObserveMovementAtTick(tick, 12 - tick);
+            _player.RenderAtTick(12);
+            Assert.AreSame(_frames[2], _renderer.sprite);
+        }
+
+        [Test]
+        public void DirectorObservesCoreMovementAndResetsForAnotherBattleAtTheSameTick()
+        {
+            Set(_player, "_bankUpFrames", new[] { _frames[3] });
+            Invoke(_director, "SyncPlayerAnimation");
+            for (int i = 0; i < 4; i++)
+            {
+                _sim.Step(new InputCommand(0, 1, false));
+                Invoke(_director, "ObservePlayerAnimation", _sim);
+            }
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[3], _renderer.sprite);
+            Assert.AreEqual(4, _sim.Tick);
+            var next = NewSim();
+            for (int i = 0; i < 4; i++) next.Step(InputCommand.None);
+            SetSim(next);
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+            Assert.AreEqual(4, next.Tick);
+        }
+
+        [Test]
+        public void SelectingStarterAgainClearsThePreviousBankWithoutOverwritingAnotherShip()
+        {
+            Set(_director, "_shipSpriteIds", new[] { "starter", "interceptor" });
+            Set(_director, "_shipSprites", new[] { _frames[0], _frames[2] });
+            Set(_player, "_bankUpFrames", new[] { _frames[3] });
+            Invoke(_director, "SyncPlayerAnimation");
+            for (int i = 0; i < 4; i++)
+            {
+                _sim.Step(new InputCommand(0, 1, false));
+                Invoke(_director, "ObservePlayerAnimation", _sim);
+            }
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[3], _renderer.sprite);
+            Invoke(_director, "ApplyShipSprite", "interceptor");
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[2], _renderer.sprite);
+            Invoke(_director, "ApplyShipSprite", "starter");
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+        }
+
+        void SetSim(BattleSim sim) { _sim = sim; Set(_director, "_sim", sim); }
+        void AdvanceTo(int tick) { while (_sim.Tick < tick) _sim.Step(InputCommand.None); }
+        void Draw(string id, int phase = 0, bool exact = false)
+            => Invoke(_director, "ApplyIdleAnimation", _renderer, id, phase, exact);
+        static void Set(object target, string name, object value) => target.GetType().GetField(name, Private).SetValue(target, value);
+        static void Invoke(object target, string name, params object[] args) => target.GetType().GetMethod(name, Private).Invoke(target, args);
+        static BattleSim NewSim()
+        {
+            var weapon = new WeaponDefinition("shot", 1, 1, 1, 1, 0, 0);
+            var content = new BattleContent(Array.Empty<EnemyDefinition>(), new[] { weapon }, weapon.Id);
+            var plan = new StagePlan(new[] { new StageSegment("animation", 1000,
+                Array.Empty<SpawnEvent>(), 1, 1, new[] { 1 }) }, "none", 1, 1, 1);
+            return new BattleSim(BattleSimConfig.CreateDefault(), new Rng(1UL), plan, content, PowerUpGauge.CreateDefault());
+        }
+    }
+}

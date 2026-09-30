@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-09-30",
+  "sourceBaseline": "f19355f",
+  "tool": "built-in image_gen.imagegen",
+  "modelAndSeed": "Not exposed by the tool; no values inferred.",
+  "reproducibility": "Exact prompts, reference chain, request transparency and output hashes are recorded. Generation is not guaranteed to be deterministic.",
+  "scope": "Foreground visual direction only; backgrounds excluded.",
+  "productionStatus": "Style sheets remain reference-only. Five native pilot PNGs are user-adopted and integrated; see adoption.json and adoption-review/VALIDATION.md for validation and deployment.",
+  "candidates": [
+    {
+      "id": "v1",
+      "output": "candidates/style-sheet-v1.png",
+      "promptDocument": "prompts.md",
+      "promptSection": "v1",
+      "referenceImages": [],
+      "transparentBackground": false,
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1895118,
+      "sha256": "01f1ad34f50a66f81d85acd10a0ef36fdf4d1546973f905d7e7331a77d8dffab",
+      "status": "not_selected_by_user",
+      "nativePixelGridVerified": false,
+      "engineReady": false
+    },
+    {
+      "id": "v2",
+      "output": "candidates/style-sheet-v2.png",
+      "promptDocument": "prompts.md",
+      "promptSection": "v2",
+      "referenceImages": [
+        "candidates/style-sheet-v1.png"
+      ],
+      "transparentBackground": false,
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1573319,
+      "sha256": "0c8023e62ea82424a27f360146217a5d081c99443fafafad6481a66ba66e41f2",
+      "status": "style_selected_by_user_first_native_batch_adopted",
+      "nativePixelGridVerified": false,
+      "engineReady": false
+    }
+  ],
+  "curationRecord": "CURATION.md",
+  "nativePilotManifest": "pilot/manifest.json"
+}

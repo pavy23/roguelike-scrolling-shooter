@@ -1,0 +1,16 @@
+{
+  "description": "One new native-resolution 48x30 pixel-art player starfighter for a premium Super Famicom side-scrolling shooter. Use ONLY the white-and-blue HERO IN THE TOP ROW of the attached public concept sheet as the visual identity reference; ignore all its other objects. Place pixels deliberately on the actual 48x30 output grid. Exactly one horizontal side-view ship facing RIGHT. Sleek pearl-ivory armor, broad cobalt-blue upper panels and swept fins, deep navy structural shadows, a clearly separated cyan canopy above the front fuselage, a long tapering right-facing nose, two compact orange exhaust flames at the left. Keep the large light and dark armor planes readable, with beautiful 3-tone hue-shifted shading and selective navy outline. About 24 deliberate opaque colors, no dithering noise, no tiny etched panel lines. Muzzle and main body center at mid-height. Ship including flames fits inside 46x26 pixels, centered with a transparent border. Keep shape horizontal and stable; no diagonal flight or isometric view. Transparent background with hard alpha edges. No text, grid, backdrop, shadow, weapon effects, additional sprites, enlarged pixels or antialiasing. The image must be a clean native sprite, not a large illustration reduced into a blur.",
+  "image_size": {
+    "width": 48,
+    "height": 30
+  },
+  "seed": 2026093001,
+  "no_background": true,
+  "reference_file": "ArtRevamp/SFC-20260930/candidates/style-sheet-v2.png",
+  "reference_size": {
+    "width": 1536,
+    "height": 1024
+  },
+  "reference_sha256": "0c8023e62ea82424a27f360146217a5d081c99443fafafad6481a66ba66e41f2",
+  "endpoint": "/generate-image-v2"
+}

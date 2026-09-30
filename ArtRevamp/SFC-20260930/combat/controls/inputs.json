@@ -1,0 +1,68 @@
+{
+  "kind": "PixelLab mask/padded reference controls; not production artwork",
+  "generatedBy": "Tools/QaHarness/prepare_sfc_combat_controls.eval.cs",
+  "sources": [
+    {
+      "id": "player-shot",
+      "source": "Assets/Art/Sprites/bullet.png",
+      "textureSize": [
+        16,
+        16
+      ],
+      "spriteRectBottomLeft": [
+        4,
+        6,
+        8,
+        3
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "ppu": 16,
+      "sourcePixelsChanged": false
+    },
+    {
+      "id": "enemy-shot",
+      "source": "Assets/Art/Sprites/enemy_shot.png",
+      "textureSize": [
+        16,
+        16
+      ],
+      "spriteRectBottomLeft": [
+        5,
+        5,
+        6,
+        6
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "ppu": 16,
+      "sourcePixelsChanged": false
+    },
+    {
+      "id": "capsule",
+      "source": "Assets/Art/Sprites/capsule.png",
+      "textureSize": [
+        16,
+        16
+      ],
+      "spriteRectBottomLeft": [
+        3,
+        4,
+        10,
+        8
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "ppu": 16,
+      "sourcePixelsChanged": false
+    }
+  ],
+  "productionAssetsWritten": false,
+  "scenesSaved": false
+}

@@ -1,0 +1,16 @@
+{
+  "usage": {
+    "type": "usd",
+    "usd": 0.011375696195496453
+  },
+  "outputs": [
+    {
+      "file": "candidate_00.png",
+      "width": 48,
+      "height": 30,
+      "sha256": "2003d0c541d65217cd8964f887d62e98d3910af63ed237a894b1f14a763501d3"
+    }
+  ],
+  "status": "candidate_pending_mask_invariance_and_art_review",
+  "postprocessing": "none; provider PNG bytes preserved"
+}

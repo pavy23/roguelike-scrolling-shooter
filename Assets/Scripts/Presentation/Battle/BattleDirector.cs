@@ -23,6 +23,8 @@ namespace Shmup.Presentation.Battle
     {
         [Header("Scene wiring")]
         [SerializeField] PlayerInputReader _input;
+        public PlayerInputReader Input => _input;
+        OnboardingHints _onboarding;
         [SerializeField] Transform _playerTransform;
         [SerializeField] GameObject _bulletPrefab;
         [SerializeField] Transform _bulletRoot;
@@ -181,6 +183,7 @@ namespace Shmup.Presentation.Battle
         readonly List<Transform> _activeFx = new List<Transform>(16);
         readonly List<SpriteRenderer> _activeFxRenderers = new List<SpriteRenderer>(16);
         readonly List<float> _activeFxAges = new List<float>(16);
+        readonly List<Color> _activeFxTints = new List<Color>(16);
         const float ExplosionDuration = 0.28f;
         int _lastHp = -1;
         float _damageFlashAge = float.MaxValue;
@@ -285,7 +288,11 @@ namespace Shmup.Presentation.Battle
                 renderer.sprite = _shipSprites[i];
                 // 엔진 프레임 애니는 starter 전용 아트 — 다른 함선은 정지 스프라이트 유지
                 var animator = _playerTransform.GetComponent<PlayerShipAnimator>();
-                if (animator != null) animator.enabled = i == 0;
+                if (animator != null)
+                {
+                    animator.ResetPose();
+                    animator.enabled = shipId == "starter";
+                }
                 return;
             }
         }
@@ -649,6 +656,8 @@ namespace Shmup.Presentation.Battle
         // (실제 원인이 그것이었다 — 하단 게이지 HUD, PowerUpHudView 참조).
 
         SpriteRenderer _playerRendererCache;
+        PlayerShipAnimator _playerAnimatorCache;
+        IBattleSim _playerAnimationSim;
 
         /// <summary>기체 스프라이트 렌더러 (지연 캐시 — 배선 검증 실패 런에서도 안전하다).</summary>
         SpriteRenderer PlayerRenderer
@@ -697,6 +706,7 @@ namespace Shmup.Presentation.Battle
 
         /// <summary>런이 끝났는가 (사망 또는 완주).</summary>
         public bool IsRunFinished => _run != null && _run.IsFinished;
+        public bool IsPlaying => _run != null && _run.State == RunState.Playing;
 
         /// <summary>타이틀 CONTINUE가 채우는 이어하기 데이터 — Awake에서 1회 소비.</summary>
         public static Shmup.Core.Simulation.RunSuspendData PendingResume;
@@ -1032,6 +1042,7 @@ namespace Shmup.Presentation.Battle
 
         void Awake()
         {
+            _onboarding = GetComponent<OnboardingHints>();
             if (!ValidateWiring()) return;
 
             Seed = DevArgs.OverrideSeed ?? DevArgs.RuntimeSeed ?? _seed;
@@ -1367,6 +1378,7 @@ namespace Shmup.Presentation.Battle
 
         void Update()
         {
+            ApplyPlayerReadability();
             AnimateExplosions();
             AnimateDamageFlash();
             AnimatePunches();
@@ -1475,7 +1487,9 @@ namespace Shmup.Presentation.Battle
                     _recorder.Record(in command);
                 }
             }
+            if (_onboarding != null) _onboarding.BeforeStep(_run.Battle, Gauge, in command);
             _run.Step(command);
+            if (_onboarding != null) _onboarding.AfterStep(_run.Battle);
             DetectContractLock(in command, playingBefore);
 
             // 최종전 판돈 (REQ-104): Core가 최종 보스 진입에서 남은 컨티뉴를 전부
@@ -1523,6 +1537,8 @@ namespace Shmup.Presentation.Battle
 
             // 이벤트는 스텝 직후 같은 호출 안에서 소비한다 — 다음 Step에서 클리어되기 때문.
             var battle = _run.Battle;
+            ObservePlayerAnimation(battle);
+            if (!ReferenceEquals(battle, _lastEventSim) && _sfx != null) _sfx.ResetPlayback();
             bool freshEvents = !ReferenceEquals(battle, _lastEventSim) || battle.Tick != _lastEventTick;
             _lastEventSim = battle;
             _lastEventTick = battle.Tick;
@@ -1578,16 +1594,14 @@ namespace Shmup.Presentation.Battle
                         // 말하지 않는 것이 문제다 — HP 바가 0이 되고 사라진 뒤
                         // 3초 동안 아무 신호가 없으면 "끝났는데 안 끝났다"로 읽힌다.
                         // 등장 배너를 다시 띄워 그 3초를 사건으로 만든다.
-                        if (_bossIntro != null) _bossIntro.Trigger();
+                        if (_bossIntro != null) _bossIntro.Trigger(BossIntroKind.FormTransition);
                         break;
                     case SimEventType.BossSpawned:
                         // WARNING 배너는 스테이지 최종 보스(와 숨은 보스)에게만 띄운다
                         // ("중간보스 나올때 Warning 뜨는것도 이상함", 2026-07-30).
                         // 중간보스는 스테이지마다 나오는 통과 의례라 매번 배너가 뜨면
                         // 경고의 무게가 사라진다 — 흔들림만 남긴다.
-                        if (_bossIntro != null
-                            && StageSection != RunStageSection.MidBoss)
-                            _bossIntro.Trigger();
+                        TriggerBossArrival();
                         if (_juice != null) _juice.Shake(0.3f);
                         break;
                     case SimEventType.BossPhaseChanged:
@@ -1859,6 +1873,15 @@ namespace Shmup.Presentation.Battle
         /// </summary>
         public bool IsBossSecondForm => _bossFormId != null;
 
+        void TriggerBossArrival()
+        {
+            if (_bossIntro == null || StageSection == RunStageSection.MidBoss) return;
+            // Core emits BossFormChanged immediately before BossSpawned for form 2.
+            // Preserve that context instead of announcing a new stage boss again.
+            _bossIntro.Trigger(IsBossSecondForm ? BossIntroKind.SecondForm
+                : StageSection == RunStageSection.HiddenBoss ? BossIntroKind.HiddenBoss : BossIntroKind.StageBoss);
+        }
+
         /// <summary>
         /// 개발용: 지금 때릴 수 있는 보스 파츠(또는 본체)를 최대 HP의 10%만큼 깎는다.
         ///
@@ -1920,6 +1943,7 @@ namespace Shmup.Presentation.Battle
         void SyncViews()
         {
             _playerTransform.localPosition = SimView.ToWorld(_sim.PlayerX, _sim.PlayerY);
+            SyncPlayerAnimation();
             SyncPlayerInvulnerabilityBlink();
 
             TrackWeaponTypeChange();
@@ -1929,9 +1953,30 @@ namespace Shmup.Presentation.Battle
             SyncEnemies();
             SyncCapsules();
             SyncBombPickups();
-            SyncObstacles();
+            SyncObstacles(Time.deltaTime);
             SyncShield();
             SyncBoss();
+        }
+
+        void SyncPlayerAnimation()
+        {
+            ObservePlayerAnimation(_sim);
+            if (_playerAnimatorCache != null) _playerAnimatorCache.RenderAtTick(Tick);
+        }
+
+        void ObservePlayerAnimation(IBattleSim battle)
+        {
+            if (battle == null) return;
+            if (_playerTransform == null) return;
+            if (_playerAnimatorCache == null)
+                _playerAnimatorCache = _playerTransform.GetComponent<PlayerShipAnimator>();
+            if (_playerAnimatorCache == null) return;
+            if (!ReferenceEquals(_playerAnimationSim, battle))
+            {
+                _playerAnimationSim = battle;
+                _playerAnimatorCache.ResetPose();
+            }
+            _playerAnimatorCache.ObserveMovementAtTick(battle.Tick, battle.PlayerY);
         }
 
         /// <summary>
@@ -1969,7 +2014,7 @@ namespace Shmup.Presentation.Battle
         bool _playerBlinking;
 
         /// <summary>장애물 뷰 동기화 (REQ-023). 테마×계열로 스프라이트를 고른다.</summary>
-        void SyncObstacles()
+        void SyncObstacles(float deltaTime)
         {
             if (_obstaclePool == null) return;
             var obstacles = _sim.Obstacles;
@@ -1984,6 +2029,7 @@ namespace Shmup.Presentation.Battle
                 // 여기서 새로 얻는데, 이때 스폰 페이드가 아니라 성장 연출을 걸어야 한다.
                 bool regenerating = _obstacleRegenAges.TryGetValue(obstacle.Id, out float regenAge)
                     && regenAge < ObstacleRegenSeconds;
+                float baseScale = ObstacleViewScale * ObstacleSizeRatio(in obstacle);
 
                 if (!_obstacleViews.TryGetValue(obstacle.Id, out var view))
                 {
@@ -1997,8 +2043,7 @@ namespace Shmup.Presentation.Battle
                     // 있으면(Core의 per-obstacle half) 기본값 대비 비율만큼 키운다 —
                     // 판정만 커지고 그림이 그대로면 "안 맞았는데 맞는" 판정이 되고,
                     // 반대면 "맞았는데 안 맞는" 판정이 된다.
-                    view.localScale = Vector3.one
-                        * ObstacleViewScale * ObstacleSizeRatio(in obstacle);
+                    view.localScale = Vector3.one * baseScale;
                     view.localRotation = Quaternion.identity;
                     var renderer = view.GetComponent<SpriteRenderer>();
                     if (renderer != null)
@@ -2030,12 +2075,12 @@ namespace Shmup.Presentation.Battle
                     var stateRenderer = view.GetComponent<SpriteRenderer>();
                     if (fading)
                     {
-                        age += Time.deltaTime;
+                        age += deltaTime;
                         _obstacleFadeAges[obstacle.Id] = age;
                     }
                     if (flashing)
                     {
-                        flash -= Time.deltaTime;
+                        flash -= deltaTime;
                         // 0에 닿는 프레임에 흰색으로 복원되고 키가 빠진다 — 잔틴트 방지
                         if (flash <= 0f) _obstacleHitFlashes.Remove(obstacle.Id);
                         else _obstacleHitFlashes[obstacle.Id] = flash;
@@ -2044,13 +2089,13 @@ namespace Shmup.Presentation.Battle
                     float regenT = 1f;
                     if (regenerating)
                     {
-                        regenAge += Time.deltaTime;
+                        regenAge += deltaTime;
                         regenT = Mathf.Clamp01(regenAge / ObstacleRegenSeconds);
                         // 마지막 프레임에 정확히 원 스케일/원 색으로 복귀시키고 키를 뺀다.
                         if (regenAge >= ObstacleRegenSeconds)
                         {
                             _obstacleRegenAges.Remove(obstacle.Id);
-                            view.localScale = Vector3.one * ObstacleViewScale;
+                            view.localScale = Vector3.one * baseScale;
                         }
                         else
                         {
@@ -2059,7 +2104,7 @@ namespace Shmup.Presentation.Battle
                             // 선형이면 "커진다"가 아니라 "늘어난다"로 읽힌다 (0.3 → 1.0).
                             float eased = Mathf.Sin(regenT * Mathf.PI * 0.5f);
                             float scale = Mathf.Lerp(ObstacleRegenStartScale, 1f, eased)
-                                          * ObstacleViewScale;
+                                          * baseScale;
                             view.localScale = new Vector3(scale, scale, 1f);
                         }
                     }
@@ -2351,15 +2396,25 @@ namespace Shmup.Presentation.Battle
         /// <summary>현재 스테이지에 적용 중인 계약. 스테이지 1과 런 종료 후에는 null.</summary>
         public ContractDefinition ActiveContract => _run?.ActiveContract;
 
-        public void ChooseContract(int index)
+        int _choiceInputFrame = -1;
+
+        public bool CanInteractWithChoices => !_replayMode && Time.timeScale > 0f
+            && !OptionsScreen.BlocksPauseInput && !AudioSettingsPanel.BlocksInput;
+
+        // Resume/confirm must not also pick a reward underneath the pause menu.
+        public void BlockChoiceInputThisFrame() => _choiceInputFrame = Time.frameCount;
+
+        public bool ChooseContract(int index)
         {
-            if (!AwaitingContract) return;
-            if (_replayMode) return;   // 리플레이 중 수동 선택 금지 (자동 재현)
-            if (!_run.ChooseContract(index)) return;   // 잘못된 인덱스는 Core가 안전 거부
+            if (!AwaitingContract || !CanInteractWithChoices || _choiceInputFrame == Time.frameCount)
+                return false;
+            if (!_run.ChooseContract(index)) return false;
+            _choiceInputFrame = Time.frameCount;
             // 기록은 성공 후에만 — 거부된 선택이 기록되면 리플레이가 어긋난다.
             if (_recordingActive) _recordedContractChoices.Add(index);
             RefreshBattle();
             SyncViews();
+            return true;
         }
 
         /// <summary>
@@ -2399,27 +2454,31 @@ namespace Shmup.Presentation.Battle
         public System.Collections.Generic.IReadOnlyList<RewardOption> RewardOptions
             => _run?.RewardOptions;
 
-        public void ChooseReward(int index)
+        public bool ChooseReward(int index)
         {
-            if (!AwaitingReward) return;
-            if (_replayMode) return;   // 리플레이 중 수동 선택 금지 (자동 재현)
+            if (!AwaitingReward || !CanInteractWithChoices || BossDeathCinematicActive
+                || _choiceInputFrame == Time.frameCount) return false;
+            if (!_run.ChooseReward(index)) return false;
+            _choiceInputFrame = Time.frameCount;
             if (_recordingActive) _recordedChoices.Add(index);
-            _run.ChooseReward(index);
             RefreshBattle();
             SyncViews();
+            return true;
         }
 
         // ── 보상 리롤 (REQ-072 — 캡슐 화폐) ─────────────────────────────────────
 
         public int CapsuleBalance => _run?.CapsuleBalance ?? 0;
         public int RewardRerollCost => _run?.RewardRerollCost ?? 0;
-        public bool CanRerollRewards => _run != null && _run.CanRerollRewardOptions;
+        public bool CanRerollRewards => CanInteractWithChoices && !BossDeathCinematicActive
+            && _run != null && _run.CanRerollRewardOptions && _run.RewardOptions.Count > 0;
 
         /// <summary>리롤 성공 여부. 리플레이 기록에는 선택 -1이 리롤을 뜻한다.</summary>
         public bool RerollRewards()
         {
-            if (!AwaitingReward || _replayMode) return false;
+            if (!CanRerollRewards || _choiceInputFrame == Time.frameCount) return false;
             if (!_run.RerollRewardOptions()) return false;
+            _choiceInputFrame = Time.frameCount;
             if (_recordingActive) _recordedChoices.Add(RerollChoiceSentinel);
             return true;
         }
@@ -2552,6 +2611,8 @@ namespace Shmup.Presentation.Battle
                     {
                         renderer.sprite = SpriteForBulletKind(bullet.Kind);
                         renderer.color = ColorForBulletKind(bullet.Kind);
+                        renderer.sortingOrder = bullet.Faction == BulletFaction.Enemy
+                            ? CombatReadability.HostileBulletOrder : CombatReadability.FriendlyBulletOrder;
                     }
                     view.localScale = Vector3.one * ScaleForBulletKind(bullet.Kind);
                 }
@@ -2747,13 +2808,17 @@ namespace Shmup.Presentation.Battle
             if (fx == null) return;
             fx.localPosition = position;
             var renderer = fx.GetComponent<SpriteRenderer>();
+            if (renderer != null)
+            {
+                renderer.sortingOrder = CombatReadability.ExplosionOrder;
+                renderer.color = CombatReadability.ExplosionColor(tint, 0f, FlashReduced);
+            }
             if (HasExplosionFrames)
             {
                 fx.localScale = Vector3.one * scale;
                 if (renderer != null)
                 {
                     renderer.sprite = _explosionFrames[0];
-                    renderer.color = tint;
                 }
             }
             else
@@ -2763,6 +2828,15 @@ namespace Shmup.Presentation.Battle
             _activeFx.Add(fx);
             _activeFxRenderers.Add(renderer);
             _activeFxAges.Add(0f);
+            _activeFxTints.Add(tint);
+        }
+
+        public bool FlashReduced => _juice != null && _juice.FlashReduced;
+
+        void ApplyPlayerReadability()
+        {
+            if (PlayerRenderer != null) PlayerRenderer.sortingOrder = CombatReadability.PlayerOrder;
+            if (_shieldView != null) _shieldView.sortingOrder = CombatReadability.PlayerOrder - 1;
         }
 
         /// <summary>적 피격 펀치: 짧은 스케일 팝 + 붉은 틴트. 원 스케일은 시작 시점 값을 복원한다.</summary>
@@ -3011,12 +3085,15 @@ namespace Shmup.Presentation.Battle
                     _activeFx.RemoveAt(i);
                     _activeFxRenderers.RemoveAt(i);
                     _activeFxAges.RemoveAt(i);
+                    _activeFxTints.RemoveAt(i);
                     continue;
                 }
 
                 _activeFxAges[i] = age;
                 float t = age / lifetime;
                 var renderer = _activeFxRenderers[i];
+                if (renderer != null)
+                    renderer.color = CombatReadability.ExplosionColor(_activeFxTints[i], t, FlashReduced);
                 if (HasExplosionFrames)
                 {
                     if (renderer != null)
@@ -3029,12 +3106,6 @@ namespace Shmup.Presentation.Battle
                 }
 
                 _activeFx[i].localScale = Vector3.one * Mathf.Lerp(0.6f, 1.8f, t);
-                if (renderer != null)
-                {
-                    var c = renderer.color;
-                    c.a = 1f - t;
-                    renderer.color = c;
-                }
             }
         }
 
@@ -3047,25 +3118,10 @@ namespace Shmup.Presentation.Battle
 
             if (_damageFlash == null) return;
 
-            bool flashReduced = _juice != null && _juice.FlashReduced;
-
-            // 폭탄이 피격보다 우선한다 — 화면을 지우는 사건이 더 크고, 폭탄 직후 피격이
-            // 겹칠 때(무적 만료 직전) 약한 쪽이 이기면 연출이 뒤바뀐다.
-            if (_bombFlashAge < BombFlashDuration)
-            {
-                _bombFlashAge += Time.deltaTime;
-                float t = Mathf.Clamp01(1f - _bombFlashAge / BombFlashDuration);
-                // 폭탄 아이콘과 같은 자홍 계열 — 무엇이 터졌는지 색으로 연결된다.
-                _damageFlash.color = new Color(1f, 0.55f, 1f, t * (flashReduced ? 0.3f : 0.7f));
-                return;
-            }
-
-            if (_damageFlashAge >= DamageFlashDuration) return;
-
-            _damageFlashAge += Time.deltaTime;
-            float intensity = flashReduced ? 0.15f : 0.35f;
-            float alpha = Mathf.Clamp01(1f - _damageFlashAge / DamageFlashDuration) * intensity;
-            _damageFlash.color = new Color(1f, 0.2f, 0.2f, alpha);
+            // Both clocks advance even while the other effect is visible; no delayed hit flash.
+            if (_bombFlashAge < BombFlashDuration) _bombFlashAge += Time.deltaTime;
+            if (_damageFlashAge < DamageFlashDuration) _damageFlashAge += Time.deltaTime;
+            _damageFlash.color = CombatReadability.ScreenFlash(_damageFlashAge, _bombFlashAge, FlashReduced);
         }
 
         /// <summary>
@@ -3165,11 +3221,8 @@ namespace Shmup.Presentation.Battle
         }
 
         /// <summary>
-        /// 아이들 애니 프레임 조회. 반환: 평탄 배열의 (시작, 개수). 없으면 count 0.
-        /// 순수 표현 — 시간 기반 프레임 순환이라 시뮬 결정론과 무관하다.
-        /// </summary>
-        /// <summary>
-        /// 애니 프레임 구간을 찾는다. <paramref name="exact"/>면 접두사가 아니라
+        /// 애니 프레임 구간과 실제 매칭된 클립 이름을 찾는다. 없으면 count 0.
+        /// <paramref name="exact"/>면 접두사가 아니라
         /// **id가 완전히 같을 때만** 잡는다.
         ///
         /// 접두사 매칭은 적에게는 맞다(zako_sine_slow가 zako_sine을 물려받는다).
@@ -3179,13 +3232,15 @@ namespace Shmup.Presentation.Battle
         /// 원본이 그대로 서 있다 (사람 보고 2026-08-05: "첫 파괴 이후 코어 보스가
         /// 나와야하는데 원본 보스 그대로야" — 두 번 보고받고서야 여기까지 왔다).
         /// </summary>
-        void GetAnimRange(string id, out int start, out int count, bool exact = false)
+        string GetAnimRange(string id, out int start, out int count, bool exact = false)
         {
             start = 0;
             count = 0;
-            if (_animPrefixes == null || _animFrameCounts == null || _animFrames == null) return;
+            if (string.IsNullOrEmpty(id) || _animPrefixes == null || _animFrameCounts == null || _animFrames == null)
+                return null;
             int bestLength = -1;
             int offset = 0;
+            string clipId = null;
             int total = Mathf.Min(_animPrefixes.Length, _animFrameCounts.Length);
             for (int i = 0; i < total; i++)
             {
@@ -3200,10 +3255,12 @@ namespace Shmup.Presentation.Battle
                     bestLength = _animPrefixes[i].Length;
                     start = offset;
                     count = _animFrameCounts[i];
+                    clipId = _animPrefixes[i];
                 }
                 offset += _animFrameCounts[i];
             }
             if (start + count > _animFrames.Length) count = 0;
+            return count > 0 ? clipId : null;
         }
 
         /// <summary>
@@ -3243,10 +3300,12 @@ namespace Shmup.Presentation.Battle
             SpriteRenderer renderer, string id, int desyncSalt, bool exact = false)
         {
             if (renderer == null) return;
-            GetAnimRange(id, out int start, out int count, exact);
+            string clipId = GetAnimRange(id, out int start, out int count, exact);
             if (count <= 0) return;
-            int frame = ((int)(Time.time * _animFramesPerSecond) + desyncSalt) % count;
-            renderer.sprite = _animFrames[start + frame];
+            int frame = SpriteAnimationPlayback.IdleFrameAt(
+                clipId, Tick, _animFramesPerSecond, count, desyncSalt, FlashReduced);
+            var sprite = _animFrames[start + frame];
+            if (sprite != null) renderer.sprite = sprite;
         }
 
         /// <summary>가장 긴 접두어 매칭 — zako_sine_slow가 zako_sine보다 구체적 매칭을 이기게.</summary>

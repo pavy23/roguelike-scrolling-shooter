@@ -1,0 +1,24 @@
+{
+  "action": "Fixed-camera sprite animation of this exact starfighter, facing right. A very small UPWARD BANK and return: neutral, wings roll subtly to show cobalt undersides, HOLD the upward-bank silhouette, return to the original neutral. Change ONLY the swept wing panels and their overlapping armor shading. Keep the nose, cockpit, center spine, engines and body at their EXACT input pixel coordinates throughout; the rightmost 9 columns must stay unchanged. Wings stay rigid and foreshorten around the stationary horizontal body, never flap like a bird. NO image translation, NO vertical movement, NO image rotation, NO zoom, NO new objects, NO flashing. Same 48x30 transparent canvas, same palette, hard alpha and sharp original pixel edges. Preserve padding. Small deliberate SFC shooter sprite pose change, anchored nose throughout.",
+  "frame_count": 4,
+  "no_background": true,
+  "first_frame": {
+    "file": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+    "size": [
+      48,
+      30
+    ],
+    "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097"
+  },
+  "last_frame": {
+    "file": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+    "size": [
+      48,
+      30
+    ],
+    "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097"
+  },
+  "seed": 2026093013,
+  "drift_threshold": 0.0,
+  "endpoint": "/animate-with-text-v3"
+}

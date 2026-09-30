@@ -18,7 +18,6 @@ namespace Shmup.Presentation.Battle
         [SerializeField] InputActionAsset _actions;
         [SerializeField] string _actionMapName = "Player";
         [SerializeField] string _moveActionName = "Move";
-        [SerializeField] string _fireActionName = "Attack";
         [SerializeField] string _activateActionName = "Activate";
 
         [Tooltip("아날로그 스틱을 디지털 8방향으로 바꿀 때의 임계값.")]
@@ -26,16 +25,15 @@ namespace Shmup.Presentation.Battle
 
         /// <summary>옵션 화면(리바인딩)용 읽기 접근자.</summary>
         public InputActionAsset Actions => _actions;
-        public string FireActionName => _fireActionName;
         public string ActivateActionName => _activateActionName;
+        public InputAction MoveAction => FindPlayerAction(_moveActionName);
+        public InputAction ActivateAction => FindPlayerAction(_activateActionName);
+        InputAction FindPlayerAction(string name) => _actions?.FindActionMap(_actionMapName, false)?.FindAction(name, false);
 
         InputAction _moveAction;
-        InputAction _fireAction;
         InputAction _activateAction;
 
         Vector2 _move;
-        bool _fireHeld;
-        bool _firePressedThisFrame;
         bool _activateHeld;
         bool _activatePressedThisFrame;
         bool _bombPressedThisFrame;
@@ -58,15 +56,13 @@ namespace Shmup.Presentation.Battle
                 return;
             }
 
-            LoadAutoFirePreference();
+            PlayerBindings.Load(_actions);
             _moveAction = map.FindAction(_moveActionName, throwIfNotFound: false);
-            _fireAction = map.FindAction(_fireActionName, throwIfNotFound: false);
             // 게이지 활성화 (REQ-019). 액션이 없는 구 에셋이면 직접 키 샘플링으로 폴백.
             _activateAction = map.FindAction(_activateActionName, throwIfNotFound: false);
-            if (_moveAction == null || _fireAction == null)
+            if (_moveAction == null)
             {
-                Debug.LogError($"[{nameof(PlayerInputReader)}] '{_moveActionName}' 또는 " +
-                               $"'{_fireActionName}' 액션이 없다.");
+                Debug.LogError($"[{nameof(PlayerInputReader)}] '{_moveActionName}' 액션이 없다.");
                 enabled = false;
             }
         }
@@ -74,25 +70,35 @@ namespace Shmup.Presentation.Battle
         void OnEnable()
         {
             _moveAction?.Enable();
-            _fireAction?.Enable();
             _activateAction?.Enable();
         }
 
         void OnDisable()
         {
             _moveAction?.Disable();
-            _fireAction?.Disable();
             _activateAction?.Disable();
+            ClearSample();
+        }
+
+        void ClearSample()
+        {
             _move = Vector2.zero;
-            _fireHeld = false;
-            _firePressedThisFrame = false;
+            _activateHeld = false;
+            _activatePressedThisFrame = false;
+            _bombPressedThisFrame = false;
         }
 
         void Update()
         {
+            // Menu/rebind keys must not become queued gameplay commands on resume.
+            if (Time.timeScale <= 0f)
+            {
+                ClearSample();
+                TouchControls.Instance?.ConsumeActivate();
+                BombButton.Instance?.ConsumePress();
+                return;
+            }
             _move = _moveAction.ReadValue<Vector2>();
-            _fireHeld = _fireAction.IsPressed();
-            if (_fireAction.WasPressedThisFrame()) _firePressedThisFrame = true;
 
             // 모바일 터치 조작 (원격 플레이). 이동은 아날로그 델타 경로로 따로 넘어가므로
             // 여기서는 버튼만 합친다. 시뮬은 InputCommand만 보므로 입력원이 달라도
@@ -100,7 +106,6 @@ namespace Shmup.Presentation.Battle
             var touch = TouchControls.Instance;
             if (touch != null && touch.Active)
             {
-                if (touch.Fire) _fireHeld = true;
                 if (touch.ConsumeActivate()) _activatePressedThisFrame = true;
             }
 
@@ -138,30 +143,9 @@ namespace Shmup.Presentation.Battle
         /// <summary>조작 회귀 추적용 진단 문자열. 원인 확정 후 제거한다.</summary>
         public static string DebugState = "(no command yet)";
 
-        public const string AutoFirePrefKey = "rss.autofire";
-
-        /// <summary>
-        /// 오토파이어: 발사 입력을 항상 켠 것으로 취급한다. 터치 조작에서 발사를 홀드하면
-        /// 게이지 활성화를 누를 손가락이 없어 폰에서는 기본 ON.
-        /// 입력 생성 방식일 뿐이라 시뮬·결정론·리플레이에는 영향이 없다.
-        /// </summary>
-        public static bool AutoFire { get; private set; }
-
-        public static void SetAutoFire(bool value)
-        {
-            AutoFire = value;
-            PlayerPrefs.SetInt(AutoFirePrefKey, value ? 1 : 0);
-            SaveFlush.Request();
-        }
-
-        public static void LoadAutoFirePreference()
-        {
-            // 항상 ON ("오토샷은 그냥 없애자. 늘 쏴야하니까", 2026-07-31).
-            // 슈팅에서 발사를 쉬는 순간은 없고, 토글은 실수로 꺼져 "총이 안 나간다"
-            // 문의만 만들었다. 저장값도 무시한다 — 과거에 꺼 둔 채 저장된 사람이
-            // 업데이트 후 무발사 상태로 시작하면 안 된다.
-            AutoFire = true;
-        }
+        // Always-fire policy (user decision, 2026-07-31). Legacy rss.autofire saves
+        // and Attack binding overrides cannot disable firing, even before Awake runs.
+        public static bool AutoFire => true;
 
         /// <summary>한 틱 분량의 입력을 만들어 반환하고 눌림 래치를 소모한다.</summary>
         public InputCommand ConsumeCommand()
@@ -176,7 +160,7 @@ namespace Shmup.Presentation.Battle
             }
             if (!enabled) return InputCommand.None;
 
-            bool fire = AutoFire || _fireHeld || _firePressedThisFrame;
+            bool fire = AutoFire;
             bool activateGauge = _activateHeld || _activatePressedThisFrame;
 
             // 손가락이 화면에 닿아 있는 동안만 아날로그 경로를 쓴다 (REQ-045). Core는
@@ -211,7 +195,6 @@ namespace Shmup.Presentation.Battle
                 + $"d=({command.AnalogDeltaXSubUnits},{command.AnalogDeltaYSubUnits}) "
                 + $"mv=({command.MoveX},{command.MoveY})";
 
-            _firePressedThisFrame = false;
             _activatePressedThisFrame = false;
             _bombPressedThisFrame = false;
             return command;

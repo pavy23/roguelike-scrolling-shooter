@@ -1,0 +1,16 @@
+{
+  "description": "Pixel art right-facing white and blue space fighter ROLLING LEFT into an upward turn. The two wings have VERY DIFFERENT projected lengths. The TOP wing is dramatically foreshortened: only a small dark navy-blue triangular fin touching the hull, most of its old tall wing area becomes empty transparent background. The BOTTOM wing is fully extended, a thin long swept ivory triangle with a dark blue shadow edge. Deliberately ASYMMETRIC wing silhouette, compact top fin and long lower wing. Preserve the exact same fuselage, cockpit, horizontal nose, tail and engines. Crisp polished 16-bit SFC pixel art, pointed tapered wing tips, clean stepped diagonal contours. Empty transparent space surrounds the short folded top wing. No rectangular slabs, no extra wings, no symmetric pair of long wings. Native 48 by 30 pixels, limited original colors.",
+  "image_size": {
+    "width": 48,
+    "height": 30
+  },
+  "no_background": true,
+  "seed": 2026093018,
+  "text_guidance_scale": 5.0,
+  "endpoint": "/inpaint",
+  "source_file": "Assets/Art/Sprites/sfc_player_ship.png",
+  "mask_file": "ArtRevamp/SFC-20260930/banking/control/wing-silhouette-mask.png",
+  "source_sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097",
+  "mask_sha256": "2091271c641ac190c0a6ccf44fe274a1beee42bc7aa53da659df70df75345ad3",
+  "color_reference": "same source PNG"
+}

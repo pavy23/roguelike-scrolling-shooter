@@ -1,0 +1,12 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "One compact round crimson armored enemy drone for a refined 16-bit console side-scrolling shooter, side view facing left. One prominent recessed amber circular sensor at the left front, squat dark navy mechanical body enclosed by three broad vermilion armor plates, two small swept fins and short orange rear engine at the right. Clearly readable circular silhouette, not a long fighter. Elegant hand-placed pixel clusters, restrained ivory edge highlights, three hue-shifted tones per material, about 20 opaque colors, broad light and shadow planes with no noisy scratches or rivets. Fits fully inside a 22 by 20 pixel region centered in the actual 24x24 canvas. Transparent background and hard alpha, no soft glow, no ground, no shadow, no text. Original design matching an ivory/cobalt hero and a teal/ivory boss palette family.",
+  "image_size": { "width": 24, "height": 24 },
+  "seed": 2026093002,
+  "outline": "selective outline",
+  "detail": "medium detail",
+  "view": "side",
+  "direction": "west",
+  "no_background": true
+}

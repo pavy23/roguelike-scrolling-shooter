@@ -12,7 +12,7 @@ namespace Shmup.Presentation.Battle
     /// ("파워업과 봄 아이템 ... 사운드가 너무 거슬려", 2026-08-02).
     /// 레이저 예고·발사음은 Tools/SfxGen/sfxgen_laser.py 후보 b(험 + 흡기)다
     /// ("레이저 발사하는 소리도 따로 있어야 할듯", 2026-08-02).
-    /// 같은 틱에 같은 소리는 1회만 재생해 다중 격파 시 볼륨 폭주를 막는다.
+    /// 6개의 재사용 소스와 시간 간격으로 동시 발음과 반복을 제한한다.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class SfxPlayer : MonoBehaviour
@@ -46,185 +46,231 @@ namespace Shmup.Presentation.Battle
         /// </summary>
         const int HeavyBeamHalfWidthSubUnits = 512;
 
-        /// <summary>선택 함선의 주무기 계열 — 발사음을 계열별로 바꾼다 (REQ-022 후속).</summary>
+        // Legacy ship/clip bindings are retained for serialized scene compatibility.
+        // PlayerFired remains silent under the existing user-approved audio policy.
         public Shmup.Core.WeaponType WeaponFamily { get; set; } = Shmup.Core.WeaponType.Vulcan;
-
-        AudioClip FireClip =>
-            WeaponFamily == Shmup.Core.WeaponType.Laser && _laserBeam != null ? _laserBeam :
-            WeaponFamily == Shmup.Core.WeaponType.Spread && _spreadShot != null ? _spreadShot :
-            _laser;
 
         [Range(0f, 1f)]
         [SerializeField] float _laserVolume = 0.35f;
 
-        // 이번 스텝에서 이미 재생한 클립 (틱당 1회 제한)
-        readonly bool[] _playedThisStep = new bool[17];
+        enum Lane { Warning, Threat, Player, Impact, Destruction, Reward, Count }
 
-        // ── 레이저 소리 (2026-08-02 사람 요청: "레이저 발사하는 소리도 따로 있어야 할듯") ──
-        //
-        // **소스 구분이 필요하다.** LaserFired의 Arg는 소스 종류가 아니라 빔 반폭이라
-        // 이벤트만으로는 적 레이저와 플레이어 PRISM BEAM을 가를 수 없다. 소스가 실리는
-        // 곳은 LaserTelegraphStarted의 Arg뿐인데, 플레이어 빔은 예고 단계가 없어 그
-        // 이벤트를 아예 내지 않는다 — 그래서 **예고를 낸 id만 적대 레이저로 기억**하고,
-        // LaserFired가 그 목록에 없으면 플레이어 빔으로 판정한다.
-        //
-        // 플레이어 빔을 굳이 낮추는 이유: 지속빔이라 오토파이어로 계속 재점화되면
-        // 발사음이 끊이지 않는다. 완전히 지우면 "빔이 켜졌다"는 확인이 사라지므로
-        // 들릴락 말락 한 볼륨만 남긴다.
-        readonly HashSet<int> _hostileLasers = new HashSet<int>();
-
-        /// <summary>추적 id 상한. 런이 길어지면 LaserEnded를 못 본 id가 쌓일 수 있다.</summary>
-        const int MaxTrackedLasers = 64;
-
-        const float HostileLaserFireVolume = 0.5f;
-
-        /// <summary>초대형 빔은 더 크게 — 화면을 관통하는 것이 조용하면 안 된다.</summary>
-        const float HeavyBeamFireVolume = 0.72f;
-        const float PlayerBeamFireVolume = 0.15f;
-
-        public void PlayEvents(ReadOnlySpan<SimEvent> events)
+        struct Cue
         {
-            if (_source == null) return;
-            Array.Clear(_playedThisStep, 0, _playedThisStep.Length);
+            public AudioClip Clip;
+            public float Gain, Interval;
+            public int Priority;
+            public bool VaryPitch;
+        }
 
-            // 반복 피로 완화: 틱 단위 ±4% 피치 랜덤 (표현 전용 — 시뮬 Rng와 무관)
-            if (events.Length > 0)
-                _source.pitch = 1f + (UnityEngine.Random.value - 0.5f) * 0.08f;
+        sealed class Voice
+        {
+            public AudioSource Source;
+            public AudioChannelSource Channel;
+            public readonly SfxVoiceGate Gate = new SfxVoiceGate();
+            public float Gain;
+        }
 
-            // 전멸 폭탄은 같은 틱에 적 사망 폭발음을 대량으로 몰고 온다. 폭발 채널을
-            // 먼저 선점해 큰 볼륨으로 한 번만 울린다 — 그러지 않으면 사망음이 채널을
-            // 먹어 폭탄이 작게 들리거나, 별도 채널로 두면 두 폭발음이 겹쳐 클리핑한다.
-            for (int i = 0; i < events.Length; i++)
-            {
-                if (events[i].Type != SimEventType.BombActivated) continue;
-                PlayOnce(2, _explosion, 1f);
-                break;
-            }
+        readonly Voice[] _voices = new Voice[(int)Lane.Count];
+        readonly Cue[] _pending = new Cue[(int)Lane.Count];
+        // Only hostile beams have a telegraph. Keep tracking even while muted.
+        readonly HashSet<int> _hostileLasers = new HashSet<int>();
+        const int MaxTrackedLasers = 256;
+        bool _initialized;
+        double _duckUntil;
+        float _backgroundGain = 1f;
 
-            // 같은 이유로 적대 레이저 발사가 채널을 먼저 잡는다. 플레이어 빔 점화가
-            // 같은 틱에 끼면 (거의 안 들리는 0.15로) 적 레이저를 삼켜 버린다 —
-            // 나를 노리는 빔이 내가 켠 빔에 묻히는 것이 가장 나쁜 경우다.
-            // **첫 빔이 아니라 가장 굵은 빔으로 고른다.** 처음에는 첫 이벤트에서
-            // 곧장 break했는데, 코어의 초대형 빔은 포탑 빔들과 같은 틱에 점화되는
-            // 일이 흔하다. 얇은 쪽이 먼저 오면 채널을 먹고 끝나서, 화면에는 반폭
-            // 5유닛 빔이 나가는데 귀에는 잡몹 발사음만 들렸다.
-            int widestHalfWidth = -1;
-            for (int i = 0; i < events.Length; i++)
-            {
-                if (events[i].Type != SimEventType.LaserFired
-                    || !_hostileLasers.Contains(events[i].EntityId))
-                    continue;
-                // LaserFired의 Arg는 그 빔의 반폭이다 — 굵기로 소리를 고른다.
-                if (events[i].Arg > widestHalfWidth)
-                    widestHalfWidth = events[i].Arg;
-            }
-            if (widestHalfWidth >= 0)
-            {
-                bool heavy = widestHalfWidth >= HeavyBeamHalfWidthSubUnits
-                    && _laserFireHeavy != null;
-                PlayOnce(
-                    16,
-                    heavy ? _laserFireHeavy : _laserFire,
-                    heavy ? HeavyBeamFireVolume : HostileLaserFireVolume);
-            }
+        /// <summary>Cumulative admitted starts, for headless event-stream QA (not hardware voices).</summary>
+        public int StartedVoiceCount { get; private set; }
 
-            for (int i = 0; i < events.Length; i++)
+        void Awake() => Initialize();
+        void OnEnable() { Initialize(); AudioPreferences.Changed += OnPreferencesChanged; }
+        void OnDisable() { AudioPreferences.Changed -= OnPreferencesChanged; ResetPlayback(); }
+
+        void Initialize()
+        {
+            if (_initialized || _source == null) return;
+            var originalChannel = _source.GetComponent<AudioChannelSource>();
+            float baseVolume = originalChannel != null ? originalChannel.BaseVolume : _source.volume;
+            for (int i = 0; i < _voices.Length; i++)
             {
-                switch (events[i].Type)
+                AudioSource source;
+                GameObject child = null;
+                if (i == (int)Lane.Impact) source = _source;
+                else
                 {
-                    case SimEventType.PlayerFired:
-                        // 발사음은 내지 않는다 — 주무기와 미사일 모두
-                        // ("주무기랑 미사일 소리 둘다 꺼야 한다", 2026-07-30).
-                        //
-                        // 오토파이어가 기본 ON이라 발사가 쉬지 않고 일어난다. 거기에
-                        // 주무기와 미사일이 각각 이 이벤트를 내므로 발사음이 끊이지 않고
-                        // 울려 듣기 괴로웠다. 발사 자체는 탄이 화면에 보이고 명중하면
-                        // 타격음이 나므로, 발사음이 없어도 피드백은 충분히 남는다.
-                        break;
+                    child = new GameObject("Sfx " + (Lane)i);
+                    child.SetActive(false);
+                    child.transform.SetParent(transform, false);
+                    source = child.AddComponent<AudioSource>();
+                    source.volume = baseVolume;
+                    source.outputAudioMixerGroup = _source.outputAudioMixerGroup;
+                    source.mute = _source.mute;
+                }
+                source.playOnAwake = false;
+                source.loop = false;
+                source.spatialBlend = 0f;
+                source.ignoreListenerPause = false;
+                source.priority = i < (int)Lane.Impact ? 24 : 160;
+                var channel = source.GetComponent<AudioChannelSource>();
+                if (channel == null) channel = source.gameObject.AddComponent<AudioChannelSource>();
+                channel.Configure(AudioChannel.Effects);
+                _voices[i] = new Voice { Source = source, Channel = channel };
+                if (child != null) child.SetActive(true);
+            }
+            _initialized = true;
+        }
+
+        public void PlayEvents(ReadOnlySpan<SimEvent> events) => PlayEventsAt(events, AudioSettings.dspTime);
+
+        // Explicit clock seam lets EditMode QA replay dense traffic without playing sound or waiting.
+        void PlayEventsAt(ReadOnlySpan<SimEvent> events, double now)
+        {
+            if (!_initialized || !isActiveAndEnabled) return;
+            Array.Clear(_pending, 0, _pending.Length);
+            // Pre-register telegraphs so an immediate fire is classified correctly regardless of
+            // event ordering in the batch. Remove ended ids only after the fire pass.
+            for (int i = 0; i < events.Length; i++)
+                if (events[i].Type == SimEventType.LaserTelegraphStarted)
+                {
+                    if (_hostileLasers.Count >= MaxTrackedLasers) _hostileLasers.Clear();
+                    _hostileLasers.Add(events[i].EntityId);
+                }
+
+            for (int i = 0; i < events.Length; i++)
+            {
+                var e = events[i];
+                switch (e.Type)
+                {
+                    // Existing user policy: main-shot and missile auto-fire remain silent.
+                    case SimEventType.PlayerFired: break;
                     case SimEventType.EnemyHit:
-                        PlayOnce(1, _hit, 0.5f);
-                        break;
-                    case SimEventType.EnemyKilled:
-                        PlayOnce(2, _explosion, 0.8f);
-                        break;
-                    case SimEventType.PlayerHit:
-                        PlayOnce(3, _hit, 1f);
-                        break;
-                    case SimEventType.PlayerKilled:
-                        PlayOnce(4, _explosion, 1f);
-                        break;
-                    case SimEventType.CapsulePicked:
-                        // 오토파이어로 캡슐을 연달아 먹는 구간이 있어 이 소리가 가장 자주
-                        // 울린다 — 0.9는 과했다. 차임 자체도 피크 0.6으로 낮게 만들었다.
-                        PlayOnce(5, _pickup, 0.5f);
-                        break;
-                    case SimEventType.PowerUpLevelChanged:
-                        PlayOnce(6, _powerup, 0.6f);
-                        break;
-                    case SimEventType.BossSpawned:
-                        // 보스 등장은 획득 차임이 아니라 경보다. 차임을 얌전하게 바꾼 뒤
-                        // 강화음으로 보스를 알리면 "좋은 일"처럼 들린다 (2026-08-02).
-                        PlayOnce(7, _warning, 0.85f);
-                        break;
-                    case SimEventType.BossPhaseChanged:
-                        PlayOnce(8, _hit, 1f);
-                        break;
-                    case SimEventType.StageCleared:
-                        // 클리어는 BgmPlayer가 5.5초 팡파르(jingle_clear)를 0.9로 울린다.
-                        // 여기서는 그 위에 얹는 짧은 확인음 정도로만 남긴다.
-                        PlayOnce(9, _powerup, 0.45f);
-                        break;
-                    case SimEventType.BombAcquired:
-                        // 캡슐보다 귀한 획득이라 pickup이 아니라 powerup 계열로 알린다.
-                        PlayOnce(10, _powerup, 0.55f);
-                        break;
-                    case SimEventType.BombActivationRejectedEmpty:
-                        // 재고 없이 눌렀다 — 짧고 작게. 버튼이 죽지 않았음을 알리는 정도다.
-                        PlayOnce(11, _hit, 0.25f);
-                        break;
-                    case SimEventType.BossAttackTelegraphed:
-                        // 위험 패턴 예고 — 눈과 귀 양쪽으로. 탄막 속에서는 화면 번쩍임을
-                        // 놓치기 쉽다.
-                        PlayOnce(12, _warning, 0.7f);
-                        break;
+                        Offer(Lane.Impact, _hit, .5f, 2, .09f, true); break;
                     case SimEventType.ObstacleDamaged:
-                        // 장애물은 적과 달리 가만히 있는 과녁이라 지속 사격을 받는다.
-                        // 적 피격(0.5)과 같은 볼륨이면 벽 하나 부수는 동안 화면 전체가
-                        // 타격음으로 덮인다 — 채널도 EnemyHit과 나눠 두어야 같은 틱에
-                        // 적과 장애물을 동시에 맞혔을 때 한쪽이 삼켜지지 않는다.
-                        PlayOnce(13, _hit, 0.3f);
-                        break;
+                        Offer(Lane.Impact, _hit, .3f, 1, .12f, true); break;
+                    case SimEventType.EnemyKilled:
+                        Offer(Lane.Destruction, _explosion, .8f, 2, .14f, true); break;
                     case SimEventType.ObstacleDestroyed:
-                        // 파괴는 격파와 같은 종류의 성과지만 적 격파(0.8)보다는 작다 —
-                        // 장애물은 길을 여는 수단이지 목표가 아니다.
-                        PlayOnce(14, _explosion, 0.6f);
-                        break;
+                        Offer(Lane.Destruction, _explosion, .6f, 1, .18f, true); break;
+                    case SimEventType.BombActivated:
+                        Offer(Lane.Destruction, _explosion, 1f, 3, .25f); break;
+                    case SimEventType.PlayerHit:
+                        Offer(Lane.Player, _hit, 1f, 1, .12f); break;
+                    case SimEventType.PlayerKilled:
+                        Offer(Lane.Player, _explosion, 1f, 2, .25f); break;
+                    case SimEventType.CapsulePicked:
+                        Offer(Lane.Reward, _pickup, .5f, 1, .14f, true); break;
+                    case SimEventType.PowerUpLevelChanged:
+                        Offer(Lane.Reward, _powerup, .6f, 3, .2f); break;
+                    case SimEventType.BombAcquired:
+                        Offer(Lane.Reward, _powerup, .55f, 2, .2f); break;
+                    case SimEventType.StageCleared:
+                        Offer(Lane.Reward, _powerup, .45f, 4, .3f); break;
+                    case SimEventType.BombActivationRejectedEmpty:
+                        Offer(Lane.Reward, _hit, .25f, 0, .3f); break;
+                    case SimEventType.BossSpawned:
+                    case SimEventType.WarshipWarningStarted:
+                        Offer(Lane.Warning, _warning, .85f, 3, .35f); break;
+                    case SimEventType.BossPhaseChanged:
+                        Offer(Lane.Warning, _hit, 1f, 1, .2f); break;
+                    case SimEventType.BossAttackTelegraphed:
+                    case SimEventType.BossMovementTelegraphed:
+                    case SimEventType.BossPartMeleeTelegraphed:
+                        Offer(Lane.Warning, _warning, .7f, 2, .25f); break;
                     case SimEventType.LaserTelegraphStarted:
-                        // 예고는 경고지 위협 그 자체가 아니다 — 절제된 볼륨으로 깐다.
-                        // 탄막 속에서 예고선을 놓쳐도 귀로 "곧 온다"가 남아야 한다.
-                        // 플레이어 빔은 이 이벤트를 내지 않으므로 전부 적대 레이저다.
-                        if (_hostileLasers.Count >= MaxTrackedLasers)
-                            _hostileLasers.Clear();
-                        _hostileLasers.Add(events[i].EntityId);
-                        PlayOnce(15, _laserCharge, 0.35f);
-                        break;
+                        Offer(Lane.Warning, _laserCharge, .35f, 0, .2f); break;
                     case SimEventType.LaserFired:
-                        // 적대 발사는 위 선점 패스가 이미 큰 볼륨으로 울렸다. 여기 남는
-                        // 것은 플레이어 빔 점화뿐이고, 채널이 먹혔으면 조용히 넘어간다.
-                        PlayOnce(16, _laserFire, PlayerBeamFireVolume);
-                        break;
-                    case SimEventType.LaserEnded:
-                        _hostileLasers.Remove(events[i].EntityId);
+                        if (_hostileLasers.Contains(e.EntityId))
+                        {
+                            bool heavy = e.Arg >= HeavyBeamHalfWidthSubUnits;
+                            Offer(Lane.Threat, heavy && _laserFireHeavy != null ? _laserFireHeavy : _laserFire,
+                                heavy && _laserFireHeavy != null ? .72f : .5f, heavy ? 2 : 1, .12f);
+                        }
+                        else Offer(Lane.Impact, _laserFire, .15f, 0, .25f);
                         break;
                 }
             }
+            for (int i = 0; i < events.Length; i++)
+                if (events[i].Type == SimEventType.LaserEnded) _hostileLasers.Remove(events[i].EntityId);
+
+            if (AudioListener.pause || AudioPreferences.Get(AudioChannel.Master) <= 0f
+                || AudioPreferences.Get(AudioChannel.Effects) <= 0f) return;
+
+            // Protected voices go first so background attacks are already ducked at their onset.
+            for (int i = 0; i < _voices.Length; i++)
+            {
+                var cue = _pending[i];
+                if (cue.Clip == null) continue;
+                var voice = _voices[i];
+                // Admission uses the longest possible duration; random pitch never retunes a
+                // sound already playing. Warnings and major feedback retain their authored pitch.
+                double duration = cue.Clip.length / (cue.VaryPitch ? .96f : 1f);
+                double interval = i <= (int)Lane.Player || i == (int)Lane.Reward
+                    ? Math.Max(cue.Interval, duration) : cue.Interval;
+                if (!voice.Gate.TryStart(now, cue.Priority, interval, duration)) continue;
+                if (i < (int)Lane.Impact)
+                {
+                    _duckUntil = Math.Max(_duckUntil, now + Math.Min(.5, Math.Max(.25, duration)));
+                    _backgroundGain = .35f;
+                }
+                voice.Source.Stop();
+                voice.Source.clip = cue.Clip;
+                voice.Source.pitch = cue.VaryPitch ? UnityEngine.Random.Range(.96f, 1.04f) : 1f;
+                voice.Gain = cue.Gain;
+                ApplyGain(i);
+                // Batch Editor tests inspect admission and source wiring without audible output.
+                if (Application.isPlaying) voice.Source.Play();
+                StartedVoiceCount++;
+            }
+            RefreshGains();
         }
 
-        void PlayOnce(int channel, AudioClip clip, float volume)
+        void Offer(Lane lane, AudioClip clip, float gain, int priority, float interval, bool varyPitch = false)
         {
-            if (clip == null || _playedThisStep[channel]) return;
-            _playedThisStep[channel] = true;
-            _source.PlayOneShot(clip, volume);
+            if (clip == null) return; // An absent high-priority clip must not silence a valid fallback.
+            ref var candidate = ref _pending[(int)lane];
+            if (candidate.Clip != null && candidate.Priority >= priority) return;
+            candidate = new Cue { Clip = clip, Gain = gain, Priority = priority,
+                Interval = interval, VaryPitch = varyPitch };
         }
+
+        void Update()
+            => UpdateMix(AudioSettings.dspTime, Time.unscaledDeltaTime);
+
+        void UpdateMix(double now, float deltaTime)
+        {
+            if (!_initialized || AudioListener.pause) return;
+            if (now >= _duckUntil)
+                _backgroundGain = Mathf.MoveTowards(_backgroundGain, 1f, deltaTime * 4f);
+            RefreshGains();
+        }
+
+        void ApplyGain(int lane)
+        {
+            var voice = _voices[lane];
+            voice.Channel.SetMixGain(voice.Gain * (lane < (int)Lane.Impact ? 1f : _backgroundGain));
+        }
+        void RefreshGains() { if (_initialized) for (int i = 0; i < _voices.Length; i++) ApplyGain(i); }
+        void OnPreferencesChanged()
+        {
+            if (AudioPreferences.Get(AudioChannel.Master) <= 0f || AudioPreferences.Get(AudioChannel.Effects) <= 0f)
+                StopVoices(); // Unmuting must not resurrect an old warning/explosion tail.
+        }
+        void StopVoices()
+        {
+            if (!_initialized) return;
+            for (int i = 0; i < _voices.Length; i++)
+            {
+                var voice = _voices[i];
+                voice.Source.Stop();
+                voice.Source.clip = null;
+                voice.Gate.Reset();
+                voice.Gain = 0;
+            }
+            _duckUntil = 0;
+            _backgroundGain = 1f;
+            RefreshGains();
+        }
+        public void ResetPlayback() { StopVoices(); _hostileLasers.Clear(); }
     }
 }

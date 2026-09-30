@@ -1,0 +1,15 @@
+{
+  "status": "native_candidates_prepared_image_upload_approval_pending",
+  "productionArtAdopted": false,
+  "sceneChanged": false,
+  "webglDeployed": false,
+  "controls": "controls/inputs.json",
+  "review": "NATIVE-REVIEW.md",
+  "audit": "review/native-audit.json",
+  "pixelLabPilotCapUsd": 1,
+  "excludedBatches": {
+    "explosion-nine-sheet": "All four outputs violate the required 48x48 grid; no usable nine-frame clip"
+  },
+  "approvalRequested": "Combat input/mask PNGs and generated explosion candidates to api.pixellab.ai; cumulative pilot cap USD 1; no new payment or source upload",
+  "approvalReceived": false
+}

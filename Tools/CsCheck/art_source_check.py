@@ -17,6 +17,7 @@ Assets에 직접 넣었더니, 매 빌드마다 art-input의 옛 파일이 그�
     python art_source_check.py
 """
 import hashlib
+import json
 import pathlib
 import sys
 
@@ -30,6 +31,18 @@ def digest(path):
 
 
 def main():
+    # Curated revamp originals are tracked with their acceptance hashes. They
+    # intentionally bypass the workstation's older, untracked art-input folder.
+    for manifest in sorted((ROOT / "ArtRevamp").rglob("adoption.json")):
+        for entry in json.loads(manifest.read_text(encoding="utf-8"))["assets"]:
+            for field in ("source", "asset"):
+                path = (ROOT / entry[field]).resolve()
+                if not path.is_relative_to(ROOT) or not path.is_file():
+                    print(f"채택한 아트 {field} 누락/경로 오류: {entry[field]}", file=sys.stderr)
+                    return 1
+                if hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
+                    print(f"큐레이션 원본과 불일치: {entry[field]}", file=sys.stderr)
+                    return 1
     if not ART_INPUT.is_dir():
         # art-input이 없는 머신(CI·다른 클론)에서는 검사할 원본이 없다.
         return 0

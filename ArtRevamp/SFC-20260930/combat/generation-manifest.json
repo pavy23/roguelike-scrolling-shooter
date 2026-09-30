@@ -1,0 +1,19 @@
+{
+  "kind": "combat design study; not native production sprites",
+  "tool": "image_gen.imagegen",
+  "prompt": "prompts.md",
+  "reference": "ArtRevamp/SFC-20260930/candidates/style-sheet-v2.png",
+  "referenceSha256": "0c8023e62ea82424a27f360146217a5d081c99443fafafad6481a66ba66e41f2",
+  "output": "candidates/combat-study-v1.png",
+  "sha256": "fc669daa72dcc298a65859f29098874ef9c2b5119ad714102d134fe58f9fc685",
+  "canvas": [
+    1536,
+    1024
+  ],
+  "transparentBackground": false,
+  "postprocessing": "none; byte-for-byte copy",
+  "seedExposed": false,
+  "humanCuration": "pending native-size candidates",
+  "productionAssetsChanged": false,
+  "pixelLabRequests": 0
+}

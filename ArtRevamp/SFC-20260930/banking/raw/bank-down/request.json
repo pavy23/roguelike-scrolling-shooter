@@ -1,0 +1,16 @@
+{
+  "action": "Animate this exact right-facing ivory/cobalt starfighter banking downward in place, for a 2D horizontal shooter. Start from the input neutral pose, then gradually roll the wings in the OPPOSITE direction to an upward bank, revealing the broad bright top of the nearer wing and foreshortening the far wing; end holding a clear modest downward-bank pose. Wing edges and overlapping armor planes change, not the entire image rotating. Keep the nose pointing exactly right. LOCK the nose tip at pixel (44,13), rightmost nose pixels, center spine, fuselage center, length and engine mounts. No whole-body translation, bob, zoom, yaw, pitch or camera movement. Preserve this ship's ivory armor, cobalt shadows, cyan canopy and orange exhaust. Crisp pixel clusters on the original transparent 48x30 canvas. Hard alpha, no antialiasing, blur or background. Small deliberate SFC banking motion, no attack or flash.",
+  "frame_count": 6,
+  "no_background": true,
+  "first_frame": {
+    "file": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+    "size": [
+      48,
+      30
+    ],
+    "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097"
+  },
+  "seed": 2026093012,
+  "drift_threshold": 0.03,
+  "endpoint": "/animate-with-text-v3"
+}

@@ -1,0 +1,265 @@
+{
+  "kind": "Disposable Editor candidate integration preview; not deployed or browser playtested",
+  "candidatesInjectedInMemoryOnly": true,
+  "sceneSaved": false,
+  "assetsImported": false,
+  "playerPrefsAccessed": false,
+  "userSavesAccessed": false,
+  "gameplayDataChanged": false,
+  "ppu": 16,
+  "referenceResolution": [
+    640,
+    360
+  ],
+  "captureResolution": [
+    1280,
+    720
+  ],
+  "muzzleLocalPosition": [
+    0.85,
+    0.0,
+    0.0
+  ],
+  "observations": [
+    {
+      "theme": 0,
+      "tick": 0,
+      "inputY": 1,
+      "sprite": "sfc_player_ship",
+      "x": -3328,
+      "y": 0,
+      "file": "battle-candidate-theme-0-tick-0.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 4,
+      "inputY": 1,
+      "sprite": "up-A",
+      "x": -3328,
+      "y": 221,
+      "file": "battle-candidate-theme-0-tick-4.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 6,
+      "inputY": 1,
+      "sprite": "up-B",
+      "x": -3328,
+      "y": 332,
+      "file": "battle-candidate-theme-0-tick-6.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 9,
+      "inputY": 0,
+      "sprite": "sfc_player_engine_01",
+      "x": -3328,
+      "y": 443,
+      "file": "battle-candidate-theme-0-tick-9.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 13,
+      "inputY": -1,
+      "sprite": "sfc_player_ship",
+      "x": -3328,
+      "y": 389,
+      "file": "battle-candidate-theme-0-tick-13.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 16,
+      "inputY": -1,
+      "sprite": "down-A",
+      "x": -3328,
+      "y": 222,
+      "file": "battle-candidate-theme-0-tick-16.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 18,
+      "inputY": -1,
+      "sprite": "down-B",
+      "x": -3328,
+      "y": 111,
+      "file": "battle-candidate-theme-0-tick-18.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 0,
+      "tick": 21,
+      "inputY": 0,
+      "sprite": "sfc_player_engine_01",
+      "x": -3328,
+      "y": 0,
+      "file": "battle-candidate-theme-0-tick-21.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 0,
+      "inputY": 1,
+      "sprite": "sfc_player_ship",
+      "x": -3328,
+      "y": 0,
+      "file": "battle-candidate-theme-2-tick-0.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 4,
+      "inputY": 1,
+      "sprite": "up-A",
+      "x": -3328,
+      "y": 221,
+      "file": "battle-candidate-theme-2-tick-4.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 6,
+      "inputY": 1,
+      "sprite": "up-B",
+      "x": -3328,
+      "y": 332,
+      "file": "battle-candidate-theme-2-tick-6.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 9,
+      "inputY": 0,
+      "sprite": "sfc_player_engine_01",
+      "x": -3328,
+      "y": 443,
+      "file": "battle-candidate-theme-2-tick-9.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 13,
+      "inputY": -1,
+      "sprite": "sfc_player_ship",
+      "x": -3328,
+      "y": 389,
+      "file": "battle-candidate-theme-2-tick-13.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 16,
+      "inputY": -1,
+      "sprite": "down-A",
+      "x": -3328,
+      "y": 222,
+      "file": "battle-candidate-theme-2-tick-16.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 18,
+      "inputY": -1,
+      "sprite": "down-B",
+      "x": -3328,
+      "y": 111,
+      "file": "battle-candidate-theme-2-tick-18.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 2,
+      "tick": 21,
+      "inputY": 0,
+      "sprite": "sfc_player_engine_01",
+      "x": -3328,
+      "y": 0,
+      "file": "battle-candidate-theme-2-tick-21.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 0,
+      "inputY": 1,
+      "sprite": "sfc_player_ship",
+      "x": -3328,
+      "y": 0,
+      "file": "battle-candidate-theme-4-tick-0.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 4,
+      "inputY": 1,
+      "sprite": "up-A",
+      "x": -3328,
+      "y": 221,
+      "file": "battle-candidate-theme-4-tick-4.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 6,
+      "inputY": 1,
+      "sprite": "up-B",
+      "x": -3328,
+      "y": 332,
+      "file": "battle-candidate-theme-4-tick-6.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 9,
+      "inputY": 0,
+      "sprite": "sfc_player_engine_01",
+      "x": -3328,
+      "y": 443,
+      "file": "battle-candidate-theme-4-tick-9.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 13,
+      "inputY": -1,
+      "sprite": "sfc_player_ship",
+      "x": -3328,
+      "y": 389,
+      "file": "battle-candidate-theme-4-tick-13.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 16,
+      "inputY": -1,
+      "sprite": "down-A",
+      "x": -3328,
+      "y": 222,
+      "file": "battle-candidate-theme-4-tick-16.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 18,
+      "inputY": -1,
+      "sprite": "down-B",
+      "x": -3328,
+      "y": 111,
+      "file": "battle-candidate-theme-4-tick-18.png",
+      "pausedPoseStable": true
+    },
+    {
+      "theme": 4,
+      "tick": 21,
+      "inputY": 0,
+      "sprite": "sfc_player_engine_01",
+      "x": -3328,
+      "y": 0,
+      "file": "battle-candidate-theme-4-tick-21.png",
+      "pausedPoseStable": true
+    }
+  ]
+}

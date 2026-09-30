@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-09-30",
+  "selectedStyle": "../candidates/style-sheet-v2.png",
+  "styleSha256": "0c8023e62ea82424a27f360146217a5d081c99443fafafad6481a66ba66e41f2",
+  "status": "first_five_native_pngs_adopted_and_integrated_other_candidates_not_adopted",
+  "productionAssetsChanged": true,
+  "adoptionRecord": "../adoption.json",
+  "validationRecord": "../adoption-review/VALIDATION.md",
+  "rasterPostprocessing": "None; generator bytes preserved",
+  "generationRequests": [
+    "requests/drone-sensor.json",
+    "requests/drone.json",
+    "requests/explosion-v2.json",
+    "requests/explosion.json",
+    "requests/fast-v2.json",
+    "requests/fast.json",
+    "requests/starter-engine.json",
+    "requests/starter-pixen.json",
+    "requests/starter.txt",
+    "requests/turret-v2.json",
+    "requests/turret.json"
+  ],
+  "proNativeRequest": "raw/starter/request.json",
+  "proNativeJob": "raw/starter/job.json",
+  "droneAnimationRequest": "raw/drone-sensor/request.json",
+  "droneAnimationJob": "raw/drone-sensor/job.json",
+  "highResolutionReference": {
+    "generator": "built-in image_gen.imagegen",
+    "prompt": "references/starter-reference-prompt.txt",
+    "reference": "../candidates/style-sheet-v2.png",
+    "transparentBackground": true,
+    "uploadedToPixelLab": false
+  },
+  "originalOutputs": [
+    {
+      "file": "raw/drone-sensor/frame_00.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 814,
+      "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35"
+    },
+    {
+      "file": "raw/drone-sensor/frame_01.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 798,
+      "sha256": "f495d43205d9385982cc0f47fb14951c8f2b6138bdc6268c6e6ce5afb9162711"
+    },
+    {
+      "file": "raw/drone-sensor/frame_02.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 805,
+      "sha256": "18d1ee64158a90f1f3f7cb271018b6d70093cc28a9d37b67edb39a00325c4d4f"
+    },
+    {
+      "file": "raw/drone-sensor/frame_03.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 823,
+      "sha256": "82b4ddea539a42677a03d2692b79c44e2c1bde82bddb14ed6cc7e1f14dbede40"
+    },
+    {
+      "file": "raw/drone-sensor/frame_04.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 814,
+      "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35"
+    },
+    {
+      "file": "raw/drone.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 814,
+      "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35"
+    },
+    {
+      "file": "raw/explosion-v2.png",
+      "width": 48,
+      "height": 48,
+      "bytes": 1584,
+      "sha256": "2a1d756ea94399781094b93de888150c6d4497584d4a70c1e1bed0ee9414f246"
+    },
+    {
+      "file": "raw/explosion.png",
+      "width": 48,
+      "height": 48,
+      "bytes": 2336,
+      "sha256": "1b6e95dfb12ea5de619981d1684c6f5f1cc0eab4d62e05852595fdf6110cb01b"
+    },
+    {
+      "file": "raw/fast-v2.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 490,
+      "sha256": "c01068e8e9f3786219481cf59ff9e08b41a34b30f0dfaff722d87a5370cfd343"
+    },
+    {
+      "file": "raw/fast.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 351,
+      "sha256": "8720d10246ca60940b509e437a67b34671dc1095440d7499d65b150613357e77"
+    },
+    {
+      "file": "raw/starter/candidate_00.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1083,
+      "sha256": "06ff03bd1937918e8fe500e0ae64e1f1362d58e9c5d7f82966945f9e9a8501ec"
+    },
+    {
+      "file": "raw/starter/candidate_01.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1171,
+      "sha256": "764807d83a6c2058638758a5504938c089c30d36a54841e2427185a80e83eba6"
+    },
+    {
+      "file": "raw/starter/candidate_02.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1064,
+      "sha256": "b142d3e9b4bb76cccf9a5d2ccc0dea3919060d2115bba64d386b6cd8ce249f26"
+    },
+    {
+      "file": "raw/starter/candidate_03.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1357,
+      "sha256": "ca80a11b88952aa48b8a81c01f81e7c64ab9903677c902fdd81589ee7de1ec24"
+    },
+    {
+      "file": "raw/starter/candidate_04.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1253,
+      "sha256": "5512045bdbfaf581a38916779b404761da7d22b44a123b5425ab094af6b3a86a"
+    },
+    {
+      "file": "raw/starter/candidate_05.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1179,
+      "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097"
+    },
+    {
+      "file": "raw/starter/candidate_06.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1163,
+      "sha256": "c25cefb9db05e8856b7186c6e32499316852211617f3d33b7dcca8a904ff93e0"
+    },
+    {
+      "file": "raw/starter/candidate_07.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1084,
+      "sha256": "f66d638560c43b3be77dc6c70f329acbc4526d721117bda939c0bec69931511e"
+    },
+    {
+      "file": "raw/starter/candidate_08.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1187,
+      "sha256": "79453f76d217944bf90e3135479a73bccac91a6b65e86cf53306234cc7f530aa"
+    },
+    {
+      "file": "raw/starter/candidate_09.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1244,
+      "sha256": "d791599749c21538852ab50fcb41bb10131072a4f75ddce9e4808a30210810ef"
+    },
+    {
+      "file": "raw/starter/candidate_10.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1198,
+      "sha256": "0e55387ef93ecf965f143621ed8cb706bc9cfceec65d09064fd88029d342d577"
+    },
+    {
+      "file": "raw/starter/candidate_11.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1009,
+      "sha256": "86108ed2139e7179174149f1a0188b83c994d0529d55bf3009e760d55a223d24"
+    },
+    {
+      "file": "raw/starter/candidate_12.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1301,
+      "sha256": "3cbf8394d584a88a51d23948f455259378e0a969c38025a5cbdc9e253cd7d5bc"
+    },
+    {
+      "file": "raw/starter/candidate_13.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1086,
+      "sha256": "1048af68c32faf5f12a66cc906c4e9b64010b830769fe1d1c657bfd6f9d62f59"
+    },
+    {
+      "file": "raw/starter/candidate_14.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1081,
+      "sha256": "64bf205ea68b2c54dab49c1f829950de143b2aa3942d2903cb7548bdfccd1dc1"
+    },
+    {
+      "file": "raw/starter/candidate_15.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1102,
+      "sha256": "8f2e8c5974e1bd0237aee9dc16e2ae0f250d64e4ff0a602da707c87c517f2a6a"
+    },
+    {
+      "file": "raw/starter-engine/frame_00.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1182,
+      "sha256": "e7cc2c6a40c179876922f23e272caa95dd2375552e23a5f32ca91865c01425a0"
+    },
+    {
+      "file": "raw/starter-engine/frame_01.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1192,
+      "sha256": "e42f487cd7fe2a0574efcc1b33e9318cdc28480d68dc835656d23ad48b607dfa"
+    },
+    {
+      "file": "raw/starter-engine/frame_02.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1158,
+      "sha256": "72c86ba021d5c267eff48cf44428de9bf574a918be8304053ffa1a261c205804"
+    },
+    {
+      "file": "raw/starter-engine/frame_03.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1175,
+      "sha256": "11610827063da36f7bd5e011ffdaeaf22a804cc978eb0b6dbf7eb373f279b821"
+    },
+    {
+      "file": "raw/starter-engine/frame_04.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1165,
+      "sha256": "69cac239c718b2e3028dffb0429898ef35d22c5d72b52ef94104cb164f4ab160"
+    },
+    {
+      "file": "raw/starter-engine/frame_05.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1205,
+      "sha256": "38794bb914492a0e51bf14bdea25082d53063b4bde18d60559ce7c46233c466d"
+    },
+    {
+      "file": "raw/starter-engine/frame_06.png",
+      "width": 48,
+      "height": 30,
+      "bytes": 1180,
+      "sha256": "88895654bd9a0ecb7e17e9b2ecb4dffd7c16f003dfd03d8e43ac908ff168f401"
+    },
+    {
+      "file": "raw/starter-pixen.png",
+      "width": 48,
+      "height": 32,
+      "bytes": 1259,
+      "sha256": "0dffb7e2b635e88d872e4e56e7a102a6ad2b9cd11943109ff78bc43c3f420c76"
+    },
+    {
+      "file": "raw/turret-v2.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 502,
+      "sha256": "b033e0f64e905d577aaf17d91dde11505ba40c027f3607777216e9e0e671b9b5"
+    },
+    {
+      "file": "raw/turret.png",
+      "width": 24,
+      "height": 24,
+      "bytes": 504,
+      "sha256": "0a6ae6e10cb2e4e0ecd71afb45ff52e8e21d460dba9d00b2a5f9911473f3d34a"
+    },
+    {
+      "file": "references/starter-reference.png",
+      "width": 1586,
+      "height": 992,
+      "bytes": 406575,
+      "sha256": "0217145cb6122b8e58236efdbe1adc71effbd12f98579cb28af2e1bc9099c804"
+    }
+  ]
+}

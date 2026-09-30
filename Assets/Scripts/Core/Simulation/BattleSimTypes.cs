@@ -1031,7 +1031,8 @@ namespace Shmup.Core.Simulation
             LaserThicknessStage thicknessStage,
             int halfWidth,
             int phaseTicksRemaining,
-            int damage)
+            int damage,
+            int fullHalfWidth = 0)
         {
             Id = id;
             SourceKind = sourceKind;
@@ -1043,6 +1044,7 @@ namespace Shmup.Core.Simulation
             Phase = phase;
             ThicknessStage = thicknessStage;
             HalfWidth = halfWidth;
+            FullHalfWidth = Math.Max(halfWidth, fullHalfWidth);
             PhaseTicksRemaining = phaseTicksRemaining;
             Damage = damage;
         }
@@ -1057,6 +1059,12 @@ namespace Shmup.Core.Simulation
         public LaserPhase Phase { get; }
         public LaserThicknessStage ThicknessStage { get; }
         public int HalfWidth { get; }
+        /// <summary>
+        /// Width to warn about before the hostile beam reaches Sustaining.
+        /// Derived from its attack definition; HalfWidth remains the current
+        /// collision width. Player beams default to their current growing width.
+        /// </summary>
+        public int FullHalfWidth { get; }
         public int PhaseTicksRemaining { get; }
         public int Damage { get; }
         public bool IsDamaging =>

@@ -1786,6 +1786,38 @@ namespace Shmup.Core.Generation
 
                 if (viableIndices.Count != 0)
                     return;
+
+                // Keep the outcome's authored pieces first. Once its unused
+                // pool is exhausted, prefer an unused ordinary theme piece to
+                // repeating a tagged piece. The exit must still support the
+                // original outcome pool for the rest of the route, so this
+                // fallback cannot strand the assembler or change eligibility.
+                if (reusePriority == 0 && outcome != MidbossOutcomeKind.Default)
+                {
+                    for (int i = 0; i < _catalog.Segments.Count; i++)
+                    {
+                        StageSegmentTemplate candidate = _catalog.Segments[i];
+                        if (selectedTemplates[i]
+                            || !candidate.SupportsDifficulty(difficulty)
+                            || !candidate.SupportsTheme(themeId)
+                            || !candidate.SupportsMidbossOutcome(MidbossOutcomeKind.Default))
+                            continue;
+
+                        int exit = StagePlanClearability.Advance(
+                            reachable, candidate, _validLanes);
+                        if (exit == 0
+                            || !CanComplete(
+                                exit, segmentsRemaining, stageIndex, difficulty,
+                                themeId, outcome, completionCache))
+                            continue;
+
+                        viableIndices.Add(i);
+                        viableExits.Add(exit);
+                    }
+
+                    if (viableIndices.Count != 0)
+                        return;
+                }
             }
         }
 

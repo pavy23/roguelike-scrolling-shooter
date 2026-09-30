@@ -127,7 +127,9 @@ namespace Shmup.Presentation.Battle
             colors.selectedColor = Color.white;
             colors.fadeDuration = 0.06f;
             button.colors = colors;
+            go.AddComponent<UiFocusOutline>().Initialize();
             if (onClick != null) button.onClick.AddListener(onClick);
+            go.AddComponent<UiButtonFeedback>().Initialize(button);
             return button;
         }
 
@@ -244,7 +246,7 @@ namespace Shmup.Presentation.Battle
             shadow.effectDistance = new Vector2(distance, -distance);
         }
 
-        static Image CreateImage(Transform parent, string name, Color color)
+        public static Image CreateImage(Transform parent, string name, Color color)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);

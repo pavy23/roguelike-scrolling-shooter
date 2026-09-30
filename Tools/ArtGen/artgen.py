@@ -7,8 +7,10 @@
 사용 예:
   python artgen.py openai  --prompt "..." --out out/raw/ship.png [--n 2] [--model gpt-image-2]
   python artgen.py pixen   --prompt "..." --width 24 --height 24 --seed 7 --out out/raw/zako.png
+  python artgen.py native  --prompt-file prompt.txt --width 48 --height 30 --seed 7 \
+                           --reference concept.png --out-dir out/raw/ship [--resume]
   python artgen.py animate --first out/raw/boom0.png --action "exploding fireball" \
-                           --frames 8 --out-dir out/raw/expl
+                           --frames 8 --out-dir out/raw/expl [--last last.png] [--resume]
   python artgen.py post    --src out/raw/ship.png --target 48x30 --colors 48 \
                            --out ../../../art-input/player_ship.png
   python artgen.py sheet   --src-dir out/raw/expl --out out/final/fx_explosion_m.png
@@ -17,6 +19,7 @@
 """
 import argparse
 import base64
+import hashlib
 import json
 import os
 import sys
@@ -196,6 +199,10 @@ def cmd_pixen(args) -> None:
     }
     if args.seed is not None:
         payload["seed"] = args.seed
+    for name in ("outline", "detail", "view", "direction"):
+        value = getattr(args, name, None)
+        if value is not None:
+            payload[name] = value
     try:
         result = _post_json(f"{PIXELLAB_BASE}/create-image-pixen", payload, token)
     except SystemExit:
@@ -211,26 +218,210 @@ def cmd_pixen(args) -> None:
     _save_b64_png(images[0], Path(args.out))
 
 
-def cmd_animate(args) -> None:
-    token = _require_env("PIXELLAB_API_KEY")
+def cmd_native(args) -> None:
+    """Generate new native-size candidates with PixelLab Pro; never resize output.
+
+    A concept reference supplies design identity, not a pre-rendered sprite to
+    downscale. Keep requests, jobs and exact original results for art review.
+    """
+    out_dir = Path(args.out_dir)
+    request_path = out_dir / "request.json"
+    job_path = out_dir / "job.json"
+    if out_dir.exists() and any(out_dir.iterdir()) and not args.resume:
+        raise SystemExit(f"Output exists; use --resume for the same job: {out_dir}")
+    prompt = Path(args.prompt_file).read_text(encoding="utf-8-sig").strip()
+    if not 1 <= len(prompt) <= 2000:
+        raise SystemExit("Native generation prompt must contain 1-2000 characters.")
+    if not (16 <= args.width <= 792 and 16 <= args.height <= 688):
+        raise SystemExit("Native generation dimensions exceed the API limits.")
     payload = {
-        "first_frame": {"type": "base64", "base64": _b64_of(Path(args.first))},
+        "description": prompt,
+        "image_size": {"width": args.width, "height": args.height},
+        "seed": args.seed,
+        "no_background": True,
+    }
+    record = dict(payload)
+    if args.reference:
+        ref_path = Path(args.reference)
+        with Image.open(ref_path) as reference:
+            ref_size = {"width": reference.width, "height": reference.height}
+        payload["reference_images"] = [{
+            "image": {"type": "base64", "base64": _b64_of(ref_path)},
+            "size": ref_size,
+            "usage_description": "Design and palette reference for the new sprite; redraw at native resolution, do not inherit the enlarged pixel grid.",
+        }]
+        record["reference_file"] = ref_path.as_posix()
+        record["reference_size"] = ref_size
+        record["reference_sha256"] = hashlib.sha256(ref_path.read_bytes()).hexdigest()
+    record["endpoint"] = "/generate-image-v2"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if args.resume:
+        if not request_path.exists() or not job_path.exists():
+            raise SystemExit("Cannot resume without the saved request and job.")
+        if json.loads(request_path.read_text(encoding="utf-8")) != record:
+            raise SystemExit("Resume arguments differ from the original request.")
+        accepted = json.loads(job_path.read_text(encoding="utf-8"))
+    else:
+        request_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        accepted = _post_json(f"{PIXELLAB_BASE}/generate-image-v2", payload,
+                              _require_env("PIXELLAB_API_KEY"))
+        job_path.write_text(json.dumps(accepted, indent=2) + "\n", encoding="utf-8")
+    job_id = accepted.get("background_job_id")
+    if not job_id:
+        raise SystemExit("API did not return a generation job; inspect saved job.json.")
+    print(f"accepted: {job_id}; usage={accepted.get('usage')}", flush=True)
+    result = _wait_background_job(job_id, _require_env("PIXELLAB_API_KEY"))
+    content = result.get("last_response", result)
+    images = _find_b64_images(content)
+    if not images:
+        # Keep diagnostics local without echoing an image payload into the terminal.
+        (out_dir / "response.json").write_text(json.dumps(result), encoding="utf-8")
+        raise SystemExit("Completed job had no base64 image; inspect response.json.")
+    outputs = []
+    for i, b64 in enumerate(images):
+        path = out_dir / f"candidate_{i:02d}.png"
+        _save_b64_png(b64, path)
+        with Image.open(path) as generated:
+            outputs.append({"file": path.name, "width": generated.width,
+                            "height": generated.height,
+                            "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+    (out_dir / "outputs.json").write_text(json.dumps({
+        "job_id": job_id, "usage": accepted.get("usage"),
+        "completed_usage": result.get("usage"),
+        "requested_size": payload["image_size"], "outputs": outputs,
+        "status": "candidate_pending_native_size_and_art_review",
+        "postprocessing": "none; original generated bytes preserved",
+    }, indent=2) + "\n", encoding="utf-8")
+    print(f"Saved {len(outputs)} unmodified native candidates.")
+
+
+def cmd_animate(args) -> None:
+    """Keep paid jobs resumable and never mistake echoed inputs for frames."""
+    out_dir = Path(args.out_dir)
+    request_path, job_path = out_dir / "request.json", out_dir / "job.json"
+    resume = getattr(args, "resume", False)
+    if out_dir.exists() and any(out_dir.iterdir()) and not resume:
+        raise SystemExit(f"Output exists; use --resume for the same job: {out_dir}")
+    if args.frames not in range(4, 17, 2):
+        raise SystemExit("Animation frame count must be even and between 4 and 16.")
+    if not 1 <= len(args.action) <= 1000:
+        raise SystemExit("Animation action must contain 1-1000 characters.")
+    payload = {
         "action": args.action,
         "frame_count": args.frames,
         "no_background": True,
     }
+    record = dict(payload)
+    first_size = None
+    for role in ("first", "last"):
+        value = getattr(args, role, None)
+        if not value:
+            continue
+        path = Path(value)
+        with Image.open(path) as source:
+            size = source.size
+        if max(size) > 256 or size[0] * size[1] * args.frames > 524288:
+            raise SystemExit("Animation input exceeds the API pixel limits.")
+        if first_size is None:
+            first_size = size
+        elif size != first_size:
+            raise SystemExit("Animation first and last frames must use the same canvas.")
+        payload[f"{role}_frame"] = {"type": "base64", "base64": _b64_of(path)}
+        record[f"{role}_frame"] = {"file": path.as_posix(), "size": list(size),
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
     if args.seed is not None:
         payload["seed"] = args.seed
-    result = _post_json(f"{PIXELLAB_BASE}/animate-with-text-v3", payload, token)
-    if result.get("background_job_id"):
-        result = _wait_background_job(result["background_job_id"], token)
-    images = _find_b64_images(result)
-    # first_frame을 에코할 수 있으니 요청 프레임 수보다 많으면 앞에서 자른다.
+        record["seed"] = args.seed
+    if getattr(args, "drift_threshold", None) is not None:
+        if args.drift_threshold < 0:
+            raise SystemExit("Drift threshold must be non-negative.")
+        payload["drift_threshold"] = args.drift_threshold
+        record["drift_threshold"] = args.drift_threshold
+    record["endpoint"] = "/animate-with-text-v3"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if resume:
+        if not request_path.exists() or not job_path.exists():
+            raise SystemExit("Cannot resume without the saved request and job.")
+        if json.loads(request_path.read_text(encoding="utf-8")) != record:
+            raise SystemExit("Resume arguments differ from the original request.")
+        accepted = json.loads(job_path.read_text(encoding="utf-8"))
+    else:
+        request_path.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        accepted = _post_json(f"{PIXELLAB_BASE}/animate-with-text-v3", payload,
+                              _require_env("PIXELLAB_API_KEY"))
+        job_path.write_text(json.dumps(accepted, indent=2) + "\n", encoding="utf-8")
+    job_id = accepted.get("background_job_id")
+    if not job_id:
+        raise SystemExit("API did not return an animation job; inspect saved job.json.")
+    print(f"accepted: {job_id}; usage={accepted.get('usage')}", flush=True)
+    result = _wait_background_job(job_id, _require_env("PIXELLAB_API_KEY"))
+    content = result.get("last_response") or {}
+    # Official v3 output contract is last_response.images. Other fields can
+    # include source images, thumbnails or echoes; they are not animation frames.
+    images = _find_b64_images(content.get("images", []))
     if not images:
-        raise SystemExit(f"프레임이 응답에 없다:\n{json.dumps(result)[:2000]}")
-    out_dir = Path(args.out_dir)
+        raise SystemExit("Completed job has no last_response.images; use --resume to inspect this job without paying again.")
+    outputs = []
     for i, b64 in enumerate(images):
-        _save_b64_png(b64, out_dir / f"frame_{i:02d}.png")
+        path = out_dir / f"frame_{i:02d}.png"
+        _save_b64_png(b64, path)
+        with Image.open(path) as frame:
+            outputs.append({"file": path.name, "width": frame.width, "height": frame.height,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+    (out_dir / "outputs.json").write_text(json.dumps({
+        "job_id": job_id, "accepted_usage": accepted.get("usage"),
+        "completed_usage": result.get("usage"), "requested_frames": args.frames,
+        "returned_frames": len(outputs), "frame_count_matches": len(outputs) == args.frames,
+        "outputs": outputs, "status": "candidate_pending_frame_continuity_and_art_review",
+        "postprocessing": "none; original generated bytes preserved",
+    }, indent=2) + "\n", encoding="utf-8")
+    print(f"Saved {len(outputs)} output frames; requested {args.frames}. Review continuity before use.")
+
+
+def cmd_inpaint_native(args) -> None:
+    """Edit a native sprite through a provider mask, keeping all returned PNG bytes."""
+    source, mask_path, out_dir = Path(args.src), Path(args.mask), Path(args.out_dir)
+    if out_dir.exists() and any(out_dir.iterdir()):
+        raise SystemExit(f"Output exists; do not purchase the same edit again: {out_dir}")
+    description = Path(args.prompt_file).read_text(encoding="utf-8-sig").strip()
+    if not 1 <= len(description) <= 2000:
+        raise SystemExit("Inpaint prompt must contain 1-2000 characters.")
+    with Image.open(source) as original, Image.open(mask_path) as mask:
+        width, height = original.size
+        if original.size != mask.size or not (16 <= width <= 200 and 16 <= height <= 200):
+            raise SystemExit("Inpaint source/mask must match and be 16-200 pixels on each side.")
+        mask_rgba = mask.convert("RGBA")
+        mask_values = mask_rgba.get_flattened_data() if hasattr(mask_rgba, "get_flattened_data") else mask_rgba.getdata()
+        if any(pixel not in ((0, 0, 0, 255), (255, 255, 255, 255)) for pixel in mask_values):
+            raise SystemExit("Inpaint mask must contain only opaque black and white pixels.")
+    palette_path = Path(args.palette) if getattr(args, "palette", None) else source
+    payload = {"description": description, "image_size": {"width": width, "height": height},
+        "inpainting_image": {"type": "base64", "base64": _b64_of(source)},
+        "mask_image": {"type": "base64", "base64": _b64_of(mask_path)},
+        "color_image": {"type": "base64", "base64": _b64_of(palette_path)},
+        "no_background": True, "seed": args.seed, "text_guidance_scale": 5.0}
+    record = {key: value for key, value in payload.items()
+        if key not in ("inpainting_image", "mask_image", "color_image")}
+    record.update(endpoint="/inpaint", source_file=source.as_posix(), mask_file=mask_path.as_posix(),
+        source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+        mask_sha256=hashlib.sha256(mask_path.read_bytes()).hexdigest(),
+        color_reference=palette_path.as_posix(), palette_sha256=hashlib.sha256(palette_path.read_bytes()).hexdigest())
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "request.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    result = _post_json(f"{PIXELLAB_BASE}/inpaint", payload, _require_env("PIXELLAB_API_KEY"))
+    outputs = []
+    for i, b64 in enumerate(_find_b64_images(result.get("image") or result.get("images") or {})):
+        path = out_dir / f"candidate_{i:02d}.png"
+        _save_b64_png(b64, path)
+        with Image.open(path) as generated:
+            outputs.append({"file": path.name, "width": generated.width, "height": generated.height,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+    (out_dir / "outputs.json").write_text(json.dumps({"usage": result.get("usage"), "outputs": outputs,
+        "status": "candidate_pending_mask_invariance_and_art_review",
+        "postprocessing": "none; provider PNG bytes preserved"}, indent=2) + "\n", encoding="utf-8")
+    if not outputs:
+        raise SystemExit("Provider returned no image; inspect the saved request before any retry.")
+    print(f"Saved {len(outputs)} unmodified native masked edit candidates.")
 
 
 def cmd_pixelart(args) -> None:
@@ -415,7 +606,21 @@ def main() -> None:
     p.add_argument("--height", type=int, required=True)
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--out", required=True)
+    p.add_argument("--outline", choices=("single color black outline", "single color outline", "selective outline", "lineless"))
+    p.add_argument("--detail", choices=("low detail", "medium detail", "highly detailed"))
+    p.add_argument("--view", choices=("side", "low top-down", "high top-down"))
+    p.add_argument("--direction", choices=("north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"))
     p.set_defaults(func=cmd_pixen)
+
+    p = sub.add_parser("native", help="PixelLab Pro native-size generation with saved provenance")
+    p.add_argument("--prompt-file", required=True)
+    p.add_argument("--width", type=int, required=True)
+    p.add_argument("--height", type=int, required=True)
+    p.add_argument("--seed", type=int, required=True)
+    p.add_argument("--reference", help="Design reference PNG; not a downscale source")
+    p.add_argument("--out-dir", required=True)
+    p.add_argument("--resume", action="store_true", help="Poll the saved job without purchasing another generation")
+    p.set_defaults(func=cmd_native)
 
     p = sub.add_parser("animate", help="PixelLab animate-with-text-v3로 프레임 생성")
     p.add_argument("--first", required=True, help="첫 프레임 PNG (max 256x256)")
@@ -423,7 +628,19 @@ def main() -> None:
     p.add_argument("--frames", type=int, default=8, help="4-16 짝수")
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--out-dir", required=True)
+    p.add_argument("--last", help="Optional last frame to keep a loop seam stable")
+    p.add_argument("--drift-threshold", type=float, default=None, help="API color de-flicker threshold")
+    p.add_argument("--resume", action="store_true", help="Poll the saved job without purchasing another animation")
     p.set_defaults(func=cmd_animate)
+
+    p = sub.add_parser("inpaint-native", help="PixelLab native-size masked edit with saved provenance")
+    p.add_argument("--palette", help="Optional palette control PNG; defaults to source colors")
+    p.add_argument("--src", required=True)
+    p.add_argument("--mask", required=True)
+    p.add_argument("--prompt-file", required=True)
+    p.add_argument("--seed", type=int, required=True)
+    p.add_argument("--out-dir", required=True)
+    p.set_defaults(func=cmd_inpaint_native)
 
     p = sub.add_parser("pixelart", help="고해상 원본을 PixelLab image-to-pixelart로 네이티브 픽셀화")
     p.add_argument("--src", required=True)

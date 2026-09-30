@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "curation": "ArtRevamp/SFC-20260930/CURATION.md",
+  "userApproval": "현재후보 ㄱㄱ 그리고 다음작업",
+  "status": "adopted_deployed",
+  "assets": [
+    {
+      "source": "ArtRevamp/SFC-20260930/banking/raw/masked-up-fold/candidate_00.png",
+      "asset": "Assets/Art/Sprites/sfc_player_bank_up_00.png",
+      "sha256": "8b69e7a8b2b116888a8b17ea87597160275f00951853449b8485a6d4661cda98",
+      "width": 48,
+      "height": 30,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/banking/raw/bank-up-engine-warm/candidate_00.png",
+      "asset": "Assets/Art/Sprites/sfc_player_bank_up_01.png",
+      "sha256": "14b9c231c8897f91cd5915c2dddc41cf726e097755d5c34ba377366cc595ee5b",
+      "width": 48,
+      "height": 30,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/banking/raw/masked-down-fold/candidate_00.png",
+      "asset": "Assets/Art/Sprites/sfc_player_bank_down_00.png",
+      "sha256": "264c9147d77b35634d2bd86c8c77d6dd866539055c07dbd87ec59509915c8b94",
+      "width": 48,
+      "height": 30,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/banking/raw/bank-down-engine-warm/candidate_00.png",
+      "asset": "Assets/Art/Sprites/sfc_player_bank_down_01.png",
+      "sha256": "2003d0c541d65217cd8964f887d62e98d3910af63ed237a894b1f14a763501d3",
+      "width": 48,
+      "height": 30,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "engineFps": 10,
+  "legacyArtInputMayOverride": false,
+  "rasterPostprocessing": "none; approved PNG bytes copied unchanged",
+  "webglDeployed": true,
+  "deployedSourceCommit": "7eefb4c6d9cb6dd2ee2df238228743aceadb01eb",
+  "deploymentCommit": "6f676fb5f7255776928a6c546df5a9b736afbbbe",
+  "playUrl": "https://pavy23.github.io/rss-play/?v=20260930-222926-7eefb4c",
+  "servedVerification": "adoption-review/served-verification.json"
+}

@@ -1,0 +1,12 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "One grounded armored sci-fi gun turret, horizontal side view with a single cannon pointing LEFT. Premium 16-bit console pixel art. A long readable horizontal dark metal barrel with ivory highlights, an angular warm ivory armor housing over navy machinery, a single small amber sensor, a solid low cobalt-grey pedestal. Broad clean armor planes, no fine etched panel noise, about 20 opaque colors and three hue-shifted tones per material, selective dark navy outline. Center the compact complete turret in an actual 24x24 native pixel canvas with a one-pixel transparent border. The barrel and base must be distinct silhouettes. Transparent background with hard alpha. No scene, ground plane, shadow, text, grid, muzzle flash or bullets. Original refined SFC shooter style.",
+  "image_size": { "width": 24, "height": 24 },
+  "seed": 2026093004,
+  "outline": "selective outline",
+  "detail": "medium detail",
+  "view": "side",
+  "direction": "west",
+  "no_background": true
+}

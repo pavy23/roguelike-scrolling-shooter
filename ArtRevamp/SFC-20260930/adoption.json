@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "curation": "ArtRevamp/SFC-20260930/CURATION.md",
+  "userApproval": "계속 가자",
+  "status": "adopted_integrated_and_deployed",
+  "deployedSourceCommit": "4767e78d888031ed19fdecf1d226b5ca15a6f3b9",
+  "playUrl": "https://pavy23.github.io/rss-play/?v=20260930-184433-4767e78",
+  "validationRecord": "ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md",
+  "assets": [
+    {
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+      "asset": "Assets/Art/Sprites/sfc_player_ship.png",
+      "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097",
+      "width": 48,
+      "height": 30,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/starter-engine/frame_01.png",
+      "asset": "Assets/Art/Sprites/sfc_player_engine_01.png",
+      "sha256": "e42f487cd7fe2a0574efcc1b33e9318cdc28480d68dc835656d23ad48b607dfa",
+      "width": 48,
+      "height": 30,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/drone.png",
+      "asset": "Assets/Art/Sprites/enemy_sfc_drone.png",
+      "sha256": "bcd32d01f00886a2b0643a9839c880ed6737887cb5c8a15f262c6e2adab7da35",
+      "width": 24,
+      "height": 24,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/fast-v2.png",
+      "asset": "Assets/Art/Sprites/enemy_sfc_fast.png",
+      "sha256": "c01068e8e9f3786219481cf59ff9e08b41a34b30f0dfaff722d87a5370cfd343",
+      "width": 24,
+      "height": 24,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "ArtRevamp/SFC-20260930/pilot/raw/turret-v2.png",
+      "asset": "Assets/Art/Sprites/enemy_sfc_turret.png",
+      "sha256": "b033e0f64e905d577aaf17d91dde11505ba40c027f3607777216e9e0e671b9b5",
+      "width": 24,
+      "height": 24,
+      "ppu": 16,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "engineFrames": [
+    "sfc_player_ship",
+    "sfc_player_engine_01"
+  ],
+  "engineFps": 10,
+  "staticEnemyClips": [
+    "zako_straight",
+    "zako_fast",
+    "turret"
+  ],
+  "legacyArtInputMayOverride": false,
+  "rasterPostprocessing": "none; original candidate PNG bytes copied unchanged"
+}

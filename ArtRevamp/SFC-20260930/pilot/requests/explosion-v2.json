@@ -1,0 +1,11 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "One iconic 16-bit console pixel-art explosion sprite, native 48x48 transparent canvas. A compact rounded fireball flash in the center, a connected irregular six-lobed silhouette, about 30 pixels across leaving a wide transparent margin. White-hot small core, pale yellow inner lobes, rich amber middle band, vermilion outer rim. ONLY 8 flat opaque palette colors, four broad stepped concentric color bands, strong beautiful pixel clusters. Smooth asymmetry made with deliberate pixel steps, not star-shaped long thin spikes. No smoky haze, glow, antialiasing, dither, tiny confetti, detached pixels, text, frames or background. One explosion only. Hard alpha and perfectly crisp edges.",
+  "image_size": { "width": 48, "height": 48 },
+  "seed": 2026093010,
+  "outline": "lineless",
+  "detail": "low detail",
+  "view": "side",
+  "no_background": true
+}

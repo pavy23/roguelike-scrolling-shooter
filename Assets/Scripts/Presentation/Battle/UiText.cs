@@ -7,12 +7,29 @@ namespace Shmup.Presentation.Battle
     /// </summary>
     public static class UiText
     {
+        public const string OnboardingStep = "FLIGHT GUIDE  {0}/3";
+        public const string OnboardingMoveTouch = "Drag to move your ship.\nWeapons fire automatically.";
+        public const string OnboardingAutomaticFire = "WEAPONS FIRE AUTOMATICALLY";
+        public const string OnboardingCollect = "Collect a capsule dropped by an enemy.\nEach capsule moves the highlight on the gauge below.";
+        public const string OnboardingInvest = "Press {0} to invest in the highlighted slot.\nCollect more capsules to choose a different slot.";
+        public const string OnboardingSelect = "Collect a capsule to highlight a slot.\nThen press {0} to invest in it.";
+        public const string OnboardingContract = "Upgrades are locked by this sector's contract.\nContinue this guide when upgrades are available.";
+        public const string OnboardingUnavailable = "This slot is locked or already at its limit.\nCollect a capsule to move to another slot.";
+        public const string OnboardingCompleteTitle = "FLIGHT GUIDE COMPLETE";
+        public const string OnboardingComplete = "Move, collect, invest - you are ready.\nReplay this guide anytime from Options.";
+        public const string ReplayGuide = "REPLAY FLIGHT GUIDE";
+        public const string GaugeCollect = "COLLECT A CAPSULE TO SELECT AN UPGRADE";
+        public const string GaugeMax = "{0} MAX - COLLECT TO MOVE SELECTION";
+        public const string GaugeLocked = "CONTRACT LOCK - {0}";
+        public const string GaugeInvest = "{0}  {1}/{2}   |   {3} INVEST";
+        public const string GaugeUpgrade = "{0}   |   {1} UPGRADE";
+
         // 온보딩 (첫 런 3단계)
         // 폭탄(B)을 빼놓고 있었다. 키는 처음부터 있었는데 안내에 없어서 사람이
         // "폭탄도 키보드로 누를수 있게 해줘(이미 되어있나?)"라고 물었다 —
         // 화면에 적히지 않은 조작은 없는 것과 같다 (2026-08-05).
         public const string Onboarding1 =
-            "MOVE  WASD / LEFT STICK      FIRE  SPACE / (A)      "
+            "MOVE  WASD / LEFT STICK      FIRE  AUTOMATIC      "
             + "BOMB  B / (B)      PAUSE  ESC / (START)";
         public const string Onboarding2 =
             "Destroy enemies to drop capsules - each one advances the gauge below";
@@ -22,7 +39,7 @@ namespace Shmup.Presentation.Battle
         // 일시정지
         public const string PauseTitle = "PAUSED";
         public const string PauseHints =
-            "ESC / (START) RESUME      O / (SELECT) OPTIONS      Q QUIT TO TITLE";
+            "ESC / (START) RESUME   O / (SELECT) OPTIONS   V / (Y) AUDIO   Q QUIT";
         public const string VolumeFormat = "VOLUME  {0}%   (LEFT / RIGHT)";
 
         // 게임오버 / 완주

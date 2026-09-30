@@ -1,0 +1,12 @@
+{
+  "backend": "pixen",
+  "endpoint": "/create-image-pixen",
+  "description": "One small long narrow red enemy interceptor starfighter, exact horizontal side view facing LEFT, for a refined 16-bit console scrolling shooter. Needle-like left-facing nose, broad vermilion swept fins, dark navy mechanical fuselage, small amber canopy, two short vivid orange engines at the right. Distinct long triangular silhouette, clearly different from a round drone. White edge highlights only on the upper armor planes. Elegant controlled pixel clusters, about 20 opaque colors, three hue-shifted tones per material, no noisy etching, no single-pixel confetti. Fits inside a 22 by 14 pixel region centered in the native 24x24 canvas. Transparent background with hard alpha. No text, ground, shadows, bullets, grid, antialiasing or soft glow.",
+  "image_size": { "width": 24, "height": 24 },
+  "seed": 2026093003,
+  "outline": "selective outline",
+  "detail": "medium detail",
+  "view": "side",
+  "direction": "west",
+  "no_background": true
+}

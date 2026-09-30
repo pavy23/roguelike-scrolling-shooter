@@ -29,10 +29,9 @@ namespace Shmup.Presentation.Battle
     /// 3. **원점 표식.** 예고 내내 발사 원점에 차지 글로우를 띄운다. 어디서
     ///    나오는지 보이지 않으면 예고선을 봐도 피할 방향을 못 정한다.
     ///
-    /// **발사는 원점에서 앞으로 뻗어 나간다.** 예전에는 Firing 진입 프레임에 전장이
-    /// 통째로 켜져서 "갑자기 나타난다"로 읽혔다(사람 지적 2026-08-01). 선단이 원점에서
-    /// 끝점까지 뻗는 아주 짧은 연출을 넣되, Core 히트박스는 진입 즉시 전장이므로
-    /// 길게 끌지 않는다 — 늦으면 "안 보이는 곳에서 맞았다"가 된다.
+    /// 예고 폭은 Core의 FullHalfWidth로 첫 사이클부터 표시한다. Firing 첫 틱부터
+    /// 전장에 피해 판정이 있으므로 본체·코어도 즉시 전장을 덮는다. 원점에서 앞으로
+    /// 뻗는 연출은 바깥 광채에만 적용해 위험 구간의 표시를 지연시키지 않는다.
     ///
     /// 순수 표현 — 판정은 전부 Core의 선분 대 원 정수 연산이 한다.
     /// </summary>
@@ -127,20 +126,12 @@ namespace Shmup.Presentation.Battle
         /// <summary>코어(중심 흰 선) 최소 두께 (2px).</summary>
         const float MinCoreThickness = 0.125f;
 
-        /// <summary>
-        /// 아직 실폭을 못 본 빔의 예고 두께 기준값 (12px). Core는 Telegraph 단계에
-        /// ThinHalfWidth만 주므로 첫 사이클에는 실폭을 알 수 없다 — 같은 발사체가
-        /// Sustaining에 들어가면 그때 실측값으로 갱신된다. 과대 표기는 안전한 쪽
-        /// 오차다(더 넓게 피한다). 과소 표기는 맞고 나서야 알게 된다.
-        /// </summary>
-        const float FallbackFullThickness = 0.75f;
-
         /// <summary>Sustaining 코어가 외곽에서 차지하는 비율.</summary>
         const float CoreFraction = 0.42f;
 
         /// <summary>
-        /// 발사 순간 선단이 원점에서 끝점까지 뻗는 데 걸리는 시간. Core는 Firing 첫 틱부터
-        /// 전장으로 판정하므로 이 값은 "눈이 방향을 읽을 수 있는 최소치"여야 한다.
+        /// 발사 순간 바깥 광채가 원점에서 끝점까지 뻗는 시간. 본체·코어의 길이에는
+        /// 영향을 주지 않는다.
         /// </summary>
         const float GrowSeconds = 0.18f;
 
@@ -195,10 +186,6 @@ namespace Shmup.Presentation.Battle
         readonly List<int> _trackIds = new List<int>(8);
         readonly List<float> _growAges = new List<float>(8);
         readonly List<float> _blinkPhases = new List<float>(8);
-
-        // 발사원별 실측 빔 폭 (월드 유닛). 같은 포탑이 사이클을 돌며 다시 쏘므로
-        // 두 번째 예고부터는 정확한 위험 폭을 보여 줄 수 있다.
-        readonly Dictionary<int, float> _knownFullThickness = new Dictionary<int, float>();
 
         // 스프라이트 스케일 1이 만드는 월드 크기 — px_white는 2px/PPU16 = 0.125u다.
         float _unitX = 1f;
@@ -278,9 +265,8 @@ namespace Shmup.Presentation.Battle
                     // 풀이 모자라 못 그린 빔도 살아 있는 것은 맞다 — 여기서 빠뜨리면
                     // 추적 기록이 지워졌다가 다음 프레임에 처음부터 다시 뻗는다.
                     _seen.Add(laser.Id);
-                    LearnFullThickness(laser);
                     if (slot >= _bands.Count) continue;
-                    Draw(slot++, laser);
+                    Draw(slot++, laser, Time.deltaTime);
                 }
             }
 
@@ -321,47 +307,18 @@ namespace Shmup.Presentation.Battle
             return _trackIds.Count - 1;
         }
 
-        static int SourceKey(in LaserState laser)
-            => (int)laser.SourceKind * 1000003 + laser.SourceEntityId;
-
         /// <summary>
-        /// Sustaining 단계는 Core가 FullHalfWidth를 그대로 준다 — 그때 실폭을 기억해
-        /// 같은 발사원의 다음 예고를 정확한 폭으로 그린다.
+        /// 바깥 광채의 길이 비율 (0~1). Firing 구간에만 적용한다.
         /// </summary>
-        void LearnFullThickness(in LaserState laser)
-        {
-            if (laser.SourceKind == LaserSourceKind.Player) return;
-            if (laser.ThicknessStage != LaserThicknessStage.Full) return;
-            float thickness = 2f * laser.HalfWidth / SimSpace.SubUnitsPerWorldUnit;
-            if (thickness <= 0.0001f) return;
-            // 런이 길어지면 죽은 엔티티 id가 쌓인다 — 통째로 비우고 다시 배운다.
-            if (_knownFullThickness.Count > 64) _knownFullThickness.Clear();
-            _knownFullThickness[SourceKey(laser)] = thickness;
-        }
-
-        float FullThicknessFor(in LaserState laser, float trueThickness)
-        {
-            if (laser.SourceKind == LaserSourceKind.Player) return trueThickness;
-            float known = _knownFullThickness.TryGetValue(SourceKey(laser), out float value)
-                ? value : FallbackFullThickness;
-            return Mathf.Max(known, trueThickness);
-        }
-
-        /// <summary>
-        /// 지금 그려야 할 길이 비율 (0~1). 예고는 전장으로 보여 줘야 어디를 피할지 알 수
-        /// 있고, 발사 이후 단계(Sustaining/Dissipating)는 이미 다 뻗은 뒤다 —
-        /// 뻗는 연출은 Firing 구간만의 것이다.
-        /// </summary>
-        float GrowFraction(int track, in LaserState laser)
+        float GrowFraction(int track, in LaserState laser, float deltaTime)
         {
             if (laser.Phase != LaserPhase.Firing) return 1f;
 
-            float age = _growAges[track] + Time.deltaTime;
+            float age = _growAges[track] + deltaTime;
             _growAges[track] = age;
             if (age >= GrowSeconds) return 1f;
 
-            // 감속 곡선: 선단이 초반에 확 튀어나가고 끝에서 붙는다. 등속으로 늘리면
-            // "천천히 자란다"로 읽혀 히트박스(이미 전장)와의 어긋남이 더 눈에 띈다.
+            // 감속 곡선: 광채가 초반에 확 튀어나가고 끝에서 붙는다.
             float t = age / GrowSeconds;
             return Mathf.Max(1f - (1f - t) * (1f - t), MinGrowFraction);
         }
@@ -370,14 +327,14 @@ namespace Shmup.Presentation.Battle
         /// 예고 맥동 값 (0~1). 주기를 위상 누적으로 굴려 임박 구간에서 주파수가
         /// 바뀌어도 밝기가 튀지 않는다.
         /// </summary>
-        float Pulse(int track, float hz)
+        float Pulse(int track, float hz, float deltaTime)
         {
-            float phase = Mathf.Repeat(_blinkPhases[track] + Time.deltaTime * hz, 1f);
+            float phase = Mathf.Repeat(_blinkPhases[track] + deltaTime * hz, 1f);
             _blinkPhases[track] = phase;
             return 0.5f - 0.5f * Mathf.Cos(phase * 2f * Mathf.PI);
         }
 
-        void Draw(int slot, in LaserState laser)
+        void Draw(int slot, in LaserState laser, float deltaTime)
         {
             var outer = _outers[slot];
             var band = _bands[slot];
@@ -406,10 +363,18 @@ namespace Shmup.Presentation.Battle
             // Core가 준 반폭 = 지금 이 순간의 실제 히트박스 폭.
             float trueThickness = Mathf.Max(
                 2f * laser.HalfWidth / SimSpace.SubUnitsPerWorldUnit, MinCoreThickness);
-            float fullThickness = FullThicknessFor(laser, trueThickness);
+            float fullThickness = laser.SourceKind == LaserSourceKind.Player
+                ? trueThickness
+                : Mathf.Max(2f * laser.FullHalfWidth / SimSpace.SubUnitsPerWorldUnit, trueThickness);
 
-            float grow = GrowFraction(track, laser);
+            float grow = GrowFraction(track, laser, deltaTime);
             bool player = laser.SourceKind == LaserSourceKind.Player;
+            bool reduced = _director != null && _director.FlashReduced;
+            int order = player ? CombatReadability.FriendlyLaserOrder : CombatReadability.HostileLaserOrder;
+            outer.sortingOrder = order;
+            band.sortingOrder = order + 1;
+            core.sortingOrder = order + 2;
+            glow.sortingOrder = impact.sortingOrder = order + 3;
 
             float bandThickness, coreThickness;
             Color bandColor, coreColor;
@@ -422,7 +387,8 @@ namespace Shmup.Presentation.Battle
                 {
                     float toFire = laser.PhaseTicksRemaining / (float)SimSpace.TicksPerSecond;
                     bool imminent = toFire <= ImminentSeconds;
-                    float pulse = Pulse(track, imminent ? ImminentPulseHz : TelegraphPulseHz);
+                    // Reduced-flash keeps the complete warning shape and a steady urgency level.
+                    float pulse = reduced ? .5f : Pulse(track, imminent ? ImminentPulseHz : TelegraphPulseHz, deltaTime);
                     float alpha = imminent
                         ? Mathf.Lerp(ImminentAlphaMin, ImminentAlphaMax, pulse)
                         : Mathf.Lerp(TelegraphAlphaMin, TelegraphAlphaMax, pulse);
@@ -488,20 +454,19 @@ namespace Shmup.Presentation.Battle
                 }
             }
 
-            // 원점(Start)에 뿌리를 박고 선단만 앞으로 뻗는다 — 중심이 아니라 시작점이
-            // 고정돼야 "쏘아 나간다"로 읽힌다.
-            Vector3 center = start + delta * (0.5f * grow);
-            float drawn = length * grow;
+            // 본체·코어는 첫 피해 틱부터 판정 선분 전체를 표시한다.
+            Vector3 center = start + delta * 0.5f;
 
             // 후보 C: 바깥 광채 → 본체 → 흰 코어. 세 겹 다 감쇠가 구워진 같은
             // 스프라이트라, 겹칠수록 가운데가 단단해지고 바깥이 부드럽게 사라진다.
             Color outerColor = bandColor;
             outerColor.a = bandColor.a * OuterAlphaScale;
+            if (reduced) outerColor.a *= .45f;
             PlaceQuad(
-                outer, center, rotation, drawn,
+                outer, start + delta * (0.5f * grow), rotation, length * grow,
                 bandThickness * OuterWidthScale, outerColor);
-            PlaceQuad(band, center, rotation, drawn, bandThickness, bandColor);
-            PlaceQuad(core, center, rotation, drawn, coreThickness, coreColor);
+            PlaceQuad(band, center, rotation, length, bandThickness, bandColor);
+            PlaceQuad(core, center, rotation, length, coreThickness, coreColor);
 
             // 총구 플레어 — 원점에 박혀 "여기서 나온다"를 말한다.
             //
@@ -513,20 +478,18 @@ namespace Shmup.Presentation.Battle
             // 캡은 방사 감쇠라, 빔 두께보다 조금 크게 걸면 그 원호가 빔의 시작
             // 단면을 덮어 둥근 머리가 된다.
             float capSize = Mathf.Max(chargeSize, bandThickness * MuzzleCapWidthScale);
-            PlaceCap(glow, start, rotation, capSize, glowAlpha,
+            PlaceCap(glow, start, rotation, capSize, glowAlpha * (reduced ? .4f : 1f),
                 player ? PlayerCore : bandColor);
 
-            // 착탄 스플래시 — 선단에 붙어 "여기에 닿는다"를 말한다. 뻗는 중에는
-            // 선단이 곧 현재 끝이므로 grow를 따라간다. 예고 중에는 띄우지 않는다 —
-            // 아직 아무 데도 닿지 않았는데 착탄점이 있으면 거짓말이 된다.
+            // 착탄 캡도 실제 선분 끝에 고정한다. 예고 중에는 띄우지 않는다.
             bool hitting = laser.Phase == LaserPhase.Firing
                 || laser.Phase == LaserPhase.Sustaining;
             PlaceCap(
                 impact,
-                start + delta * grow,
+                end,
                 rotation,
                 hitting ? coreThickness * ImpactSizeScale : 0f,
-                hitting ? coreColor.a * 0.9f : 0f,
+                hitting ? coreColor.a * (reduced ? .35f : .9f) : 0f,
                 coreColor);
         }
 

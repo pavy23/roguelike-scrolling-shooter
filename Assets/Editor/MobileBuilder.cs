@@ -74,7 +74,8 @@ namespace Shmup.EditorTools
                 UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
 
             string outDir = Path.GetFullPath(
-                Path.Combine(Application.dataPath, "..", "Builds", "Web"));
+                System.Environment.GetEnvironmentVariable("RSS_WEB_BUILD_OUTPUT")
+                ?? Path.Combine(Application.dataPath, "..", "Builds", "Web"));
             Directory.CreateDirectory(outDir);
 
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
