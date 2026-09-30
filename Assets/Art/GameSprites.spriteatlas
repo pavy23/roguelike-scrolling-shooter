@@ -53,6 +53,7 @@ SpriteAtlas:
     packedSpriteRenderDataKeys:
     - 954173008d05e4e42a567ab770ae6256: 21300000
     - 3b029c00c8285f94ea29c32ddede2078: 21300000
+    - 759ced001f21e364f9342bc5441661e0: 21300000
     - 61dc3e00ca59a3246a533f9ca4ff0d96: 21300000
     - 3d127f00e54e0e54b98de63277603869: 21300000
     - c252bb40ed75f474e91deb0463db8c04: 21300000
@@ -154,6 +155,7 @@ SpriteAtlas:
     - dedbe3c44bf29c24c925e299371913a0: 21300000
     - 4ac639d4dc58d01479d5dc485994f06c: 21300000
     - 47f56ad41ff255744bba95e63069a5a4: 21300000
+    - 4d3f3bd40da5ffc47a5a8c3061d3d4f8: 21300000
     - aa157cd410c038349adff9c7cbeabf94: 21300000
     - 8d06b2e46baa71846ba4831af6bdbe8f: 21300000
     - e83144054af4f124bb2a589f50e8e536: 21300000
@@ -223,6 +225,7 @@ SpriteAtlas:
     - 9b01a0e7a1aaec4468556eca3584fad2: 21300000
     - 30c728f777f4f2d4d8616ae17e18a5bc: 21300000
     - f0f11a08ff11d4740bafc002a9b98450: 21300000
+    - 31d7a238db21f8e4aa626872c9111454: 21300000
     - e809b538d908e4840a4de5f173ec216c: 21300000
     - 07449a38a1c1b574cb0ddeb1a5a874fc: 21300000
     - 4856f1484ea9b854184275951178d0d7: 21300000
@@ -322,6 +325,7 @@ SpriteAtlas:
     - a901f81d3431e4b4d91214dd92948859: 21300000
     - 6af6dc1d5b5690449b03a7cb228e4c7e: 21300000
     - 61eaa02de2beef64e82e022b231b90d5: 21300000
+    - d049c02d17cb8b541a8c1a4ae6651747: 21300000
     - 7e7ad22db381a544d96026e68991b38f: 21300000
     - 0ca3ac2d770a2e4439769590d4ae7ee0: 21300000
     - 00c87e2d9b0aa354e8f064768a2c68af: 21300000
@@ -398,6 +402,7 @@ SpriteAtlas:
   m_PackedSprites:
   - {fileID: 21300000, guid: 954173008d05e4e42a567ab770ae6256, type: 3}
   - {fileID: 21300000, guid: 3b029c00c8285f94ea29c32ddede2078, type: 3}
+  - {fileID: 21300000, guid: 759ced001f21e364f9342bc5441661e0, type: 3}
   - {fileID: 21300000, guid: 61dc3e00ca59a3246a533f9ca4ff0d96, type: 3}
   - {fileID: 21300000, guid: 3d127f00e54e0e54b98de63277603869, type: 3}
   - {fileID: 21300000, guid: c252bb40ed75f474e91deb0463db8c04, type: 3}
@@ -499,6 +504,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: dedbe3c44bf29c24c925e299371913a0, type: 3}
   - {fileID: 21300000, guid: 4ac639d4dc58d01479d5dc485994f06c, type: 3}
   - {fileID: 21300000, guid: 47f56ad41ff255744bba95e63069a5a4, type: 3}
+  - {fileID: 21300000, guid: 4d3f3bd40da5ffc47a5a8c3061d3d4f8, type: 3}
   - {fileID: 21300000, guid: aa157cd410c038349adff9c7cbeabf94, type: 3}
   - {fileID: 21300000, guid: 8d06b2e46baa71846ba4831af6bdbe8f, type: 3}
   - {fileID: 21300000, guid: e83144054af4f124bb2a589f50e8e536, type: 3}
@@ -568,6 +574,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 9b01a0e7a1aaec4468556eca3584fad2, type: 3}
   - {fileID: 21300000, guid: 30c728f777f4f2d4d8616ae17e18a5bc, type: 3}
   - {fileID: 21300000, guid: f0f11a08ff11d4740bafc002a9b98450, type: 3}
+  - {fileID: 21300000, guid: 31d7a238db21f8e4aa626872c9111454, type: 3}
   - {fileID: 21300000, guid: e809b538d908e4840a4de5f173ec216c, type: 3}
   - {fileID: 21300000, guid: 07449a38a1c1b574cb0ddeb1a5a874fc, type: 3}
   - {fileID: 21300000, guid: 4856f1484ea9b854184275951178d0d7, type: 3}
@@ -667,6 +674,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: a901f81d3431e4b4d91214dd92948859, type: 3}
   - {fileID: 21300000, guid: 6af6dc1d5b5690449b03a7cb228e4c7e, type: 3}
   - {fileID: 21300000, guid: 61eaa02de2beef64e82e022b231b90d5, type: 3}
+  - {fileID: 21300000, guid: d049c02d17cb8b541a8c1a4ae6651747, type: 3}
   - {fileID: 21300000, guid: 7e7ad22db381a544d96026e68991b38f, type: 3}
   - {fileID: 21300000, guid: 0ca3ac2d770a2e4439769590d4ae7ee0, type: 3}
   - {fileID: 21300000, guid: 00c87e2d9b0aa354e8f064768a2c68af, type: 3}
@@ -742,6 +750,7 @@ SpriteAtlas:
   m_PackedSpriteNamesToIndex:
   - anim_zako_tank_02
   - fort_far
+  - sfc_player_bank_up_01
   - warship_core
   - anim_mortar_drone_03
   - anim_mini_horror_00
@@ -843,6 +852,7 @@ SpriteAtlas:
   - hud_icon_0
   - fort_fg
   - anim_void_moth_02
+  - sfc_player_bank_down_00
   - anim_scrap_tumbler_01
   - anim_mini_horror_04
   - core_fg
@@ -912,6 +922,7 @@ SpriteAtlas:
   - anim_zako_sine_03
   - scrap_near
   - missile_lance
+  - sfc_player_bank_up_00
   - anim_boss_storm_02
   - player_ship
   - anim_wisp_04
@@ -1011,6 +1022,7 @@ SpriteAtlas:
   - anim_zako_straight_01
   - enemy_mini_horror
   - anim_boss_fortress_02
+  - sfc_player_bank_down_01
   - abyss_far
   - anim_phase_disc_04
   - warship_stern
