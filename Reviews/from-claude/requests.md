@@ -2049,3 +2049,12 @@ Core 597개 / Unity 731개 통과. 36개 클립/180프레임의 실제 씬 참�
 후속 수정으로 남겼다. `ANIMATION-REVIEW.md`에 뱅킹/보스 루프 등 미완료 아트 과제를 기록했다.
 `f4e143a`의 WebGL 빌드를 `rss-play@23dd1e3`에 게시했고 Pages 성공/공개 파일 4개
 해시 일치를 확인했다. 이번 버전의 브라우저 주행은 미실시다.
+
+### 2026-09-30 UI 겹침 수정 대행분 리뷰 인계
+
+사용자의 다음 작업 지시에 따라 Codex가 Presentation/오케스트레이션을 대행했다.
+BattleHudVisibility의 전투/선택/결과/일시정지 표시 전환, PauseScreen의 하위 설정창
+표시 우선순위와 RESUME 포커스 복원, Options 진입 버튼의 LateUpdate 갱신,
+Reward/Contract의 일시정지 시 표시 억제를 원 담당 복귀 시 리뷰한다.
+Core 597개 / Unity 743개 통과. 실제 Battle 씬의 통합 UI 렌더 24장으로 3가지 크기를
+확인했고, 사용자 기기의 전체 실주행은 미실시다. 상세 근거/범위는 REVAMP-LOG에 남겼다.

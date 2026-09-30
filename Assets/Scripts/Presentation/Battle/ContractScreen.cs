@@ -137,6 +137,12 @@ namespace Shmup.Presentation.Battle
             _root.SetActive(false);
         }
 
+        void LateUpdate()
+        {
+            if (_root != null && (Time.timeScale <= 0f || OptionsScreen.IsOpen || AudioSettingsPanel.BlocksInput))
+                _root.SetActive(false);
+        }
+
         void LayoutBoxes(int count)
         {
             if (_shownCount == count) return;

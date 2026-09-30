@@ -14,6 +14,7 @@ namespace Shmup.Presentation.Battle
         [SerializeField] BattleDirector _director;
         bool _paused;
         GameObject _root;
+        GameObject _toggleRoot;
         AudioSettingsPanel _audioSettings;
         Button _resumeButton;
 
@@ -42,6 +43,7 @@ namespace Shmup.Presentation.Battle
             {
                 var toggleCanvas = UiKit.CreateCanvas("PauseToggleCanvas", 79);
                 toggleCanvas.transform.SetParent(transform, false);
+                _toggleRoot = toggleCanvas.gameObject;
                 // Preserve the user's chosen upper-left pause entry point.
                 var toggleButton = UiKit.CreateTouchButton(toggleCanvas.transform, _font, "PAUSE", 10,
                     new Vector2(0f, 1f), new Vector2(14f, -12f), new Vector2(62f, 30f),
@@ -101,6 +103,23 @@ namespace Shmup.Presentation.Battle
                 UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(
                     paused && _resumeButton != null ? _resumeButton.gameObject : null);
             if (changed) UiAudio.Play(paused ? UiCue.Confirm : UiCue.Back);
+        }
+
+        void LateUpdate()
+        {
+            // Child dialogs have their own dim/backdrop. Text from PAUSED and its
+            // buttons must not bleed through those panels or retain pointer targets.
+            bool childOpen = OptionsScreen.IsOpen || (_audioSettings != null && _audioSettings.IsOpen);
+            bool show = _paused && !childOpen;
+            if (_root != null && _root.activeSelf != show)
+            {
+                _root.SetActive(show);
+                if (show && _resumeButton != null)
+                    UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(_resumeButton.gameObject);
+            }
+            if (_toggleRoot != null)
+                _toggleRoot.SetActive(!_paused && !childOpen
+                    && (_director == null || !_director.IsRunFinished));
         }
 
         void OnDestroy()

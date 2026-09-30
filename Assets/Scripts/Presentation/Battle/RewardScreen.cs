@@ -130,6 +130,14 @@ namespace Shmup.Presentation.Battle
             UpdateRerollButton();
         }
 
+        void LateUpdate()
+        {
+            // Update restores an awaiting choice on resume, without rebuilding its
+            // cursor. A nested pause/settings screen owns the visible UI meanwhile.
+            if (_root != null && (Time.timeScale <= 0f || OptionsScreen.IsOpen || AudioSettingsPanel.BlocksInput))
+                _root.SetActive(false);
+        }
+
         void UpdateRerollButton()
         {
             int cost = _director.RewardRerollCost;

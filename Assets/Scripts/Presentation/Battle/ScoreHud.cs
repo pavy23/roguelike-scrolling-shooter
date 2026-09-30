@@ -41,6 +41,7 @@ namespace Shmup.Presentation.Battle
         {
             var canvas = UiKit.CreateCanvas("ScoreCanvas", 40);
             canvas.transform.SetParent(transform, false);
+            canvas.gameObject.AddComponent<BattleHudVisibility>().Initialize(_director);
             _text = UiKit.CreateCornerText(canvas.transform, _fontBold, "00000000", 16,
                 UiKit.TextAccent, new Vector2(1f, 1f), new Vector2(RightInset, -4f),
                 TextAnchor.UpperRight, "Score");

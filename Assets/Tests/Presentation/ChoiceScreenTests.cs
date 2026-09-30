@@ -305,6 +305,35 @@ namespace Shmup.Presentation.Tests
             }
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void PausedChoicesYieldTheScreenAndRestoreTheirSelectionWithoutSpending(bool contract)
+        {
+            if (contract)
+            {
+                SetProperty(_run, "State", RunState.AwaitingContract);
+                var option = new ContractOption(_data.Contracts.All[0], "fortress");
+                Set(_run, "_contractOptions", new[] { option, option, option });
+            }
+            else BeginRewards(3);
+            MonoBehaviour view = contract ? (MonoBehaviour)_contracts : _rewards;
+            Invoke(view, "Update");
+            Invoke(view, "SetCursor", 1);
+            int balance = _run.CapsuleBalance;
+            Time.timeScale = 0f;
+            Invoke(view, "Update");
+            Invoke(view, "LateUpdate");
+            Assert.IsFalse(Get<GameObject>(view, "_root").activeSelf);
+            Time.timeScale = 1f;
+            Invoke(view, "Update");
+            Invoke(view, "LateUpdate");
+            Assert.IsTrue(Get<GameObject>(view, "_root").activeSelf);
+            Assert.AreEqual(1, Get<int>(view, "_cursor"));
+            Assert.AreEqual(balance, _run.CapsuleBalance);
+            Assert.IsEmpty(Get<List<int>>(_director, "_recordedChoices"));
+            Assert.IsEmpty(Get<List<int>>(_director, "_recordedContractChoices"));
+        }
+
         void BeginRewards(int count)
         {
             var kind = count == 1 ? RewardSelectionKind.MidStage : RewardSelectionKind.Main;

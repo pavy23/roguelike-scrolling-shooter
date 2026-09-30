@@ -96,6 +96,7 @@ namespace Shmup.Presentation.Battle
         {
             _canvas = UiKit.CreateCanvas("GaugeCanvas", 42);
             _canvas.transform.SetParent(transform, false);
+            _canvas.gameObject.AddComponent<BattleHudVisibility>().Initialize(_director);
 
             // 알파만 쓴다. 이 캔버스에는 raycastTarget이 켜진 그래픽이 없지만,
             // 흐려진 게이지가 조작 터치를 먹는 일이 절대 없도록 못을 박아 둔다.

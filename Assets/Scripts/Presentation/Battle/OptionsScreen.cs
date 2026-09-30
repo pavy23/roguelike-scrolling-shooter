@@ -151,6 +151,15 @@ namespace Shmup.Presentation.Battle
             IsOpen = false;
         }
 
+        void LateUpdate()
+        {
+            // Audio can open in another component's Update. Refresh even when its
+            // input guard skipped our Update, so this entry never sits behind it.
+            if (_openButtonRoot == null) return;
+            bool show = Time.timeScale == 0f && !_open && !AudioSettingsPanel.BlocksInput;
+            if (_openButtonRoot.activeSelf != show) _openButtonRoot.SetActive(show);
+        }
+
         void SetOpen(bool open)
         {
             _pauseInputConsumedFrame = Time.frameCount;
@@ -190,14 +199,6 @@ namespace Shmup.Presentation.Battle
                 || (gamepad != null && gamepad.buttonEast.wasPressedThisFrame))) SetOpen(false);
             if (Time.timeScale != 0f && _open) SetOpen(false);   // 일시정지 해제 시 자동 닫힘
             IsOpen = _open;
-
-            // 옵션 입구는 일시정지 중, 옵션이 닫혀 있을 때만 보인다.
-            if (_openButtonRoot != null)
-            {
-                bool showOpenButton = Time.timeScale == 0f && !_open;
-                if (_openButtonRoot.activeSelf != showOpenButton)
-                    _openButtonRoot.SetActive(showOpenButton);
-            }
 
             if (!_open)
             {
