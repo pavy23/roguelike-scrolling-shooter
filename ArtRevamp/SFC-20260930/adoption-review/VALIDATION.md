@@ -14,6 +14,8 @@
 - 신규 이름으로 추가하여 기존 PNG 338개와 GUID, 배경 52개를 보존했다.
   새 원본은 미추적 `art-input` 복사 경로를 사용하지 않는다. 채택 파일과 원본이
   승인 당시 해시와 다르면 `art_source_check.py`가 실패한다.
+- WebGL 빌드가 갱신한 기존 SpriteAtlas의 5개 GUID/이름 인덱스도 저장했다.
+  Atlas 설정 변경 없이 신규 원본의 packed 참조만 추가된다.
 
 Core/GameData/판정/탄 발사 위치는 바꾸지 않았다. `.meta`는 Unity 임포터로 생성했고,
 실제 Sprite의 전체 rect·중앙 피벗·PPU16·Point·무압축·mipmap 없음까지 확인했다.
