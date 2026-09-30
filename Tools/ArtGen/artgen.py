@@ -377,6 +377,52 @@ def cmd_animate(args) -> None:
     print(f"Saved {len(outputs)} output frames; requested {args.frames}. Review continuity before use.")
 
 
+def cmd_inpaint_native(args) -> None:
+    """Edit a native sprite through a provider mask, keeping all returned PNG bytes."""
+    source, mask_path, out_dir = Path(args.src), Path(args.mask), Path(args.out_dir)
+    if out_dir.exists() and any(out_dir.iterdir()):
+        raise SystemExit(f"Output exists; do not purchase the same edit again: {out_dir}")
+    description = Path(args.prompt_file).read_text(encoding="utf-8-sig").strip()
+    if not 1 <= len(description) <= 2000:
+        raise SystemExit("Inpaint prompt must contain 1-2000 characters.")
+    with Image.open(source) as original, Image.open(mask_path) as mask:
+        width, height = original.size
+        if original.size != mask.size or not (16 <= width <= 200 and 16 <= height <= 200):
+            raise SystemExit("Inpaint source/mask must match and be 16-200 pixels on each side.")
+        mask_rgba = mask.convert("RGBA")
+        mask_values = mask_rgba.get_flattened_data() if hasattr(mask_rgba, "get_flattened_data") else mask_rgba.getdata()
+        if any(pixel not in ((0, 0, 0, 255), (255, 255, 255, 255)) for pixel in mask_values):
+            raise SystemExit("Inpaint mask must contain only opaque black and white pixels.")
+    palette_path = Path(args.palette) if getattr(args, "palette", None) else source
+    payload = {"description": description, "image_size": {"width": width, "height": height},
+        "inpainting_image": {"type": "base64", "base64": _b64_of(source)},
+        "mask_image": {"type": "base64", "base64": _b64_of(mask_path)},
+        "color_image": {"type": "base64", "base64": _b64_of(palette_path)},
+        "no_background": True, "seed": args.seed, "text_guidance_scale": 5.0}
+    record = {key: value for key, value in payload.items()
+        if key not in ("inpainting_image", "mask_image", "color_image")}
+    record.update(endpoint="/inpaint", source_file=source.as_posix(), mask_file=mask_path.as_posix(),
+        source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+        mask_sha256=hashlib.sha256(mask_path.read_bytes()).hexdigest(),
+        color_reference=palette_path.as_posix(), palette_sha256=hashlib.sha256(palette_path.read_bytes()).hexdigest())
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "request.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+    result = _post_json(f"{PIXELLAB_BASE}/inpaint", payload, _require_env("PIXELLAB_API_KEY"))
+    outputs = []
+    for i, b64 in enumerate(_find_b64_images(result.get("image") or result.get("images") or {})):
+        path = out_dir / f"candidate_{i:02d}.png"
+        _save_b64_png(b64, path)
+        with Image.open(path) as generated:
+            outputs.append({"file": path.name, "width": generated.width, "height": generated.height,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+    (out_dir / "outputs.json").write_text(json.dumps({"usage": result.get("usage"), "outputs": outputs,
+        "status": "candidate_pending_mask_invariance_and_art_review",
+        "postprocessing": "none; provider PNG bytes preserved"}, indent=2) + "\n", encoding="utf-8")
+    if not outputs:
+        raise SystemExit("Provider returned no image; inspect the saved request before any retry.")
+    print(f"Saved {len(outputs)} unmodified native masked edit candidates.")
+
+
 def cmd_pixelart(args) -> None:
     """고해상 원본(gpt-image 등)을 PixelLab image-to-pixelart로 네이티브 픽셀 해상도로 변환."""
     token = _require_env("PIXELLAB_API_KEY")
@@ -585,6 +631,15 @@ def main() -> None:
     p.add_argument("--drift-threshold", type=float, default=None, help="API color de-flicker threshold")
     p.add_argument("--resume", action="store_true", help="Poll the saved job without purchasing another animation")
     p.set_defaults(func=cmd_animate)
+
+    p = sub.add_parser("inpaint-native", help="PixelLab native-size masked edit with saved provenance")
+    p.add_argument("--palette", help="Optional palette control PNG; defaults to source colors")
+    p.add_argument("--src", required=True)
+    p.add_argument("--mask", required=True)
+    p.add_argument("--prompt-file", required=True)
+    p.add_argument("--seed", type=int, required=True)
+    p.add_argument("--out-dir", required=True)
+    p.set_defaults(func=cmd_inpaint_native)
 
     p = sub.add_parser("pixelart", help="고해상 원본을 PixelLab image-to-pixelart로 네이티브 픽셀화")
     p.add_argument("--src", required=True)

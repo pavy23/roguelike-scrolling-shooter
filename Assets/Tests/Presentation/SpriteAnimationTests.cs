@@ -293,6 +293,113 @@ namespace Shmup.Presentation.Tests
             }
             finally { EditorSceneManager.CloseScene(scene, true); }
         }
+        [Test]
+        public void BankingFollowsActualMovementAndReversesThroughNeutralWithoutMovingTheShip()
+        {
+            Set(_player, "_bankUpFrames", new[] { _frames[3] });
+            Set(_player, "_bankDownFrames", new[] { _frames[4] });
+            _renderer.color = Color.magenta;
+            var position = _renderer.transform.localPosition = new Vector3(4, 2, 0);
+            var rotation = _renderer.transform.localRotation = Quaternion.Euler(0, 0, 12);
+            _player.ObserveMovementAtTick(0, 0);
+            for (int tick = 1; tick <= 4; tick++)
+            {
+                _player.ObserveMovementAtTick(tick, tick * 8);
+                _player.RenderAtTick(tick);
+                Assert.AreSame(_frames[tick < 4 ? 0 : 3], _renderer.sprite);
+            }
+            _player.ObserveMovementAtTick(4, -999); // Repeated paused tick cannot change its pose.
+            _player.RenderAtTick(4);
+            Assert.AreSame(_frames[3], _renderer.sprite);
+            _player.ObserveMovementAtTick(5, 24);
+            _player.RenderAtTick(5);
+            Assert.AreSame(_frames[0], _renderer.sprite, "Reverse through neutral first.");
+            for (int tick = 6; tick <= 8; tick++) _player.ObserveMovementAtTick(tick, 64 - tick * 8);
+            _player.RenderAtTick(8);
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            _player.ObserveMovementAtTick(9, 0); // Same position: released or blocked by boundary.
+            _player.RenderAtTick(9);
+            Assert.AreSame(_frames[1], _renderer.sprite);
+            Assert.AreEqual(position, _renderer.transform.localPosition);
+            Assert.AreEqual(rotation, _renderer.transform.localRotation);
+            Assert.AreEqual(Color.magenta, _renderer.color);
+        }
+
+        [Test]
+        public void BankingObservationsSurviveSparseRenderingAndResetOnSeekOrTickRewind()
+        {
+            Set(_player, "_bankUpFrames", new[] { _frames[3], _frames[4] });
+            _player.ObserveMovementAtTick(0, 0);
+            for (int tick = 1; tick <= 7; tick++) _player.ObserveMovementAtTick(tick, tick * 8);
+            _player.RenderAtTick(7); // Observations ran at 60 Hz even if rendering skipped frames.
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            _player.ObserveMovementAtTick(100, 9999);
+            _player.RenderAtTick(100);
+            Assert.AreSame(_frames[1], _renderer.sprite, "A seek must not infer a bank from a teleport.");
+            for (int tick = 101; tick <= 104; tick++) _player.ObserveMovementAtTick(tick, 10000 + tick);
+            _player.RenderAtTick(104);
+            Assert.AreSame(_frames[4], _renderer.sprite);
+            _player.ObserveMovementAtTick(0, 0);
+            _player.RenderAtTick(0);
+            Assert.AreSame(_frames[0], _renderer.sprite);
+        }
+
+        [Test]
+        public void MissingBankArtAndNullBankFramesFallBackToNeutralEngine()
+        {
+            Set(_player, "_bankUpFrames", new Sprite[] { null });
+            _player.ObserveMovementAtTick(0, 0);
+            for (int tick = 1; tick <= 6; tick++) _player.ObserveMovementAtTick(tick, tick);
+            _player.RenderAtTick(6);
+            Assert.AreSame(_frames[1], _renderer.sprite);
+            for (int tick = 7; tick <= 12; tick++) _player.ObserveMovementAtTick(tick, 12 - tick);
+            _player.RenderAtTick(12);
+            Assert.AreSame(_frames[2], _renderer.sprite);
+        }
+
+        [Test]
+        public void DirectorObservesCoreMovementAndResetsForAnotherBattleAtTheSameTick()
+        {
+            Set(_player, "_bankUpFrames", new[] { _frames[3] });
+            Invoke(_director, "SyncPlayerAnimation");
+            for (int i = 0; i < 4; i++)
+            {
+                _sim.Step(new InputCommand(0, 1, false));
+                Invoke(_director, "ObservePlayerAnimation", _sim);
+            }
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[3], _renderer.sprite);
+            Assert.AreEqual(4, _sim.Tick);
+            var next = NewSim();
+            for (int i = 0; i < 4; i++) next.Step(InputCommand.None);
+            SetSim(next);
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+            Assert.AreEqual(4, next.Tick);
+        }
+
+        [Test]
+        public void SelectingStarterAgainClearsThePreviousBankWithoutOverwritingAnotherShip()
+        {
+            Set(_director, "_shipSpriteIds", new[] { "starter", "interceptor" });
+            Set(_director, "_shipSprites", new[] { _frames[0], _frames[2] });
+            Set(_player, "_bankUpFrames", new[] { _frames[3] });
+            Invoke(_director, "SyncPlayerAnimation");
+            for (int i = 0; i < 4; i++)
+            {
+                _sim.Step(new InputCommand(0, 1, false));
+                Invoke(_director, "ObservePlayerAnimation", _sim);
+            }
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[3], _renderer.sprite);
+            Invoke(_director, "ApplyShipSprite", "interceptor");
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[2], _renderer.sprite);
+            Invoke(_director, "ApplyShipSprite", "starter");
+            Invoke(_director, "SyncPlayerAnimation");
+            Assert.AreSame(_frames[0], _renderer.sprite);
+        }
+
         void SetSim(BattleSim sim) { _sim = sim; Set(_director, "_sim", sim); }
         void AdvanceTo(int tick) { while (_sim.Tick < tick) _sim.Step(InputCommand.None); }
         void Draw(string id, int phase = 0, bool exact = false)

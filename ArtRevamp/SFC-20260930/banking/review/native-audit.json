@@ -1,0 +1,886 @@
+{
+  "kind": "Read-only native PNG and protected-pixel audit; not art acceptance or gameplay",
+  "source": {
+    "file": "Assets/Art/Sprites/sfc_player_ship.png",
+    "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097"
+  },
+  "existingProductionPngUnchanged": 343,
+  "bankingApiReportedUsageUsd": 0.1502014187640614,
+  "batches": [
+    {
+      "name": "bank-down",
+      "endpoint": "/animate-with-text-v3",
+      "mask": null,
+      "usageUsd": 0.021106685976187388,
+      "requestedFrames": 6,
+      "returnedFrames": 7,
+      "frames": [
+        {
+          "file": "raw/bank-down/frame_00.png",
+          "sha256": "6de0358fea15b7c10a31bbe539ade883f4fd878d2b730b378a8a3afaaa1c10bc",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            23
+          ],
+          "changedRgbaPixels": 963,
+          "changedVisiblePixels": 1,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-down/frame_01.png",
+          "sha256": "1c5a77835b73682ab4ee827d2acd0ee92377ccf4e4a1ebbf4163fc74ddf8196c",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            46,
+            25
+          ],
+          "changedRgbaPixels": 1312,
+          "changedVisiblePixels": 411,
+          "changedNosePixels": 12,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-down/frame_02.png",
+          "sha256": "a01c0d1d20fce6b3877133c5299e81155f716c58911c1fa8ca0da9badbd76154",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            1,
+            2,
+            46,
+            26
+          ],
+          "changedRgbaPixels": 1346,
+          "changedVisiblePixels": 481,
+          "changedNosePixels": 16,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-down/frame_03.png",
+          "sha256": "9a41a65dd294f595bcb994765ede8b0db671654265baee9bc05743ef00bef9de",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 28,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            2,
+            2,
+            47,
+            27
+          ],
+          "changedRgbaPixels": 1381,
+          "changedVisiblePixels": 540,
+          "changedNosePixels": 28,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-down/frame_04.png",
+          "sha256": "3ba0d14281ff0fe5259e44ff92f8f751ef8a82478210162eb7e46efccc833b03",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 27,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            1,
+            2,
+            46,
+            26
+          ],
+          "changedRgbaPixels": 1361,
+          "changedVisiblePixels": 497,
+          "changedNosePixels": 18,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-down/frame_05.png",
+          "sha256": "53df5f4d5db414f9bca94967fcab130840f822cebfcd3c2ee53f2259723bde8a",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            1,
+            3,
+            46,
+            25
+          ],
+          "changedRgbaPixels": 1350,
+          "changedVisiblePixels": 469,
+          "changedNosePixels": 14,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-down/frame_06.png",
+          "sha256": "bbc8b0abe41355a69b98e314219ed2bf543d23d62b2cf05ba04d46da263831e6",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            3,
+            45,
+            23
+          ],
+          "changedRgbaPixels": 1294,
+          "changedVisiblePixels": 370,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "bank-down-engine",
+      "endpoint": "/inpaint",
+      "mask": "control/engine-mask.png",
+      "usageUsd": 0.007808374755912357,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/bank-down-engine/candidate_00.png",
+          "sha256": "8e396914c4f8f336d5c60b520854347ca144ee6dab2a26488d114f8523e9f649",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 26,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            3,
+            2,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 87,
+          "changedVisiblePixels": 47,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false,
+          "allowedAdditionalWarmHighlightRgb": [
+            242,
+            221,
+            192
+          ],
+          "additionalWarmHighlightPixels": 0,
+          "changesOutsideFlameContract": 26,
+          "stationaryHullEngineUsable": false
+        }
+      ]
+    },
+    {
+      "name": "bank-down-engine-warm",
+      "endpoint": "/inpaint",
+      "mask": "control/engine-tight-mask.png",
+      "usageUsd": 0.011375696195496453,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/bank-down-engine-warm/candidate_00.png",
+          "sha256": "2003d0c541d65217cd8964f887d62e98d3910af63ed237a894b1f14a763501d3",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 25,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            3,
+            2,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 44,
+          "changedVisiblePixels": 44,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false,
+          "allowedAdditionalWarmHighlightRgb": [
+            242,
+            221,
+            192
+          ],
+          "additionalWarmHighlightPixels": 10,
+          "changesOutsideFlameContract": 0,
+          "stationaryHullEngineUsable": true
+        }
+      ]
+    },
+    {
+      "name": "bank-up",
+      "endpoint": "/animate-with-text-v3",
+      "mask": null,
+      "usageUsd": 0.02158489261733161,
+      "requestedFrames": 6,
+      "returnedFrames": 7,
+      "frames": [
+        {
+          "file": "raw/bank-up/frame_00.png",
+          "sha256": "88895654bd9a0ecb7e17e9b2ecb4dffd7c16f003dfd03d8e43ac908ff168f401",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            23
+          ],
+          "changedRgbaPixels": 1,
+          "changedVisiblePixels": 1,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up/frame_01.png",
+          "sha256": "083641381f3140f0fd4496bce9fbf5c4d93f5c6e301fa6d3be839f0042a1e998",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            3,
+            46,
+            24
+          ],
+          "changedRgbaPixels": 428,
+          "changedVisiblePixels": 428,
+          "changedNosePixels": 28,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up/frame_02.png",
+          "sha256": "d4846fd15802289fce3ee7ae8d7785c91eaad2f8b15c7a98bccafe1f7e3d2374",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            2,
+            3,
+            47,
+            25
+          ],
+          "changedRgbaPixels": 488,
+          "changedVisiblePixels": 488,
+          "changedNosePixels": 29,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up/frame_03.png",
+          "sha256": "ddff28ac0fdc5a6af871d890055606d98820738cbd69b0f757e563873cc9743c",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            2,
+            3,
+            48,
+            26
+          ],
+          "changedRgbaPixels": 580,
+          "changedVisiblePixels": 580,
+          "changedNosePixels": 41,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up/frame_04.png",
+          "sha256": "2b571afd0c71a8aa95dc5a11c015ecbcc4c6c74ab379ea3c6f54daf74301c8e8",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            3,
+            2,
+            48,
+            28
+          ],
+          "changedRgbaPixels": 625,
+          "changedVisiblePixels": 625,
+          "changedNosePixels": 43,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up/frame_05.png",
+          "sha256": "5a13f02d236894727dc316d451f838467d2486fa267f3da8acf472a35c755005",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            2,
+            2,
+            47,
+            28
+          ],
+          "changedRgbaPixels": 612,
+          "changedVisiblePixels": 612,
+          "changedNosePixels": 38,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up/frame_06.png",
+          "sha256": "86ecca5a9de03f68a26eeaa7e75dad10e4b74fc4c028dd5a222779b916321200",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            46,
+            28
+          ],
+          "changedRgbaPixels": 607,
+          "changedVisiblePixels": 607,
+          "changedNosePixels": 33,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "bank-up-engine",
+      "endpoint": "/inpaint",
+      "mask": "control/engine-mask.png",
+      "usageUsd": 0.007879862123065524,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/bank-up-engine/candidate_00.png",
+          "sha256": "441e6b25253573c270447c43a01d1ee2354c96874eb2dc01c7bad707c1785f8e",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 24,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            3,
+            2,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 88,
+          "changedVisiblePixels": 51,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false,
+          "allowedAdditionalWarmHighlightRgb": [
+            242,
+            221,
+            192
+          ],
+          "additionalWarmHighlightPixels": 0,
+          "changesOutsideFlameContract": 35,
+          "stationaryHullEngineUsable": false
+        }
+      ]
+    },
+    {
+      "name": "bank-up-engine-warm",
+      "endpoint": "/inpaint",
+      "mask": "control/engine-tight-mask.png",
+      "usageUsd": 0.009718609750270843,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/bank-up-engine-warm/candidate_00.png",
+          "sha256": "14b9c231c8897f91cd5915c2dddc41cf726e097755d5c34ba377366cc595ee5b",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 25,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            3,
+            2,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 44,
+          "changedVisiblePixels": 44,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false,
+          "allowedAdditionalWarmHighlightRgb": [
+            242,
+            221,
+            192
+          ],
+          "additionalWarmHighlightPixels": 16,
+          "changesOutsideFlameContract": 0,
+          "stationaryHullEngineUsable": true
+        }
+      ]
+    },
+    {
+      "name": "bank-up-loop",
+      "endpoint": "/animate-with-text-v3",
+      "mask": null,
+      "usageUsd": 0.022110003193219502,
+      "requestedFrames": 4,
+      "returnedFrames": 5,
+      "frames": [
+        {
+          "file": "raw/bank-up-loop/frame_00.png",
+          "sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            23
+          ],
+          "changedRgbaPixels": 0,
+          "changedVisiblePixels": 0,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up-loop/frame_01.png",
+          "sha256": "543663c2d1663fc38be34b0926c82d4e515777767c96139207ec07c30f9da4e2",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            3,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 435,
+          "changedVisiblePixels": 435,
+          "changedNosePixels": 25,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up-loop/frame_02.png",
+          "sha256": "986023dd986fea849ce7b87fb41286e394b1bf1fda3cce05ddab8bcd37e1b602",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            4,
+            45,
+            25
+          ],
+          "changedRgbaPixels": 534,
+          "changedVisiblePixels": 534,
+          "changedNosePixels": 30,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up-loop/frame_03.png",
+          "sha256": "87486a5b04ebf0523cb25354f9369477bfced9253198885c910e693699fb52eb",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 30,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            3,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 435,
+          "changedVisiblePixels": 435,
+          "changedNosePixels": 25,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        },
+        {
+          "file": "raw/bank-up-loop/frame_04.png",
+          "sha256": "b5087d11ea924bb3ff2746b34d32f6003d6156dfd49d59cd98937aa29b2692bc",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 28,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            23
+          ],
+          "changedRgbaPixels": 16,
+          "changedVisiblePixels": 16,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": null,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "masked-down",
+      "endpoint": "/inpaint",
+      "mask": "control/wing-mask.png",
+      "usageUsd": 0.007812572578589121,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/masked-down/candidate_00.png",
+          "sha256": "2b68381e00f33ca991bfc190e8e43a56da9b155544b9178651c64cab5758afc9",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            27
+          ],
+          "changedRgbaPixels": 315,
+          "changedVisiblePixels": 193,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "masked-down-fold",
+      "endpoint": "/inpaint",
+      "mask": "control/wing-silhouette-mask.png",
+      "usageUsd": 0.008393570615185631,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/masked-down-fold/candidate_00.png",
+          "sha256": "264c9147d77b35634d2bd86c8c77d6dd866539055c07dbd87ec59509915c8b94",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 165,
+          "changedVisiblePixels": 133,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "masked-down-refined",
+      "endpoint": "/inpaint",
+      "mask": "control/wing-silhouette-mask.png",
+      "usageUsd": 0.010078873568110994,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/masked-down-refined/candidate_00.png",
+          "sha256": "5db817e611398db4f9b18dcfbcb4b74ae9eaf2ca589821c4c276fbb7cc757d66",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            1,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 173,
+          "changedVisiblePixels": 144,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "masked-up",
+      "endpoint": "/inpaint",
+      "mask": "control/wing-mask.png",
+      "usageUsd": 0.007608767708142599,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/masked-up/candidate_00.png",
+          "sha256": "230d0e399a6170aee1530fec62a3c513760d54d7ef45ee6970236ed6526a6828",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            27
+          ],
+          "changedRgbaPixels": 317,
+          "changedVisiblePixels": 183,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "masked-up-fold",
+      "endpoint": "/inpaint",
+      "mask": "control/wing-silhouette-mask.png",
+      "usageUsd": 0.007161375727918412,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/masked-up-fold/candidate_00.png",
+          "sha256": "8b69e7a8b2b116888a8b17ea87597160275f00951853449b8485a6d4661cda98",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            2,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 182,
+          "changedVisiblePixels": 156,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false
+        }
+      ]
+    },
+    {
+      "name": "masked-up-refined",
+      "endpoint": "/inpaint",
+      "mask": "control/wing-silhouette-mask.png",
+      "usageUsd": 0.007562133954630958,
+      "requestedFrames": null,
+      "returnedFrames": 1,
+      "frames": [
+        {
+          "file": "raw/masked-up-refined/candidate_00.png",
+          "sha256": "826afc390885be6c4fa4642248baab4cde6133ff0ce1ab15080da1c17532eff6",
+          "size": [
+            48,
+            30
+          ],
+          "visibleColors": 29,
+          "partialAlphaPixels": 0,
+          "opaqueBoundsTopLeft": [
+            0,
+            1,
+            45,
+            24
+          ],
+          "changedRgbaPixels": 173,
+          "changedVisiblePixels": 139,
+          "changedNosePixels": 0,
+          "changedPixelsOutsideMask": 0,
+          "pngPostprocessed": false
+        }
+      ]
+    }
+  ],
+  "proposedForHumanCuration": [
+    {
+      "file": "raw/bank-down-engine-warm/candidate_00.png",
+      "sha256": "2003d0c541d65217cd8964f887d62e98d3910af63ed237a894b1f14a763501d3",
+      "size": [
+        48,
+        30
+      ],
+      "visibleColors": 25,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        3,
+        2,
+        45,
+        24
+      ],
+      "changedRgbaPixels": 44,
+      "changedVisiblePixels": 44,
+      "changedNosePixels": 0,
+      "changedPixelsOutsideMask": 0,
+      "pngPostprocessed": false,
+      "allowedAdditionalWarmHighlightRgb": [
+        242,
+        221,
+        192
+      ],
+      "additionalWarmHighlightPixels": 10,
+      "changesOutsideFlameContract": 0,
+      "stationaryHullEngineUsable": true
+    },
+    {
+      "file": "raw/bank-up-engine-warm/candidate_00.png",
+      "sha256": "14b9c231c8897f91cd5915c2dddc41cf726e097755d5c34ba377366cc595ee5b",
+      "size": [
+        48,
+        30
+      ],
+      "visibleColors": 25,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        3,
+        2,
+        45,
+        24
+      ],
+      "changedRgbaPixels": 44,
+      "changedVisiblePixels": 44,
+      "changedNosePixels": 0,
+      "changedPixelsOutsideMask": 0,
+      "pngPostprocessed": false,
+      "allowedAdditionalWarmHighlightRgb": [
+        242,
+        221,
+        192
+      ],
+      "additionalWarmHighlightPixels": 16,
+      "changesOutsideFlameContract": 0,
+      "stationaryHullEngineUsable": true
+    },
+    {
+      "file": "raw/masked-down-fold/candidate_00.png",
+      "sha256": "264c9147d77b35634d2bd86c8c77d6dd866539055c07dbd87ec59509915c8b94",
+      "size": [
+        48,
+        30
+      ],
+      "visibleColors": 29,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        0,
+        2,
+        45,
+        24
+      ],
+      "changedRgbaPixels": 165,
+      "changedVisiblePixels": 133,
+      "changedNosePixels": 0,
+      "changedPixelsOutsideMask": 0,
+      "pngPostprocessed": false
+    },
+    {
+      "file": "raw/masked-up-fold/candidate_00.png",
+      "sha256": "8b69e7a8b2b116888a8b17ea87597160275f00951853449b8485a6d4661cda98",
+      "size": [
+        48,
+        30
+      ],
+      "visibleColors": 29,
+      "partialAlphaPixels": 0,
+      "opaqueBoundsTopLeft": [
+        0,
+        2,
+        45,
+        24
+      ],
+      "changedRgbaPixels": 182,
+      "changedVisiblePixels": 156,
+      "changedNosePixels": 0,
+      "changedPixelsOutsideMask": 0,
+      "pngPostprocessed": false
+    }
+  ],
+  "newBankArtAdopted": false,
+  "sceneBankClipsBound": false
+}

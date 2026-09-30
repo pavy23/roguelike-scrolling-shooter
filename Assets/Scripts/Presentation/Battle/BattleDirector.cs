@@ -288,7 +288,11 @@ namespace Shmup.Presentation.Battle
                 renderer.sprite = _shipSprites[i];
                 // 엔진 프레임 애니는 starter 전용 아트 — 다른 함선은 정지 스프라이트 유지
                 var animator = _playerTransform.GetComponent<PlayerShipAnimator>();
-                if (animator != null) animator.enabled = shipId == "starter";
+                if (animator != null)
+                {
+                    animator.ResetPose();
+                    animator.enabled = shipId == "starter";
+                }
                 return;
             }
         }
@@ -653,6 +657,7 @@ namespace Shmup.Presentation.Battle
 
         SpriteRenderer _playerRendererCache;
         PlayerShipAnimator _playerAnimatorCache;
+        IBattleSim _playerAnimationSim;
 
         /// <summary>기체 스프라이트 렌더러 (지연 캐시 — 배선 검증 실패 런에서도 안전하다).</summary>
         SpriteRenderer PlayerRenderer
@@ -1532,6 +1537,7 @@ namespace Shmup.Presentation.Battle
 
             // 이벤트는 스텝 직후 같은 호출 안에서 소비한다 — 다음 Step에서 클리어되기 때문.
             var battle = _run.Battle;
+            ObservePlayerAnimation(battle);
             if (!ReferenceEquals(battle, _lastEventSim) && _sfx != null) _sfx.ResetPlayback();
             bool freshEvents = !ReferenceEquals(battle, _lastEventSim) || battle.Tick != _lastEventTick;
             _lastEventSim = battle;
@@ -1954,10 +1960,23 @@ namespace Shmup.Presentation.Battle
 
         void SyncPlayerAnimation()
         {
+            ObservePlayerAnimation(_sim);
+            if (_playerAnimatorCache != null) _playerAnimatorCache.RenderAtTick(Tick);
+        }
+
+        void ObservePlayerAnimation(IBattleSim battle)
+        {
+            if (battle == null) return;
             if (_playerTransform == null) return;
             if (_playerAnimatorCache == null)
                 _playerAnimatorCache = _playerTransform.GetComponent<PlayerShipAnimator>();
-            if (_playerAnimatorCache != null) _playerAnimatorCache.RenderAtTick(Tick);
+            if (_playerAnimatorCache == null) return;
+            if (!ReferenceEquals(_playerAnimationSim, battle))
+            {
+                _playerAnimationSim = battle;
+                _playerAnimatorCache.ResetPose();
+            }
+            _playerAnimatorCache.ObserveMovementAtTick(battle.Tick, battle.PlayerY);
         }
 
         /// <summary>

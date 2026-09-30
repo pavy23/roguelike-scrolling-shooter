@@ -1,0 +1,16 @@
+{
+  "description": "Only change the masked swept wings of this exact ivory and cobalt starfighter into a subtle upward-bank pose. Show more of the dark cobalt underside of the lower wing; foreshorten the upper wing and change overlapping armor planes. This is a rigid mechanical aircraft, not a bird. Preserve the same ship design, pixel cluster density, ivory highlights, cobalt shadows and fixed top-left lighting. Pixel art for an SFC horizontal shooter, facing right. Crisp hard alpha, same palette. All unmasked nose, cockpit, fuselage, engines and exhaust must remain exactly at the source pixel coordinates and colors. No whole-body translation, rotation, resize or background.",
+  "image_size": {
+    "width": 48,
+    "height": 30
+  },
+  "no_background": true,
+  "seed": 2026093014,
+  "text_guidance_scale": 5.0,
+  "endpoint": "/inpaint",
+  "source_file": "ArtRevamp/SFC-20260930/pilot/raw/starter/candidate_05.png",
+  "mask_file": "ArtRevamp/SFC-20260930/banking/control/wing-mask.png",
+  "source_sha256": "9c91790bcea1a485f0b8a548f0c93f12fc5f4d6b439695bb9cefb12c7cc08097",
+  "mask_sha256": "9d1fa06cf28ae0ec7abc011a306c8fec63a09a5c061fbcbc019554b5ae0607ca",
+  "color_reference": "same source PNG"
+}

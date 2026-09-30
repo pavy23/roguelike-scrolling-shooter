@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SFC 기체 뱅킹 후보</title>
+<style>
+  :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #080e1b; color: #eaf1ff }
+  body { margin: 0 auto; max-width: 1400px; padding: 32px }
+  h1 { font-size: 28px; margin-bottom: 8px } p { color: #b7c7e2; line-height: 1.65 }
+  .status { color: #ffcd7b } .controls { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin: 24px 0 }
+  button, select { background: #14243e; color: #eaf1ff; border: 1px solid #547291; border-radius: 6px; padding: 8px 14px; font: inherit }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px }
+  article { background: #101b2f; border: 1px solid #2d4160; border-radius: 12px; padding: 20px; min-width: 0 }
+  h2 { font-size: 20px; margin: 0 } .stage { display: grid; place-items: center; height: 320px; overflow: auto }
+  .sprite { image-rendering: pixelated; width: 288px; height: 180px; max-width: none }
+  .native { image-rendering: pixelated; width: 48px; height: 30px; vertical-align: middle; margin: 0 16px }
+  .shot { width: 100%; display: block; border: 1px solid #2d4160; border-radius: 8px }
+  .evidence { margin-top: 32px } a { color: #8ed8ff }
+  @media(max-width:1000px) { .grid { grid-template-columns: 1fr } .stage { height: 260px } }
+</style>
+<h1>기본 기체 · 상승 / 중립 / 하강</h1>
+<p class="status">검토 후보 · 게임 및 테스트 사이트에는 아직 적용하지 않았습니다.</p>
+<p>날개 자세만 바꾸고 동체·캐노피·기수의 위치를 고정했습니다. 실제 PNG 원본을 정수 배율로 표시하며,
+  기울어진 자세에서도 불꽃만 10fps로 반복합니다. 중립은 이미 게임에 적용된 그림입니다.</p>
+<div class="controls">
+  <button id="play" type="button" aria-pressed="true">애니메이션 정지</button>
+  <label>확대 <select id="scale"><option value="2">2배</option><option value="4">4배</option><option value="6" selected>6배</option><option value="8">8배</option></select></label>
+  <span id="frame" aria-live="off">프레임 A</span>
+</div>
+<div class="grid">
+  <article><h2>상승 후보</h2><div class="stage"><img class="sprite" data-pose="up" alt="상승 자세"></div><p>실제 크기 <img class="native" data-pose="up" alt="원본 배율의 상승 자세"></p></article>
+  <article><h2>중립 · 현재 게임</h2><div class="stage"><img class="sprite" data-pose="neutral" alt="중립 자세"></div><p>실제 크기 <img class="native" data-pose="neutral" alt="원본 배율의 중립 자세"></p></article>
+  <article><h2>하강 후보</h2><div class="stage"><img class="sprite" data-pose="down" alt="하강 자세"></div><p>실제 크기 <img class="native" data-pose="down" alt="원본 배율의 하강 자세"></p></article>
+</div>
+<div class="evidence">
+  <h2>Battle 배경 위 확인</h2>
+  <p>기존 씬에 후보를 메모리로만 연결한 Unity 검수 화면입니다. 실제 Core 이동을 따라 자세를 선택했으며,
+    브라우저 실플레이 영상은 아닙니다. HUD는 숨겼습니다.</p>
+  <label>배경 <select id="theme"><option value="0">테마 0</option><option value="2">테마 2</option><option value="4">테마 4</option></select></label>
+  <label>상태 <select id="tick"><option value="0">중립</option><option value="4" selected>상승 A / 포구</option><option value="6">상승 B</option><option value="9">중립 복귀</option><option value="13">하강 시작 / 중립</option><option value="16">하강 A / 포구</option><option value="18">하강 B</option><option value="21">중립 복귀</option></select></label>
+  <p><img id="shot" class="shot" alt="선택한 배경과 자세의 Unity 검수 화면"></p>
+  <p><a href="native-audit.json">원본·픽셀 감사</a> · <a href="scene-capture.json">이동·일시정지 검증 기록</a> · <a href="../README.md">범위와 한계</a></p>
+</div>
+<script>
+const clips = {
+  up: ['../raw/masked-up-fold/candidate_00.png', '../raw/bank-up-engine-warm/candidate_00.png'],
+  neutral: ['../../../../Assets/Art/Sprites/sfc_player_ship.png', '../../../../Assets/Art/Sprites/sfc_player_engine_01.png'],
+  down: ['../raw/masked-down-fold/candidate_00.png', '../raw/bank-down-engine-warm/candidate_00.png']
+};
+let playing = !matchMedia('(prefers-reduced-motion: reduce)').matches, frame = 0;
+const button = document.querySelector('#play');
+function paint() {
+  document.querySelectorAll('[data-pose]').forEach(img => { img.src = clips[img.dataset.pose][frame]; });
+  document.querySelector('#frame').textContent = `프레임 ${frame ? 'B' : 'A'}`;
+}
+function syncButton() { button.textContent = playing ? '애니메이션 정지' : '애니메이션 재생'; button.setAttribute('aria-pressed', String(playing)); }
+button.addEventListener('click', () => { playing = !playing; syncButton(); });
+document.querySelector('#scale').addEventListener('change', event => {
+  document.querySelectorAll('.sprite').forEach(img => { img.style.width = `${48 * Number(event.target.value)}px`; img.style.height = `${30 * Number(event.target.value)}px`; });
+});
+function shot() { document.querySelector('#shot').src = `battle-candidate-theme-${document.querySelector('#theme').value}-tick-${document.querySelector('#tick').value}.png`; }
+document.querySelectorAll('#theme, #tick').forEach(select => select.addEventListener('change', shot));
+setInterval(() => { if (playing && !document.hidden) { frame ^= 1; paint(); } }, 100);
+paint(); shot(); syncButton();
+</script>
+</html>

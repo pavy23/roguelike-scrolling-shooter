@@ -2135,3 +2135,17 @@ ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md에 남긴다.
 Unity 생성 Atlas 인덱스 5개를 함께 보존했다. 공개 파일 4개의 크기/해시 일치와
 버전 스탬프를 확인했으며, 실플레이 검증은 아직이다. 새 테스트판 링크와 전체 근거는
 ArtRevamp/SFC-20260930/adoption-review/VALIDATION.md에 기록했다.
+
+
+### 2026-09-30 기체 뱅킹 준비 대행분 리뷰 인계
+
+사용자의 "다음 가자" 지시와 AGENTS §9-1에 따라 Codex가 RENDERER/QA/오케스트레이션을
+대행했다. 원 담당 복귀 시 PlayerShipAnimator의 실제 이동 관측·반전·리셋·null 대체,
+BattleDirector의 매 Core 스텝 연결과 새 Battle 식별, 새 회귀 5개를 리뷰한다.
+Tools/ArtGen의 native 마스크 생성 클라이언트는 중복 요청·흑백 마스크 검증·원본/팔레트
+해시·키 제외를 다룬다. 12개 오프라인 검사와 read-only 픽셀 감사도 함께 넘긴다.
+
+Core 611개 / Unity 791개 통과. 3테마×8상태의 실제 표시 코드 캡처 24장과 후보/비용
+근거는 ArtRevamp/SFC-20260930/banking/에 보존했다. 검토 후보 4장은 사람 큐레이션 대기다.
+생산 아트·씬/빌더/Atlas에 새 그림을 연결하지 않았으며 기존 343개 PNG는 보존했다.
+새 WebGL/배포·브라우저 실주행은 아직이다. 기존 플레이 사이트는 첫 SFC 교체판이다.

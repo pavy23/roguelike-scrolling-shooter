@@ -140,5 +140,62 @@ class AnimationGenerationSafetyTests(unittest.TestCase):
             post.assert_not_called()
 
 
+class MaskedEditSafetyTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        prompt = self.root / "prompt.txt"
+        prompt.write_text("Change only the wings.", encoding="utf-8")
+        mask = MODULE_PATH.parents[2] / "ArtRevamp/SFC-20260930/banking/control/wing-mask.png"
+        self.args = argparse.Namespace(src=str(SPRITE), mask=str(mask),
+            prompt_file=str(prompt), seed=42, out_dir=str(self.root / "masked"))
+
+    def test_masked_edit_preserves_returned_bytes_and_refuses_duplicate_purchase(self):
+        png = SPRITE.read_bytes()
+        result = {"image": {"base64": base64.b64encode(png).decode("ascii")}, "usage": {"usd": 0.01}}
+        with patch.object(artgen, "_require_env", return_value="test-only-key"), \
+             patch.object(artgen, "_post_json", return_value=result) as post, \
+             contextlib.redirect_stdout(io.StringIO()):
+            artgen.cmd_inpaint_native(self.args)
+            with self.assertRaises(SystemExit):
+                artgen.cmd_inpaint_native(self.args)
+            post.assert_called_once()
+        output = Path(self.args.out_dir)
+        self.assertEqual((output / "candidate_00.png").read_bytes(), png)
+        record = (output / "request.json").read_text(encoding="utf-8")
+        self.assertNotIn("test-only-key", record)
+        self.assertNotIn(base64.b64encode(png).decode("ascii"), record)
+        self.assertEqual(json.loads(record)["source_sha256"], hashlib.sha256(png).hexdigest())
+
+    def test_mismatched_mask_is_rejected_without_network(self):
+        self.args.mask = str(MODULE_PATH.parents[2] / "Assets/Art/Sprites/enemy_sfc_drone.png")
+        with patch.object(artgen, "_post_json") as post:
+            with self.assertRaises(SystemExit):
+                artgen.cmd_inpaint_native(self.args)
+            post.assert_not_called()
+
+    def test_colored_or_transparent_mask_is_rejected_without_network(self):
+        self.args.mask = str(SPRITE)
+        with patch.object(artgen, "_post_json") as post:
+            with self.assertRaises(SystemExit):
+                artgen.cmd_inpaint_native(self.args)
+            post.assert_not_called()
+
+    def test_explicit_palette_is_sent_and_its_hash_is_recorded(self):
+        self.args.palette = self.args.mask
+        png = SPRITE.read_bytes()
+        result = {"image": {"base64": base64.b64encode(png).decode("ascii")}}
+        with patch.object(artgen, "_require_env", return_value="test-only-key"), \
+             patch.object(artgen, "_post_json", return_value=result) as post, \
+             contextlib.redirect_stdout(io.StringIO()):
+            artgen.cmd_inpaint_native(self.args)
+        sent = post.call_args.args[1]["color_image"]["base64"]
+        palette = Path(self.args.palette).read_bytes()
+        self.assertEqual(base64.b64decode(sent), palette)
+        record = json.loads((Path(self.args.out_dir) / "request.json").read_text())
+        self.assertEqual(record["palette_sha256"], hashlib.sha256(palette).hexdigest())
+
+
 if __name__ == "__main__":
     unittest.main()

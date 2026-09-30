@@ -1,0 +1,65 @@
+{
+  "status": "prepared_pending_human_curation",
+  "style": "SFC style-sheet-v2",
+  "runtimeDriverImplemented": true,
+  "productionArtAdopted": false,
+  "savedSceneChanged": false,
+  "webglDeployed": false,
+  "clips": {
+    "up": [
+      "up-A",
+      "up-B"
+    ],
+    "down": [
+      "down-A",
+      "down-B"
+    ],
+    "fps": 10
+  },
+  "assets": [
+    {
+      "id": "up-A",
+      "file": "raw/masked-up-fold/candidate_00.png",
+      "sha256": "8b69e7a8b2b116888a8b17ea87597160275f00951853449b8485a6d4661cda98",
+      "nativeSize": [
+        48,
+        30
+      ],
+      "postprocessed": false
+    },
+    {
+      "id": "up-B",
+      "file": "raw/bank-up-engine-warm/candidate_00.png",
+      "sha256": "14b9c231c8897f91cd5915c2dddc41cf726e097755d5c34ba377366cc595ee5b",
+      "nativeSize": [
+        48,
+        30
+      ],
+      "postprocessed": false
+    },
+    {
+      "id": "down-A",
+      "file": "raw/masked-down-fold/candidate_00.png",
+      "sha256": "264c9147d77b35634d2bd86c8c77d6dd866539055c07dbd87ec59509915c8b94",
+      "nativeSize": [
+        48,
+        30
+      ],
+      "postprocessed": false
+    },
+    {
+      "id": "down-B",
+      "file": "raw/bank-down-engine-warm/candidate_00.png",
+      "sha256": "2003d0c541d65217cd8964f887d62e98d3910af63ed237a894b1f14a763501d3",
+      "nativeSize": [
+        48,
+        30
+      ],
+      "postprocessed": false
+    }
+  ],
+  "review": "review/banking-poses-fold.png",
+  "runtimeEvidence": "review/scene-capture.json",
+  "pixelAudit": "review/native-audit.json",
+  "usage": "usage.json"
+}
