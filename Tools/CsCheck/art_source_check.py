@@ -33,7 +33,7 @@ def digest(path):
 def main():
     # Curated revamp originals are tracked with their acceptance hashes. They
     # intentionally bypass the workstation's older, untracked art-input folder.
-    for manifest in sorted((ROOT / "ArtRevamp").glob("*/adoption.json")):
+    for manifest in sorted((ROOT / "ArtRevamp").rglob("adoption.json")):
         for entry in json.loads(manifest.read_text(encoding="utf-8"))["assets"]:
             for field in ("source", "asset"):
                 path = (ROOT / entry[field]).resolve()

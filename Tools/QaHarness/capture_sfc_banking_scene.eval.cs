@@ -1,4 +1,4 @@
-// Real scene and Core movement, candidate sprites injected only into this disposable Editor.
+// Real scene and Core movement; optionally inspect saved adopted bindings without injection.
 if (!UnityEngine.Application.isBatchMode || UnityEditor.EditorApplication.isPlaying)
     throw new System.InvalidOperationException("Requires batch Editor outside Play Mode.");
 var pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
@@ -7,7 +7,8 @@ if (pipeline == null || !pipeline.GetType().FullName.Contains("Universal")
     throw new System.InvalidOperationException("URP GPU required.");
 UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity");
 string root = "ArtRevamp/SFC-20260930/banking";
-string outputRoot = System.IO.Path.GetFullPath(root + "/review"); System.IO.Directory.CreateDirectory(outputRoot);
+bool adopted = System.Environment.GetEnvironmentVariable("RSS_BANK_CAPTURE") == "adopted";
+string outputRoot = System.IO.Path.GetFullPath(root + (adopted ? "/adoption-review" : "/review")); System.IO.Directory.CreateDirectory(outputRoot);
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
 var director = UnityEngine.Object.FindAnyObjectByType<Shmup.Presentation.Battle.BattleDirector>();
 object Read(string field) => director.GetType().GetField(field, flags).GetValue(director);
@@ -22,12 +23,14 @@ UnityEngine.Sprite Load(string relative, string name)
     var sprite = UnityEngine.Sprite.Create(texture, new UnityEngine.Rect(0, 0, 48, 30), UnityEngine.Vector2.one * .5f, 16, 0, UnityEngine.SpriteMeshType.FullRect);
     sprite.name = name; return sprite;
 }
-var up = new[] { Load("raw/masked-up-fold/candidate_00.png", "up-A"), Load("raw/bank-up-engine-warm/candidate_00.png", "up-B") };
-var down = new[] { Load("raw/masked-down-fold/candidate_00.png", "down-A"), Load("raw/bank-down-engine-warm/candidate_00.png", "down-B") };
 var player = (UnityEngine.Transform)Read("_playerTransform");
 var renderer = player.GetComponent<UnityEngine.SpriteRenderer>();
 var animator = player.GetComponent<Shmup.Presentation.Battle.PlayerShipAnimator>();
-Set(animator, "_bankUpFrames", up); Set(animator, "_bankDownFrames", down);
+if (!adopted)
+{
+    Set(animator, "_bankUpFrames", new[] { Load("raw/masked-up-fold/candidate_00.png", "up-A"), Load("raw/bank-up-engine-warm/candidate_00.png", "up-B") });
+    Set(animator, "_bankDownFrames", new[] { Load("raw/masked-down-fold/candidate_00.png", "down-A"), Load("raw/bank-down-engine-warm/candidate_00.png", "down-B") });
+}
 Call("ApplyShipSprite", "starter");
 var muzzle = (UnityEngine.SpriteRenderer)Read("_muzzleFlash");
 var muzzlePosition = muzzle.transform.localPosition;
@@ -75,7 +78,7 @@ foreach (int theme in new[] { 0, 2, 4 })
             throw new System.InvalidOperationException("Bank animation changed geometry or tint.");
         if (tick == 0 || tick == 4 || tick == 6 || tick == 9 || tick == 13 || tick == 16 || tick == 18 || tick == 21)
         {
-            string file = "battle-candidate-theme-" + theme + "-tick-" + tick + ".png";
+            string file = (adopted ? "battle-adopted-theme-" : "battle-candidate-theme-") + theme + "-tick-" + tick + ".png";
             muzzle.enabled = tick == 4 || tick == 16;
             Capture(file);
             var sampled = renderer.sprite;
@@ -87,8 +90,9 @@ foreach (int theme in new[] { 0, 2, 4 })
     }
 }
 System.IO.File.WriteAllText(System.IO.Path.Combine(outputRoot, "scene-capture.json"), Newtonsoft.Json.JsonConvert.SerializeObject(new {
-    kind = "Disposable Editor candidate integration preview; not deployed or browser playtested",
-    candidatesInjectedInMemoryOnly = true, sceneSaved = false, assetsImported = false,
+    kind = adopted ? "Saved scene banking bindings driven by Core in disposable Editor; not browser playtested"
+        : "Disposable Editor candidate integration preview; not deployed or browser playtested",
+    candidatesInjectedInMemoryOnly = !adopted, sceneSaved = false, assetsImported = false,
     playerPrefsAccessed = false, userSavesAccessed = false, gameplayDataChanged = false,
     ppu = 16, referenceResolution = new[] { 640, 360 }, captureResolution = new[] { 1280, 720 },
     muzzleLocalPosition = new[] { muzzlePosition.x, muzzlePosition.y, muzzlePosition.z }, observations

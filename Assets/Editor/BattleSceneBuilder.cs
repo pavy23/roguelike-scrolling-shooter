@@ -791,6 +791,16 @@ namespace Shmup.EditorTools
             return new[] { LoadAdoptedSprite("sfc_player_ship"), LoadAdoptedSprite("sfc_player_engine_01") };
         }
 
+        static void ConfigureShipAnimator(PlayerShipAnimator animator, SpriteRenderer renderer)
+        {
+            SetReference(animator, "_renderer", renderer);
+            SetReferenceArray(animator, "_frames", LoadShipAnimationFrames());
+            SetReferenceArray(animator, "_bankUpFrames", new[] {
+                LoadAdoptedSprite("sfc_player_bank_up_00"), LoadAdoptedSprite("sfc_player_bank_up_01") });
+            SetReferenceArray(animator, "_bankDownFrames", new[] {
+                LoadAdoptedSprite("sfc_player_bank_down_00"), LoadAdoptedSprite("sfc_player_bank_down_01") });
+        }
+
         // Approved SFC originals live in this repository. Untracked legacy art-input
         // must never overwrite them during scene regeneration on another machine.
         static Sprite LoadAdoptedSprite(string assetName)
@@ -1199,14 +1209,8 @@ namespace Shmup.EditorTools
             SetIntArray(director, "_animFrameCounts", animCounts.ToArray());
             SetReferenceArray(director, "_animFrames", animFlat.ToArray());
 
-            // 큐레이션한 SFC 기체 엔진 2자세.
-            var shipFrames = LoadShipAnimationFrames();
-            if (shipFrames.Length > 0)
-            {
-                var animator = player.AddComponent<PlayerShipAnimator>();
-                SetReference(animator, "_renderer", playerRenderer);
-                SetReferenceArray(animator, "_frames", shipFrames);
-            }
+            // 큐레이션한 중립/상승/하강 자세마다 고정된 몸체 + 엔진 A/B.
+            ConfigureShipAnimator(player.AddComponent<PlayerShipAnimator>(), playerRenderer);
 
             // 함선별 스프라이트 (밸런스/스피드/탱커 차별화, 2026-07-29 사람 지시)
             var shipIds = new[] { "starter", "interceptor", "bulwark" };

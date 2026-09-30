@@ -5,7 +5,7 @@ of peak Super Famicom games. Backgrounds are outside this art replacement.
 
 The user selected **style-sheet-v2**: "2안 가자". Its palette, material planes and
 silhouette language are the approved production direction. Native-size pilot
-sprites and animation are now being prepared; see [curation](CURATION.md).
+sprites and animation are being adopted in curated batches; see [curation](CURATION.md).
 
 This directory holds review candidates, generation prompts, and asset inventory.
 Candidates are not accepted production sprites or Unity atlases. Do not import
@@ -19,6 +19,8 @@ before production integration.
 
 - [한국어 제작·검수 기준](BRIEF.md)
 - [Native pilot results and remaining work](pilot/README.md)
+- [Adopted banking and validation](banking/adoption-review/VALIDATION.md)
+- [Next combat art study and native brief](combat/README.md)
 - [Interactive native sprite / engine review](pilot/review/index.html)
 - [Unity old/new comparison](pilot/review/pilot-static-comparison.png)
 - [Candidate v1](candidates/style-sheet-v1.png)

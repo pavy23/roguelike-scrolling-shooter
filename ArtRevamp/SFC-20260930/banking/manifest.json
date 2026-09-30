@@ -1,9 +1,9 @@
 {
-  "status": "prepared_pending_human_curation",
+  "status": "adopted_integrated_pending_deployment",
   "style": "SFC style-sheet-v2",
   "runtimeDriverImplemented": true,
-  "productionArtAdopted": false,
-  "savedSceneChanged": false,
+  "productionArtAdopted": true,
+  "savedSceneChanged": true,
   "webglDeployed": false,
   "clips": {
     "up": [
@@ -59,7 +59,9 @@
     }
   ],
   "review": "review/banking-poses-fold.png",
-  "runtimeEvidence": "review/scene-capture.json",
+  "runtimeEvidence": "adoption-review/scene-capture.json",
   "pixelAudit": "review/native-audit.json",
-  "usage": "usage.json"
+  "usage": "usage.json",
+  "humanApproval": "현재후보 ㄱㄱ 그리고 다음작업",
+  "adoption": "adoption.json"
 }

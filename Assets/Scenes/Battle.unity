@@ -6477,6 +6477,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 91c09ea20ea401d4291311c38ed04ead, type: 3}
   - {fileID: 21300000, guid: 8d67b3deac68539448c3e198f4a6f8bd, type: 3}
   _framesPerSecond: 10
+  _bankUpFrames:
+  - {fileID: 21300000, guid: 31d7a238db21f8e4aa626872c9111454, type: 3}
+  - {fileID: 21300000, guid: 759ced001f21e364f9342bc5441661e0, type: 3}
+  _bankDownFrames:
+  - {fileID: 21300000, guid: 4d3f3bd40da5ffc47a5a8c3061d3d4f8, type: 3}
+  - {fileID: 21300000, guid: d049c02d17cb8b541a8c1a4ae6651747, type: 3}
 --- !u!212 &1116235823
 SpriteRenderer:
   serializedVersion: 3

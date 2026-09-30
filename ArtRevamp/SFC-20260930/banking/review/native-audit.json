@@ -881,6 +881,7 @@
       "pngPostprocessed": false
     }
   ],
-  "newBankArtAdopted": false,
-  "sceneBankClipsBound": false
+  "newBankArtAdopted": true,
+  "adoptedBankAssetsVerified": 4,
+  "sceneBankClipsBound": "See adoption-review/scene-capture.json; not proven by PNG audit"
 }

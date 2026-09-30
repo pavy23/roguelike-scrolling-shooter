@@ -326,6 +326,60 @@ namespace Shmup.Presentation.Tests
         }
 
         [Test]
+        public void AdoptedBankingSceneUsesBothEngineFramesAndPreservesNativeGeometry()
+        {
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/Battle.unity", OpenSceneMode.Additive);
+            try
+            {
+                BattleDirector director = null;
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    director = root.GetComponentInChildren<BattleDirector>(true);
+                    if (director != null) break;
+                }
+                var fields = new SerializedObject(director);
+                var player = (Transform)fields.FindProperty("_playerTransform").objectReferenceValue;
+                var renderer = player.GetComponent<SpriteRenderer>();
+                var animator = new SerializedObject(player.GetComponent<PlayerShipAnimator>());
+                foreach (string direction in new[] { "up", "down" })
+                {
+                    var clip = animator.FindProperty(direction == "up" ? "_bankUpFrames" : "_bankDownFrames");
+                    Assert.AreEqual(2, clip.arraySize);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        var sprite = (Sprite)clip.GetArrayElementAtIndex(i).objectReferenceValue;
+                        Assert.AreEqual("Assets/Art/Sprites/sfc_player_bank_" + direction + "_0" + i + ".png", AssetDatabase.GetAssetPath(sprite));
+                        Assert.AreEqual(new Rect(0, 0, 48, 30), sprite.rect);
+                        Assert.AreEqual(new Vector2(24, 15), sprite.pivot);
+                        Assert.AreEqual(16, sprite.pixelsPerUnit);
+                    }
+                }
+                var sim = NewSim(); Set(director, "_sim", sim);
+                Invoke(director, "ApplyShipSprite", "starter");
+                var position = player.localPosition;
+                var muzzle = (SpriteRenderer)fields.FindProperty("_muzzleFlash").objectReferenceValue;
+                var muzzlePosition = muzzle.transform.localPosition;
+                for (int tick = 0; tick <= 21; tick++)
+                {
+                    int direction = tick <= 8 ? 1 : tick <= 12 ? 0 : tick <= 20 ? -1 : 0;
+                    if (tick > 0) sim.Step(new InputCommand(0, direction, false));
+                    Invoke(director, "ObservePlayerAnimation", sim);
+                    Invoke(director, "SyncPlayerAnimation");
+                    string expected = tick >= 4 && tick <= 8 ? "sfc_player_bank_up_0" + ((tick / 6) % 2)
+                        : tick >= 16 && tick <= 20 ? "sfc_player_bank_down_0" + ((tick / 6) % 2)
+                        : (tick / 6) % 2 == 0 ? "sfc_player_ship" : "sfc_player_engine_01";
+                    Assert.AreEqual(expected, renderer.sprite.name, "Tick " + tick);
+                    var held = renderer.sprite;
+                    Invoke(director, "SyncPlayerAnimation");
+                    Assert.AreSame(held, renderer.sprite);
+                }
+                Assert.AreEqual(position, player.localPosition);
+                Assert.AreEqual(muzzlePosition, muzzle.transform.localPosition);
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); }
+        }
+
+        [Test]
         public void BankingObservationsSurviveSparseRenderingAndResetOnSeekOrTickRewind()
         {
             Set(_player, "_bankUpFrames", new[] { _frames[3], _frames[4] });

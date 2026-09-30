@@ -87,11 +87,20 @@ def main():
     for asset in adoption["assets"]:
         if any(sha(ROOT / asset[key]) != asset["sha256"] for key in ("source", "asset")):
             raise SystemExit("Approved production art changed: " + asset["asset"])
+    bank_adoption = BANK / "adoption.json"
+    adopted_count = 0
+    if bank_adoption.is_file():
+        for asset in json.loads(bank_adoption.read_text(encoding="utf-8"))["assets"]:
+            if any(sha(ROOT / asset[key]) != asset["sha256"] for key in ("source", "asset")):
+                raise SystemExit("Adopted bank art changed: " + asset["asset"])
+            adopted_count += 1
     report = {"kind": "Read-only native PNG and protected-pixel audit; not art acceptance or gameplay",
         "source": {"file": source_path.relative_to(ROOT).as_posix(), "sha256": sha(source_path)},
         "existingProductionPngUnchanged": len(inventory["assets"]) + len(adoption["assets"]),
         "bankingApiReportedUsageUsd": usage, "batches": rows, "proposedForHumanCuration": proposed,
-        "newBankArtAdopted": False, "sceneBankClipsBound": False}
+        "newBankArtAdopted": adopted_count == 4,
+        "adoptedBankAssetsVerified": adopted_count,
+        "sceneBankClipsBound": "See adoption-review/scene-capture.json; not proven by PNG audit" if adopted_count else False}
     review = BANK / "review"
     review.mkdir(parents=True, exist_ok=True)
     (review / "native-audit.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

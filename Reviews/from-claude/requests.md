@@ -2149,3 +2149,16 @@ Core 611개 / Unity 791개 통과. 3테마×8상태의 실제 표시 코드 캡�
 근거는 ArtRevamp/SFC-20260930/banking/에 보존했다. 검토 후보 4장은 사람 큐레이션 대기다.
 생산 아트·씬/빌더/Atlas에 새 그림을 연결하지 않았으며 기존 343개 PNG는 보존했다.
 새 WebGL/배포·브라우저 실주행은 아직이다. 기존 플레이 사이트는 첫 SFC 교체판이다.
+
+### 2026-09-30 승인 뱅킹 적용·전투 아트 준비 대행분 리뷰 인계
+
+사용자의 “현재후보 ㄱㄱ 그리고 다음작업” 지시 및 AGENTS §9-1에 따라 Codex가
+RENDERER/QA/오케스트레이션을 대행했다. 원 담당 복귀 시 BattleSceneBuilder의
+공용 기체 배열 설정, Battle 씬의 네 새 참조, SpriteAnimationTests의 저장 씬 연결
+검사, nested adoption 해시 감사 및 적용/캡처 도구를 리뷰한다.
+
+Core 611개 / Unity 792개 통과. 저장된 씬으로 24상태를 재검수했고 기존 343개 PNG와
+포구/판정/게임 수치를 유지했다. 채택 범위는 CURATION.md와 banking/adoption.json에
+기록한 네 장뿐이다. 다음 탄·캡슐·폭발은 연구 시트와 native 제작 기준 단계다.
+새 PixelLab 요청/비용은 없으며 실주행 PASS로 보고하지 않는다. 빌드/배포 근거는
+ArtRevamp/SFC-20260930/banking/adoption-review/VALIDATION.md에 기록한다.
