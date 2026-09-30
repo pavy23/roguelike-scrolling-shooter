@@ -64,11 +64,11 @@ namespace Shmup.Core.Simulation
     public sealed class InputRecordingData
     {
         /// <summary>
-        /// Schema 25 records REQ-127 duration-target stage generation and
-        /// REQ-128 partial player volleys. Schema 24 recordings are rejected
-        /// because both rules can change deterministic playback.
+        /// Schema 26 records unused ordinary segments supplementing exhausted
+        /// post-midboss outcome pools. Schema 25 recordings are rejected
+        /// because the same seed can now produce a different closing route.
         /// </summary>
-        public const int CurrentSchemaVersion = 25;
+        public const int CurrentSchemaVersion = 26;
 
         [DataMember(Order = 0)]
         public int schemaVersion;

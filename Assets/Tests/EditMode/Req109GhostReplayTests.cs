@@ -197,7 +197,7 @@ namespace Shmup.Core.Tests
             ReachBiomeOpening(source, 2);
             RunSuspendData data = source.ExportSuspendData();
 
-            Assert.AreEqual(28, data.schemaVersion);
+            Assert.AreEqual(29, data.schemaVersion);
             Assert.IsNotNull(data.ghostRecording);
             Assert.IsTrue(data.ghostRecording.finalized);
             Assert.Greater(data.ghostRecording.totalTicks, 0);

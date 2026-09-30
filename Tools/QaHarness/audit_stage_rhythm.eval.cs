@@ -8,7 +8,10 @@ var data = Shmup.Core.Content.GameDataParser.Parse(
 var generator = new Shmup.Core.Generation.SegmentStageGenerator(data.StageGeneration);
 var difficultyCurve = Shmup.Core.Simulation.StageDifficultyCurve.CreateDefault();
 var report = new System.Collections.Generic.List<object>();
-foreach (ulong seed in new ulong[] { 1, 42, 12345, 99991 })
+var seeds = new System.Collections.Generic.List<ulong> { 1, 42, 12345, 99991 };
+if (System.Environment.GetEnvironmentVariable("RSS_STAGE_AUDIT_EXTENDED") == "1")
+    for (ulong seed = 100; seed < 200; seed++) seeds.Add(seed);
+foreach (ulong seed in seeds)
 {
     var order = generator.GetThemeOrder(seed);
     for (int stage = 1; stage <= order.Count; stage++)
@@ -38,12 +41,18 @@ foreach (ulong seed in new ulong[] { 1, 42, 12345, 99991 })
         spawnTicks.Sort();
         foreach (int tick in spawnTicks) { largestGap = System.Math.Max(largestGap, tick - lastSpawn); lastSpawn = tick; }
         largestGap = System.Math.Max(largestGap, length - lastSpawn);
+        string planHash;
+        using (var sha = System.Security.Cryptography.SHA256.Create())
+            planHash = System.BitConverter.ToString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(
+                Newtonsoft.Json.JsonConvert.SerializeObject(plan)))).Replace("-", "").ToLowerInvariant();
         report.Add(new { seed, stage, difficulty, theme = plan.ThemeId, section = section.ToString(), outcome = outcome.ToString(),
+            plan.BossId, planHash,
             durationTicks = length, enemySpawns = enemies, obstacles, largestSpawnGapTicks = largestGap,
             plan.SegmentReuseCount, consecutiveRepeats, lanePathClearable = Shmup.Core.Generation.StagePlanClearability.IsClearable(plan), sequence });
     }
 }
-string path = System.IO.Path.GetFullPath("out/revamp/stage-rhythm-audit.json");
+string path = System.IO.Path.GetFullPath(System.Environment.GetEnvironmentVariable("RSS_STAGE_AUDIT_OUTPUT")
+    ?? "out/revamp/stage-rhythm-audit.json");
 System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
 System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(new {
     difficultyCurve = "StageDifficultyCurve.CreateDefault", encounter = "Normal", note = "Direct generator probes use the listed seed; not RunManager's forked live-run seeds. Gaps are new-spawn gaps, not safe combat windows.", plans = report

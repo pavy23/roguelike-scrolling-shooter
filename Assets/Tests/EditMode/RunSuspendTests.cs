@@ -8,6 +8,22 @@ namespace Shmup.Core.Tests
     public sealed class RunSuspendTests
     {
         [Test]
+        public void NoContractChecksumSurvivesNullToEmptyStringSerialization()
+        {
+            RunManager source = CreateRun(new BoundaryStageGenerator());
+            RunSuspendData data = source.ExportSuspendData();
+            Assert.IsNull(data.activeContractId);
+            data.activeContractId = string.Empty;
+
+            Assert.IsTrue(SaveDataIntegrity.HasValidChecksum(data));
+            RunManager resumed = Resume(data, new BoundaryStageGenerator());
+            AssertPlansEqual(source.StagePlan, resumed.StagePlan);
+
+            data.activeContractId = "different_contract";
+            Assert.IsFalse(SaveDataIntegrity.HasValidChecksum(data));
+        }
+
+        [Test]
         public void ExportDuringStage_ReturnsIndependentStageStartSnapshot()
         {
             RunManager run = CreateRun(new BoundaryStageGenerator());

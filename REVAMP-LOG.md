@@ -602,3 +602,29 @@ WebGL 빌드 성공(10:51:24–10:53:09 KST). 산출물 4개 **29,844,758 bytes*
 unity-build.provenance.json과 served-playtest/verification.json이다. 브라우저 주행은 미실시다.
 
 [보스 안내 개선판 플레이](https://pavy23.github.io/rss-play/?v=20260930-105349-49ea1ec).
+
+## 2026-09-30 — 중간보스 이후 구성 다양화와 저장 호환성
+
+사용자의 다음 개선 지시에 따라 CleanKill 후반의 두 조각 반복을 완화했다.
+Codex가 Core 구현과 Presentation/QA/오케스트레이션 대행을 수행했다.
+Unity 플러그인의 구현·CLI·빌드 검증 지침을 계속 적용했으며 모든 Editor 작업은
+배치로 실행했다. CLI와 Pipeline은 정상 동작해 추가 패키지 변경은 하지 않았다.
+
+- 전용 조각 우선, 미사용 일반 조각 보충, 기존 풀의 완주 가능성 검사 순서를 유지한다.
+  후보 부족 시 기존 재사용 정책으로 돌아간다. GameData 숫자·아트·오디오 변경 없음.
+- 같은 입력 2,600개를 전후 비교했다. CleanKill 후반 312개에서 재사용이 사라졌고
+  전용 도입부 2개/보스 ID를 보존했다. 비대상 2,288개는 전체 계획 해시가 같다.
+  레인 연결은 전부 통과했다. 상세 생성량 차이와 한계는 STAGE-RHYTHM-REVIEW에 있다.
+- 중단 저장 v29 / 입력 기록 v26으로 이전 결정론 스키마를 명시적으로 거부한다.
+  이전 런/리플레이는 새 구성에서 실행되지 않으며 파일 삭제·영구 성장 초기화는 없다.
+  타이틀 후보 검사에서 Core 호환성/무결성 검증을 적용했다.
+- 실제 저장 DTO의 Unity JSON 왕복으로 계약 없음의 null→빈 문자열 변환을 재현했다.
+  해당 의미 값을 체크섬에서 정규화해 이어하기 검증 실패를 수정했다.
+  메모리 테스트와 진단만 수행했으며 사용자 세이브 파일에는 접근하지 않았다.
+
+검증: Core **611개**, Unity EditMode **785개** 통과(실패/건너뜀 0).
+초기 신규 테스트의 부적합 테마/빈 녹화 fixture와 기존 스키마 상수 기대치를 고쳤고,
+실제 DTO 직렬화에서 확인된 체크섬 문제도 원인을 수정한 뒤 전체 검증을 통과했다.
+stage-variety-core.trx, stage-variety-unity.xml/.log, stage-variety-before/after/comparison.json,
+save-roundtrip-audit.json/.log가 근거다. 생성 감사는 실제 RunManager 방 시드를 쓴
+런 재생이 아니며, 브라우저 플레이·회피성·체감 난이도 검증도 별도다.

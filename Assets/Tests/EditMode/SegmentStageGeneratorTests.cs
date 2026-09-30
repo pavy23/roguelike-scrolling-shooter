@@ -183,15 +183,17 @@ namespace Shmup.Core.Tests
                     closingTargetDurationTicks: -1));
         }
 
-        [Test]
-        public void PreviousDeterminismSchemasAreExplicitlyRejected()
+        [TestCase(24, 27)]
+        [TestCase(25, 28)]
+        public void PreviousDeterminismSchemasAreExplicitlyRejected(
+            int recordingVersion, int suspendVersion)
         {
             Assert.Throws<ArgumentException>(() =>
                 SaveDataIntegrity.MigrateAndValidate(
-                    new InputRecordingData { schemaVersion = 24 }));
+                    new InputRecordingData { schemaVersion = recordingVersion }));
             Assert.Throws<ArgumentException>(() =>
                 SaveDataIntegrity.MigrateAndValidate(
-                    new RunSuspendData { schemaVersion = 27 }));
+                    new RunSuspendData { schemaVersion = suspendVersion }));
         }
 
         [Test]
@@ -275,6 +277,145 @@ namespace Shmup.Core.Tests
             Assert.AreEqual(
                 MidbossOutcomeKind.Default,
                 MidbossOutcomeEvaluator.Evaluate(101, 0, false));
+        }
+
+        [Test]
+        public void PostMidbossOutcome_UsesTaggedPiecesBeforeUnusedOrdinaryPieces()
+        {
+            var generator = OutcomeGenerator(5, new[]
+            {
+                OutcomeSegment("clean_a"), OutcomeSegment("clean_b"),
+                Segment("normal_a", Center, Center, Center, "fortress"),
+                Segment("normal_b", Center, Center, Center, "fortress"),
+                Segment("normal_c", Center, Center, Center, "fortress")
+            });
+
+            for (ulong seed = 0; seed < 64; seed++)
+            {
+                StagePlan plan = generator.GeneratePostMidbossHalf(
+                    seed, 3, 3, "fortress", MidbossOutcomeKind.CleanKill);
+                Assert.AreEqual(5, plan.Segments.Count);
+                Assert.AreEqual(0, plan.SegmentReuseCount, $"seed {seed}");
+                StringAssert.StartsWith("clean_", plan.Segments[0].SegmentId);
+                StringAssert.StartsWith("clean_", plan.Segments[1].SegmentId);
+                for (int i = 2; i < plan.Segments.Count; i++)
+                    StringAssert.StartsWith("normal_", plan.Segments[i].SegmentId);
+                Assert.IsTrue(StagePlanClearability.IsClearable(plan));
+                AssertPlansEqual(plan, generator.GeneratePostMidbossHalf(
+                    seed, 3, 3, "fortress", MidbossOutcomeKind.CleanKill));
+            }
+        }
+
+        [TestCase("other_theme")]
+        [TestCase("too_hard")]
+        [TestCase("too_easy")]
+        [TestCase("other_outcome")]
+        [TestCase("unreachable_entry")]
+        [TestCase("no_outcome_continuation")]
+        public void PostMidbossOutcome_DoesNotBorrowIneligibleOrdinaryPieces(string reason)
+        {
+            int entry = reason == "unreachable_entry" ? Left : Center;
+            int exit = reason == "no_outcome_continuation" ? Left : entry;
+            var excluded = new StageSegmentTemplate(
+                "excluded", reason == "too_hard" ? 4 : 1,
+                reason == "too_easy" ? 2 : 5, 600, entry, exit,
+                new[] { entry | exit }, Array.Empty<SpawnEvent>(),
+                Array.Empty<ObstacleSpawn>(),
+                reason == "other_theme" ? "hive" : "fortress", 10, null,
+                reason == "other_outcome" ? new[] { MidbossOutcomeKind.PartFocus } : null);
+            // The ordinary piece could end at the left boss, but cannot return
+            // to the tagged pool when another slot remains.
+            var generator = new SegmentStageGenerator(new StageGenerationCatalog(
+                3, 1, Center, new[] { OutcomeSegment("clean"), excluded },
+                new[] { Boss("boss", Center | Left, "fortress") },
+                null, closingSegmentsPerStage: 3));
+
+            StagePlan plan = generator.GeneratePostMidbossHalf(
+                17, 3, 3, "fortress", MidbossOutcomeKind.CleanKill);
+            Assert.AreEqual("clean", plan.Segments[0].SegmentId);
+            Assert.AreEqual("clean", plan.Segments[1].SegmentId);
+            // At the final slot, a terminal piece may legitimately reach a boss.
+            Assert.AreEqual(reason == "no_outcome_continuation" ? "excluded" : "clean",
+                plan.Segments[2].SegmentId);
+            Assert.IsTrue(StagePlanClearability.IsClearable(plan));
+        }
+
+        [Test]
+        public void PostMidbossOutcome_ExhaustedCombinedPoolStillAvoidsAdjacentRepeats()
+        {
+            var generator = OutcomeGenerator(6, new[]
+            {
+                OutcomeSegment("clean_a"), OutcomeSegment("clean_b"),
+                Segment("normal", Center, Center, Center, "fortress")
+            });
+            for (ulong seed = 0; seed < 64; seed++)
+            {
+                StagePlan plan = generator.GeneratePostMidbossHalf(
+                    seed, 3, 3, "fortress", MidbossOutcomeKind.CleanKill);
+                Assert.AreEqual(3, plan.SegmentReuseCount);
+                Assert.AreEqual("normal", plan.Segments[2].SegmentId);
+                for (int i = 1; i < plan.Segments.Count; i++)
+                    Assert.AreNotEqual(plan.Segments[i - 1].SegmentId, plan.Segments[i].SegmentId);
+                Assert.IsTrue(StagePlanClearability.IsClearable(plan));
+            }
+        }
+
+        [Test]
+        public void PostMidbossOutcome_BorrowedPiecesStillRespectWholeSegmentDurationTarget()
+        {
+            var generator = OutcomeGenerator(5, new[]
+            {
+                OutcomeSegment("clean_a"), OutcomeSegment("clean_b"),
+                Segment("normal_a", Center, Center, Center, "fortress"),
+                Segment("normal_b", Center, Center, Center, "fortress")
+            }, 1500);
+            StagePlan plan = generator.GeneratePostMidbossHalf(
+                17, 3, 3, "fortress", MidbossOutcomeKind.CleanKill);
+            Assert.AreEqual(3, plan.Segments.Count);
+            Assert.AreEqual(1800, TotalDurationTicks(plan));
+            Assert.AreEqual(0, plan.SegmentReuseCount);
+            Assert.AreEqual(600, plan.Segments[2].LengthTicks);
+            Assert.AreEqual(60, plan.Segments[2].Spawns[0].Tick);
+        }
+
+        [TestCase(MidbossOutcomeKind.Default)]
+        [TestCase(MidbossOutcomeKind.Attrition)]
+        [TestCase(MidbossOutcomeKind.PartFocus)]
+        public void PostMidbossOutcome_OrdinaryAndUnsupportedOutcomesKeepOriginalPool(
+            MidbossOutcomeKind outcome)
+        {
+            var ordinary = new[]
+            {
+                Segment("normal_a", Center, Center, Center, "fortress"),
+                Segment("normal_b", Center, Center, Center, "fortress")
+            };
+            var original = OutcomeGenerator(5, ordinary);
+            var withTagged = OutcomeGenerator(5, new[]
+            {
+                ordinary[0], ordinary[1], OutcomeSegment("clean")
+            });
+            for (ulong seed = 0; seed < 32; seed++)
+                AssertPlansEqual(
+                    original.GeneratePostMidbossHalf(seed, 3, 3, "fortress", outcome),
+                    withTagged.GeneratePostMidbossHalf(seed, 3, 3, "fortress", outcome));
+        }
+
+        static SegmentStageGenerator OutcomeGenerator(
+            int closingCount, StageSegmentTemplate[] segments, int? duration = null)
+        {
+            return new SegmentStageGenerator(new StageGenerationCatalog(
+                3, 1, Center, segments,
+                new[] { Boss("fortress_boss", Center, "fortress") },
+                new[] { "fortress" }, closingSegmentsPerStage: closingCount,
+                closingTargetDurationTicks: duration));
+        }
+
+        static StageSegmentTemplate OutcomeSegment(string id)
+        {
+            return new StageSegmentTemplate(id, 1, 5, 600, Center, Center,
+                new[] { Center }, new[] { new SpawnEvent(60, "zako_straight", 100, 0) },
+                Array.Empty<ObstacleSpawn>(), "fortress", 10, null,
+                new[] { MidbossOutcomeKind.CleanKill });
         }
 
         [Test]

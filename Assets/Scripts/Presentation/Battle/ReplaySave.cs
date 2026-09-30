@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Shmup.Core;
 using Shmup.Core.Simulation;
 using UnityEngine;
 
@@ -53,7 +54,9 @@ namespace Shmup.Presentation.Battle
             try
             {
                 var data = JsonUtility.FromJson<ReplayFileData>(text);
-                return data != null && data.recording != null;
+                if (data == null || data.recording == null) return false;
+                SaveDataIntegrity.MigrateAndValidate(data.recording);
+                return true;
             }
             catch
             {

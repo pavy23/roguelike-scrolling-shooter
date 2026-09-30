@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Shmup.Core;
 using Shmup.Core.Simulation;
 using UnityEngine;
 
@@ -41,8 +42,10 @@ namespace Shmup.Presentation.Battle
             try
             {
                 var data = JsonUtility.FromJson<RunSuspendData>(text);
-                return data != null && data.schemaVersion > 0
-                    && data.schemaVersion <= RunSuspendData.CurrentSchemaVersion;
+                // Use the same compatibility boundary as resume, including
+                // retired deterministic layouts and checksum validation.
+                SaveDataIntegrity.MigrateAndValidate(data);
+                return true;
             }
             catch
             {

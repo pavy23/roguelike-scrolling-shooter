@@ -177,11 +177,12 @@ namespace Shmup.Core.Simulation
     public sealed class RunSuspendData
     {
         /// <summary>
-        /// Schema 28 records REQ-127 duration-target stage generation and
-        /// REQ-128 partial player volleys. Schema 27 checkpoints are rejected
-        /// because resuming regenerates room plans and combat from run inputs.
+        /// Schema 29 records unused ordinary segments supplementing exhausted
+        /// post-midboss outcome pools. Schema 28 checkpoints are rejected
+        /// because resuming regenerates room plans from the saved run inputs.
+        /// The checksum also treats null/empty active contract IDs identically.
         /// </summary>
-        public const int CurrentSchemaVersion = 28;
+        public const int CurrentSchemaVersion = 29;
 
         [DataMember(Order = 0)]
         public int schemaVersion;
