@@ -1588,16 +1588,14 @@ namespace Shmup.Presentation.Battle
                         // 말하지 않는 것이 문제다 — HP 바가 0이 되고 사라진 뒤
                         // 3초 동안 아무 신호가 없으면 "끝났는데 안 끝났다"로 읽힌다.
                         // 등장 배너를 다시 띄워 그 3초를 사건으로 만든다.
-                        if (_bossIntro != null) _bossIntro.Trigger();
+                        if (_bossIntro != null) _bossIntro.Trigger(BossIntroKind.FormTransition);
                         break;
                     case SimEventType.BossSpawned:
                         // WARNING 배너는 스테이지 최종 보스(와 숨은 보스)에게만 띄운다
                         // ("중간보스 나올때 Warning 뜨는것도 이상함", 2026-07-30).
                         // 중간보스는 스테이지마다 나오는 통과 의례라 매번 배너가 뜨면
                         // 경고의 무게가 사라진다 — 흔들림만 남긴다.
-                        if (_bossIntro != null
-                            && StageSection != RunStageSection.MidBoss)
-                            _bossIntro.Trigger();
+                        TriggerBossArrival();
                         if (_juice != null) _juice.Shake(0.3f);
                         break;
                     case SimEventType.BossPhaseChanged:
@@ -1868,6 +1866,15 @@ namespace Shmup.Presentation.Battle
         /// 히든보스 노래, 마지막 코어가 나오는 페이즈만 일반 보스곡").
         /// </summary>
         public bool IsBossSecondForm => _bossFormId != null;
+
+        void TriggerBossArrival()
+        {
+            if (_bossIntro == null || StageSection == RunStageSection.MidBoss) return;
+            // Core emits BossFormChanged immediately before BossSpawned for form 2.
+            // Preserve that context instead of announcing a new stage boss again.
+            _bossIntro.Trigger(IsBossSecondForm ? BossIntroKind.SecondForm
+                : StageSection == RunStageSection.HiddenBoss ? BossIntroKind.HiddenBoss : BossIntroKind.StageBoss);
+        }
 
         /// <summary>
         /// 개발용: 지금 때릴 수 있는 보스 파츠(또는 본체)를 최대 HP의 10%만큼 깎는다.
