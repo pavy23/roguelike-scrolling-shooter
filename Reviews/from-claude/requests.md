@@ -2069,3 +2069,5 @@ BossIntro 위치/문구/플래시 감소/메뉴 수명주기와 BattleDirector�
 Core 597개 / Unity 761개 통과. 100개 생성 계획 감사에서 CleanKill 후반의 좁은 조각
 풀이 우선 개선 대상으로 나왔다. STAGE-RHYTHM-REVIEW.md의 비교안은 아직 미구현이며
 새 기본 밸런스의 승인이나 실주행 PASS를 뜻하지 않는다.
+`49ea1ec`의 clean WebGL 빌드를 `rss-play@a10169a`에 게시했다. Pages `36657334402`
+성공과 공개 게임 파일 4개 크기/SHA-256 일치를 확인했다. 브라우저 주행은 미실시다.

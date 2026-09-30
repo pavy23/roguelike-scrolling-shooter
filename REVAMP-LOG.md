@@ -591,3 +591,14 @@ Presentation/오케스트레이션을 대행하며 Unity 플러그인의 기존 
 eec91b9의 배치를 재구성했고, 보스 그림은 위치 확인용 기존 씬 에셋이다. 실제 형태 전환
 영상이나 브라우저 실주행이 아니다. 근거는 boss-intro-unity.xml/.log,
 boss-intro-*.png, boss-intro-capture.log와 stage-rhythm-audit.json/.log다.
+
+배포 완료: clean 소스 `49ea1ec56f4419835303ac7e3d9ce36e1cf71f83`에서 Unity CLI
+WebGL 빌드 성공(10:51:24–10:53:09 KST). 산출물 4개 **29,844,758 bytes**.
+기존 라이선스 진단/미사용 필드 경고 외 새 실패는 없었다. 종료 후 생성 테스트 리소스가
+정리됐고 소스 설정 차이는 없었다. `rss-play@a10169a194220c092d1be4de4cd3a9c624df7fe5`
+게시 및 [Pages 작업 36657334402](https://github.com/pavy23/rss-play/actions/runs/36657334402)
+성공. 10:55:45 KST 공개 index/소스 SHA/버전과 파일 4개 크기·SHA-256 모두 일치했다.
+기존 HTML은 캐시 버전만 갱신했다. 근거는 boss-intro-webgl-build.log,
+unity-build.provenance.json과 served-playtest/verification.json이다. 브라우저 주행은 미실시다.
+
+[보스 안내 개선판 플레이](https://pavy23.github.io/rss-play/?v=20260930-105349-49ea1ec).
