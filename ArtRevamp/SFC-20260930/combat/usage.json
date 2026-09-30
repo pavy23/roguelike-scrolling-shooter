@@ -1,0 +1,14 @@
+{
+  "provider": "PixelLab",
+  "priorPilotSpendUsd": 0.262163876712,
+  "observedCombatSpendUsd": 0.22,
+  "observedPilotCumulativeSpendUsd": 0.482163876712,
+  "authorizedPilotCapUsd": 1,
+  "withinCap": true,
+  "newPaymentOrTopUp": false,
+  "sourceCodeUploaded": false,
+  "note": "Two text-only jobs completed: ignition USD 0.095 and rejected 9-frame sheet attempt USD 0.125. Image-upload request blocked by automatic approval review; not executed.",
+  "combatApiReportedUsageUsd": 0.22,
+  "scope": "Text-only native combat candidates; expanded image-upload approval pending",
+  "balanceDeltaMatchesApiUsage": true
+}

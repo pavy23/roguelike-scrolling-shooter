@@ -57,6 +57,13 @@ class NativeGenerationSafetyTests(unittest.TestCase):
                 artgen.cmd_native(self.args)
             post.assert_not_called()
 
+    def test_deferred_billing_is_recorded_when_acceptance_has_no_usage(self):
+        self.result["usage"] = {"type": "usd", "usd": 0.095}
+        self.generate()
+        provenance = json.loads((Path(self.args.out_dir) / "outputs.json").read_text(encoding="utf-8"))
+        self.assertIsNone(provenance["usage"])
+        self.assertEqual(provenance["completed_usage"], self.result["usage"])
+
     def test_resume_polls_saved_job_without_new_generation(self):
         self.generate()
         self.args.resume = True

@@ -2166,3 +2166,16 @@ ArtRevamp/SFC-20260930/banking/adoption-review/VALIDATION.md에 기록한다.
 최종 clean 빌드 소스 `7eefb4c`, `rss-play@6f676fb`, Pages `36722079804` 성공.
 공개 파일 4개의 크기/해시와 버전 스탬프 일치를 확인했다. 네 새 Atlas 인덱스도
 소스에 보존했다. 최신 링크와 증거는 위 VALIDATION.md에 기록했다.
+
+### 2026-09-30 전투 도트 native 준비 대행분 리뷰 인계
+
+사용자의 계속 지시에 따라 Codex가 RENDERER/QA/오케스트레이션을 대행했다.
+원 담당 복귀 시 Tools/ArtGen/artgen.py의 지연 확정 비용 기록과 오프라인 회귀,
+작은 원본을 변경 없이 여백에 넣는 Unity 마스크 입력 준비, 후보 contact sheet와
+read-only native 감사 도구를 리뷰한다. Core 611개 / ArtGen 13개 검사 통과.
+
+기존 347개 생산 PNG는 동일하며 채택/씬 연결/배포는 하지 않았다. 점화 후보 16장은
+ArtRevamp/SFC-20260930/combat/review/에서 검토한다. 9프레임 일괄 시트 4장은
+그리드 파손으로 제외했다. 자동 승인 검토가 탄/캡슐 이미지 전송을 거절했으므로
+확대 범위에 대한 사용자 응답 전에는 같은 payload나 폭발 후보를 업로드하지 않는다.
+상태·비용·제외 근거는 combat/NATIVE-REVIEW.md에 기록했다.
